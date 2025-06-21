@@ -23,13 +23,10 @@ primary_region = "iad"
   timeout = "10s"
   tls_skip_verify = false
 
-[vm]
-  cpu_kind = "shared"
-  cpus = 1
-  memory_mb = 256
-
-[[vm.processes]]
+[[processes]]
   name = "app"
+
+[vm]
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 256
