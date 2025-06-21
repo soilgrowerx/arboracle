@@ -10,7 +10,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, SortAsc, Map, Grid3X3 } from 'lucide-react';
+import { Search, Filter, SortAsc, Map, Grid3X3, Download } from 'lucide-react';
 
 export default function Home() {
   const [trees, setTrees] = useState<Tree[]>([]);
@@ -33,6 +33,48 @@ export default function Home() {
 
   const handleTreeAdded = () => {
     loadTrees();
+  };
+
+  const exportToCSV = () => {
+    if (trees.length === 0) return;
+
+    const headers = [
+      'Species',
+      'Scientific Name',
+      'Latitude',
+      'Longitude',
+      'Plus Code',
+      'Date Planted',
+      'Date Added',
+      'Notes'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...trees.map(tree => [
+        `"${tree.commonName || tree.species}"`,
+        `"${tree.scientificName || ''}"`,
+        tree.location.lat,
+        tree.location.lng,
+        `"${tree.plus_code_local}"`,
+        `"${new Date(tree.date_planted).toLocaleDateString()}"`,
+        `"${new Date(tree.created_at).toLocaleDateString()}"`,
+        `"${tree.notes || ''}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `arboracle-trees-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   // Filter and sort trees
@@ -146,6 +188,16 @@ export default function Home() {
                   Map
                 </Button>
               </div>
+            )}
+            {trees.length > 0 && (
+              <Button
+                onClick={exportToCSV}
+                variant="outline"
+                className="border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300"
+              >
+                <Download size={16} className="mr-2" />
+                Export Data
+              </Button>
             )}
             <AddTreeModal onTreeAdded={handleTreeAdded} />
           </div>
