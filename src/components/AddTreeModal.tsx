@@ -41,16 +41,21 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
       errors.push('Species is required');
     }
     
-    if (formData.location.lat === 0 && formData.location.lng === 0) {
-      errors.push('Location is required');
-    }
+    // Check if coordinates are actually provided (not just default 0,0)
+    const latInput = document.getElementById('latitude') as HTMLInputElement;
+    const lngInput = document.getElementById('longitude') as HTMLInputElement;
     
-    if (formData.location.lat < -90 || formData.location.lat > 90) {
-      errors.push('Latitude must be between -90 and 90');
-    }
-    
-    if (formData.location.lng < -180 || formData.location.lng > 180) {
-      errors.push('Longitude must be between -180 and 180');
+    if (!latInput?.value || !lngInput?.value) {
+      errors.push('Location coordinates are required');
+    } else {
+      // Only validate ranges if values are provided
+      if (formData.location.lat < -90 || formData.location.lat > 90) {
+        errors.push('Latitude must be between -90 and 90');
+      }
+      
+      if (formData.location.lng < -180 || formData.location.lng > 180) {
+        errors.push('Longitude must be between -180 and 180');
+      }
     }
     
     return errors;
@@ -161,10 +166,10 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
                 id="latitude"
                 type="number"
                 step="any"
-                value={formData.location.lat || ''}
+                value={formData.location.lat === 0 ? '' : formData.location.lat}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,
-                  location: { ...prev.location, lat: parseFloat(e.target.value) || 0 }
+                  location: { ...prev.location, lat: e.target.value ? parseFloat(e.target.value) : 0 }
                 }))}
                 placeholder="0.000000"
                 required
@@ -179,10 +184,10 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
                 id="longitude"
                 type="number"
                 step="any"
-                value={formData.location.lng || ''}
+                value={formData.location.lng === 0 ? '' : formData.location.lng}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,
-                  location: { ...prev.location, lng: parseFloat(e.target.value) || 0 }
+                  location: { ...prev.location, lng: e.target.value ? parseFloat(e.target.value) : 0 }
                 }))}
                 placeholder="0.000000"
                 required
