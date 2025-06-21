@@ -229,14 +229,14 @@ export default function Home() {
         {trees.length > 0 && (
           <div className="mb-6 space-y-4">
             {/* Search Bar */}
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600" size={20} />
+            <div className="search-container-enhanced max-w-md">
+              <Search className="search-icon-enhanced absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600" size={20} />
               <Input
                 type="text"
                 placeholder="Search by species or scientific name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 border-green-200 focus:border-green-400"
+                className="search-input-enhanced pl-10"
               />
             </div>
 
