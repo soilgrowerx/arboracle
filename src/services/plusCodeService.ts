@@ -1,12 +1,16 @@
+import { OpenLocationCode } from 'open-location-code';
+
 export interface PlusCodeResult {
   global: string;
   local: string;
 }
 
+const olc = new OpenLocationCode();
+
 export class PlusCodeService {
   static encode(latitude: number, longitude: number): PlusCodeResult {
-    const global = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
-    const local = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+    const global = olc.encode(latitude, longitude);
+    const local = olc.encode(latitude, longitude, 10); // 10-character code for local use
     
     return {
       global,
@@ -15,29 +19,26 @@ export class PlusCodeService {
   }
 
   static decode(code: string): { latitude: number; longitude: number; } {
-    const [lat, lng] = code.split(',').map(Number);
+    const decoded = olc.decode(code);
     return {
-      latitude: lat,
-      longitude: lng
+      latitude: decoded.latitudeCenter,
+      longitude: decoded.longitudeCenter
     };
   }
 
   static isValid(code: string): boolean {
-    const parts = code.split(',');
-    if (parts.length !== 2) return false;
-    const [lat, lng] = parts.map(Number);
-    return !isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+    return olc.isValid(code);
   }
 
   static isFull(code: string): boolean {
-    return this.isValid(code);
+    return olc.isFull(code);
   }
 
   static isShort(code: string): boolean {
-    return false;
+    return olc.isShort(code);
   }
 
   static recover(shortCode: string, referenceLatitude: number, referenceLongitude: number): string {
-    return shortCode;
+    return olc.recoverNearest(shortCode, referenceLatitude, referenceLongitude);
   }
 }

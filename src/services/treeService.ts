@@ -10,7 +10,37 @@ export class TreeService {
     
     try {
       const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
+      const trees = data ? JSON.parse(data) : [];
+      
+      // Migrate trees that have coordinates instead of Plus Codes
+      const migratedTrees = trees.map((tree: Tree) => {
+        // Check if plus_code_local contains coordinates (has comma)
+        if (tree.plus_code_local && tree.plus_code_local.includes(',')) {
+          const plusCodes = PlusCodeService.encode(tree.location.lat, tree.location.lng);
+          return {
+            ...tree,
+            plus_code_global: plusCodes.global,
+            plus_code_local: plusCodes.local
+          };
+        }
+        // Check if plus_code_local is missing or empty
+        if (!tree.plus_code_local || !tree.plus_code_global) {
+          const plusCodes = PlusCodeService.encode(tree.location.lat, tree.location.lng);
+          return {
+            ...tree,
+            plus_code_global: plusCodes.global,
+            plus_code_local: plusCodes.local
+          };
+        }
+        return tree;
+      });
+      
+      // Save migrated trees back to localStorage
+      if (JSON.stringify(trees) !== JSON.stringify(migratedTrees)) {
+        this.saveTrees(migratedTrees);
+      }
+      
+      return migratedTrees;
     } catch (error) {
       console.error('Error loading trees from localStorage:', error);
       return [];
