@@ -3,7 +3,8 @@
 import { Tree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, StickyNote, CheckCircle } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface TreeCardProps {
   tree: Tree;
@@ -53,9 +54,22 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
       <CardContent className="space-y-4 pt-4">
         <div className="tree-info-item flex items-center gap-3 px-2">
           <MapPin size={18} className="text-green-600 flex-shrink-0" />
-          <span className="tree-plus-code font-mono text-xs px-3 py-1.5 rounded-md">
-            {tree.plus_code_local}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-green-700 font-medium">Plus Code:</span>
+            <span className="tree-plus-code font-mono text-xs px-3 py-1.5 rounded-md">
+              {tree.plus_code_local}
+            </span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info size={14} className="text-green-500 hover:text-green-700 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Precise location code for satellite tracking and ecosystem monitoring</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </div>
         
         <div className="tree-info-item flex items-center gap-3 px-2">
