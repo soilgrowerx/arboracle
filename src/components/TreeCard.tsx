@@ -3,8 +3,11 @@
 import { Tree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, StickyNote, CheckCircle, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { PlusCodeService } from '@/services/plusCodeService';
+import { useState } from 'react';
 
 interface TreeCardProps {
   tree: Tree;
@@ -12,9 +15,30 @@ interface TreeCardProps {
 }
 
 export function TreeCard({ tree, onClick }: TreeCardProps) {
+  const [showFullCode, setShowFullCode] = useState(false);
+  const [copied, setCopied] = useState(false);
+  
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
+
+  const handleCopyCode = async (code: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const success = await PlusCodeService.copyToClipboard(code);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const toggleCodeFormat = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowFullCode(!showFullCode);
+  };
+
+  // Get enhanced Plus Code info
+  const plusCodeInfo = PlusCodeService.encode(tree.location.lat, tree.location.lng, 11);
+  const displayCode = showFullCode ? tree.plus_code_global : tree.plus_code_local;
 
   return (
     <Card 
@@ -54,18 +78,39 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
       <CardContent className="space-y-4 pt-4">
         <div className="tree-info-item flex items-center gap-3 px-2">
           <MapPin size={18} className="text-green-600 flex-shrink-0" />
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-green-700 font-medium">Plus Code:</span>
-            <span className="tree-plus-code font-mono text-xs px-3 py-1.5 rounded-md">
-              {tree.plus_code_local}
-            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={toggleCodeFormat}
+                className="tree-plus-code font-mono text-xs px-3 py-1.5 rounded-md hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200"
+              >
+                {displayCode}
+              </button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => handleCopyCode(displayCode, e)}
+                className="h-7 w-7 p-0 hover:bg-green-100"
+              >
+                {copied ? (
+                  <Check size={12} className="text-green-600" />
+                ) : (
+                  <Copy size={12} className="text-green-600" />
+                )}
+              </Button>
+            </div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Info size={14} className="text-green-500 hover:text-green-700 cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Precise location code for satellite tracking and ecosystem monitoring</p>
+                  <div className="text-sm">
+                    <p><strong>Area:</strong> {plusCodeInfo.areaSize}</p>
+                    <p><strong>Precision:</strong> {plusCodeInfo.precision} characters</p>
+                    <p className="text-xs text-gray-600 mt-1">Click code to toggle full/local format</p>
+                  </div>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

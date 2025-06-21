@@ -3,18 +3,26 @@ import { OpenLocationCode } from 'open-location-code';
 export interface PlusCodeResult {
   global: string;
   local: string;
+  short: string;
+  areaSize: string;
+  precision: number;
 }
 
 const olc = new OpenLocationCode();
 
 export class PlusCodeService {
-  static encode(latitude: number, longitude: number): PlusCodeResult {
-    const global = olc.encode(latitude, longitude);
+  static encode(latitude: number, longitude: number, precision: number = 11): PlusCodeResult {
+    const global = olc.encode(latitude, longitude, precision);
     const local = olc.encode(latitude, longitude, 10); // 10-character code for local use
+    const short = olc.shorten(global, latitude, longitude);
+    const areaSize = this.getAreaSize(precision);
     
     return {
       global,
-      local
+      local,
+      short,
+      areaSize,
+      precision
     };
   }
 
@@ -40,5 +48,52 @@ export class PlusCodeService {
 
   static recover(shortCode: string, referenceLatitude: number, referenceLongitude: number): string {
     return olc.recoverNearest(shortCode, referenceLatitude, referenceLongitude);
+  }
+
+  static getAreaSize(precision: number): string {
+    const areaSizes: { [key: number]: string } = {
+      2: '~2500 km × 2000 km',
+      4: '~250 km × 200 km', 
+      6: '~25 km × 20 km',
+      8: '~2.5 km × 2 km',
+      10: '~250 m × 200 m',
+      11: '~125 m × 100 m',
+      12: '~25 m × 20 m',
+      13: '~12.5 m × 10 m',
+      14: '~2.5 m × 2 m',
+      15: '~1.25 m × 1 m'
+    };
+    return areaSizes[precision] || '~125 m × 100 m';
+  }
+
+  static formatForDisplay(code: string, showFull: boolean = false): string {
+    if (showFull) {
+      return code;
+    }
+    // Show shortened version for display
+    return code.length > 11 ? code.substring(0, 8) + '+' + code.substring(8) : code;
+  }
+
+  static copyToClipboard(code: string): Promise<boolean> {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(code)
+        .then(() => true)
+        .catch(() => false);
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = code;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return Promise.resolve(true);
+      } catch (err) {
+        document.body.removeChild(textArea);
+        return Promise.resolve(false);
+      }
+    }
   }
 }
