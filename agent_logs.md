@@ -137,3 +137,30 @@
 - Tested with real API calls returning accurate species data (maples, oaks, etc.)
 - Represents transformation from standalone tree tracker to connected ecological platform
 - Next iterations can focus on: observation data integration, community features, advanced taxonomy displays
+
+### Version 0.6.0 - Enhanced Taxonomic Data Display 🔬
+**Agent:** Iteration-Agent-v3-Deployer  
+**Date:** 2025-01-21  
+**Git Commit Hash:** 0e936a0  
+**Is Successfully Deployed:** false (deployment in progress)  
+**Functionality Changes:**
+- **🔬 ENHANCED TREE CARDS**: Rich ecological information display with scientific accuracy
+- **Scientific Name Display**: Scientific names shown in proper italics (e.g., *Acer rubrum*)
+- **Taxonomic Classification**: Shows taxonomic rank (genus, species) with scientific names
+- **iNaturalist Verification Indicators**: 
+  - Green checkmark icon next to verified species names
+  - Blue "iNaturalist verified" badge in tree card
+- **Enhanced Data Storage**: Updated Tree interface with scientificName, commonName, taxonomicRank, iNaturalistId fields
+- **Improved User Experience**: Professional scientific presentation maintaining clean design
+
+**SCIENTIFIC IMPACT:**
+- ✅ Proper taxonomic display following scientific naming conventions
+- ✅ Clear verification indicators for scientifically validated data
+- ✅ Enhanced data model supporting future research integrations
+- ✅ Professional presentation suitable for scientific and educational use
+
+**Notes:**
+- Tree cards now display both common and scientific names with proper formatting
+- iNaturalist verification clearly indicated with visual badges and icons
+- Enhanced data structure supports future integrations with research databases
+- Next iterations can focus on: advanced filtering by taxonomy, research data export, ecological metrics
