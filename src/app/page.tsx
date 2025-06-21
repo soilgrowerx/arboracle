@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { Tree } from '@/types';
 import { TreeService } from '@/services/treeService';
 import { TreeCard } from '@/components/TreeCard';
-import { MapView } from '@/components/MapView';
 import { AddTreeModal } from '@/components/AddTreeModal';
+import { TreeStatistics } from '@/components/TreeStatistics';
 import { Toaster } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, SortAsc, Map, Grid3X3, Download } from 'lucide-react';
+import { Search, Filter, SortAsc, Download } from 'lucide-react';
 import { calculateTreeAge } from '@/lib/utils';
 
 export default function Home() {
@@ -18,7 +18,6 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date-newest');
   const [filterBy, setFilterBy] = useState('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
 
   const loadTrees = () => {
     try {
@@ -188,29 +187,6 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {/* View Toggle */}
-            {trees.length > 0 && (
-              <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-1 shadow-sm">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className={`px-3 py-2 ${viewMode === 'grid' ? 'bg-green-600 text-white hover:bg-green-700' : 'text-green-600 hover:bg-green-50'}`}
-                >
-                  <Grid3X3 size={16} className="mr-1" />
-                  Grid
-                </Button>
-                <Button
-                  variant={viewMode === 'map' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('map')}
-                  className={`px-3 py-2 ${viewMode === 'map' ? 'bg-green-600 text-white hover:bg-green-700' : 'text-green-600 hover:bg-green-50'}`}
-                >
-                  <Map size={16} className="mr-1" />
-                  Map
-                </Button>
-              </div>
-            )}
             {trees.length > 0 && (
               <Button
                 onClick={exportToCSV}
@@ -224,6 +200,9 @@ export default function Home() {
             <AddTreeModal onTreeAdded={handleTreeAdded} />
           </div>
         </div>
+
+        {/* Statistics Dashboard */}
+        <TreeStatistics trees={trees} />
 
         {/* Search and Filter Section */}
         {trees.length > 0 && (
@@ -332,8 +311,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        ) : viewMode === 'map' ? (
-          <MapView trees={filteredTrees} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredTrees.map((tree) => (
