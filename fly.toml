@@ -1,0 +1,35 @@
+app = "fern-app-rough-dust-1930"
+primary_region = "iad"
+
+[build]
+
+[env]
+  PORT = "3000"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[http_service.checks]]
+  interval = "15s"
+  grace_period = "5s"
+  method = "GET"
+  path = "/"
+  protocol = "http"
+  timeout = "10s"
+  tls_skip_verify = false
+
+[vm]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+[[vm.processes]]
+  name = "app"
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
