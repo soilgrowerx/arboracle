@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { TreeFormData } from '@/types';
 import { TreeService } from '@/services/treeService';
+import { iNaturalistService } from '@/services/inaturalistService';
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 
 interface AddTreeModalProps {
   onTreeAdded?: () => void;
@@ -24,6 +25,9 @@ interface AddTreeModalProps {
 export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const { toast } = useToast();
   const [formData, setFormData] = useState<TreeFormData>({
     species: '',
@@ -96,6 +100,8 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
         notes: '',
         images: []
       });
+      setShowSearchResults(false);
+      setSearchResults([]);
       
       onTreeAdded?.();
     } catch (error) {
@@ -129,6 +135,50 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
     }
   };
 
+  const searchSpecies = async () => {
+    if (!formData.species.trim()) {
+      toast({
+        title: "Search Error",
+        description: "Please enter a species name to search",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await iNaturalistService.searchSpecies(formData.species);
+      setSearchResults(results);
+      setShowSearchResults(true);
+      
+      if (results.length === 0) {
+        toast({
+          title: "No Results",
+          description: "No species found matching your search",
+        });
+      }
+    } catch (error) {
+      console.error('Error searching species:', error);
+      toast({
+        title: "Search Error",
+        description: "Failed to search species. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const selectSpecies = (taxon: any) => {
+    const speciesName = taxon.preferred_common_name || taxon.name;
+    setFormData(prev => ({ ...prev, species: speciesName }));
+    setShowSearchResults(false);
+    toast({
+      title: "Species Selected",
+      description: `Selected: ${speciesName}`,
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -147,16 +197,48 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="species" className="text-green-700">Species *</Label>
-            <Input
-              id="species"
-              value={formData.species}
-              onChange={(e) => setFormData(prev => ({ ...prev, species: e.target.value }))}
-              placeholder="e.g., Oak, Maple, Pine..."
-              required
-              className={`border-green-200 focus:border-green-400 ${
-                errors.some(e => e.includes('Species')) ? 'border-red-500' : ''
-              }`}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="species"
+                value={formData.species}
+                onChange={(e) => setFormData(prev => ({ ...prev, species: e.target.value }))}
+                placeholder="e.g., Oak, Maple, Pine..."
+                required
+                className={`border-green-200 focus:border-green-400 ${
+                  errors.some(e => e.includes('Species')) ? 'border-red-500' : ''
+                }`}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={searchSpecies}
+                disabled={isSearching}
+                className="border-green-300 text-green-700 hover:bg-green-50"
+              >
+                <Search size={16} />
+                {isSearching ? 'Searching...' : 'Search'}
+              </Button>
+            </div>
+            
+            {showSearchResults && searchResults.length > 0 && (
+              <div className="mt-2 max-h-40 overflow-y-auto border border-green-200 rounded-md bg-white">
+                {searchResults.map((taxon) => (
+                  <button
+                    key={taxon.id}
+                    type="button"
+                    onClick={() => selectSpecies(taxon)}
+                    className="w-full text-left px-3 py-2 hover:bg-green-50 border-b border-green-100 last:border-b-0"
+                  >
+                    <div className="font-medium text-green-800">
+                      {taxon.preferred_common_name || taxon.name}
+                    </div>
+                    <div className="text-sm text-green-600">
+                      {taxon.name} • {taxon.rank}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-2">
