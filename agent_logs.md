@@ -110,3 +110,30 @@
 - **DEPLOYMENT**: Search functionality deployed to https://fern-app-rough-dust-1930.fly.dev/
 - Enhances user experience for managing larger tree inventories
 - Next iterations can focus on: advanced filtering, sorting, map integration, iNaturalist API integration
+
+### Version 0.5.0 - iNaturalist API Integration 🌲
+**Agent:** Iteration-Agent-v3-Deployer  
+**Date:** 2025-01-21  
+**Git Commit Hash:** 1d5ef16  
+**Is Successfully Deployed:** true  
+**Functionality Changes:**
+- **🌲 MAJOR MILESTONE**: Full iNaturalist API integration connecting Arboracle to global ecological data
+- **Species Search Service**: New `inaturalistService.ts` with real-time species lookup via https://api.inaturalist.org/v1/taxa
+- **Enhanced Add Tree Modal**: Added "Search" button next to species input for instant species lookup
+- **Scientific Data Integration**: Displays common names, scientific names, and taxonomic ranks (genus, species)
+- **Smart Species Selection**: Click-to-select from search results with auto-fill functionality
+- **Plant-Focused Results**: Filtered to Plantae kingdom for tree-relevant species
+- **Professional UI**: Dropdown results match existing green theme with proper error handling
+
+**ECOLOGICAL IMPACT:**
+- ✅ Connected to global iNaturalist database with millions of species observations
+- ✅ Enables scientifically accurate species identification and naming
+- ✅ Bridges individual tree tracking with broader ecological research community
+- ✅ Foundation for future satellite imagery and ecosystem monitoring integration
+- ✅ Supports the STIM (Stasis Through Inferred Memory) research model for nature-grounded AI
+
+**Notes:**
+- **DEPLOYMENT**: iNaturalist integration successfully deployed to https://fern-app-rough-dust-1930.fly.dev/
+- Tested with real API calls returning accurate species data (maples, oaks, etc.)
+- Represents transformation from standalone tree tracker to connected ecological platform
+- Next iterations can focus on: observation data integration, community features, advanced taxonomy displays
