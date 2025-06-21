@@ -161,13 +161,13 @@ export default function Home() {
 
               {/* Filter Buttons */}
               <div className="flex items-center gap-2">
-                <Filter className="text-green-600" size={20} />
+                <Filter className="text-green-600 transition-transform duration-300 hover:scale-110" size={20} />
                 <div className="flex gap-1">
                   <Button
                     variant={filterBy === 'all' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilterBy('all')}
-                    className={filterBy === 'all' ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}
+                    className={`btn-filter-enhanced ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                   >
                     All Trees
                   </Button>
@@ -175,17 +175,19 @@ export default function Home() {
                     variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilterBy('inaturalist')}
-                    className={filterBy === 'inaturalist' ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}
+                    className={`btn-filter-enhanced ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                   >
-                    🔬 iNaturalist
+                    <span className="mr-1 transition-transform duration-300 hover:scale-110">🔬</span>
+                    iNaturalist
                   </Button>
                   <Button
                     variant={filterBy === 'manual' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilterBy('manual')}
-                    className={filterBy === 'manual' ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}
+                    className={`btn-filter-enhanced ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                   >
-                    ✏️ Manual
+                    <span className="mr-1 transition-transform duration-300 hover:scale-110">✏️</span>
+                    Manual
                   </Button>
                 </div>
               </div>
@@ -225,7 +227,7 @@ export default function Home() {
                     setFilterBy('all');
                     setSortBy('date-newest');
                   }}
-                  className="block w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                  className="block w-full px-4 py-2 btn-primary-enhanced rounded-md"
                 >
                   Clear All Filters
                 </button>

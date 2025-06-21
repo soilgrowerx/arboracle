@@ -197,8 +197,8 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
-          <Plus size={16} className="mr-2" />
+        <Button className="btn-primary-enhanced group">
+          <Plus size={16} className="mr-2 transition-transform duration-200 group-hover:rotate-90" />
           Add Tree
         </Button>
       </DialogTrigger>
@@ -228,9 +228,9 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
                 variant="outline"
                 onClick={searchSpecies}
                 disabled={isSearching}
-                className="border-green-300 text-green-700 hover:bg-green-50"
+                className="btn-search-enhanced"
               >
-                <Search size={16} />
+                <Search size={16} className={`transition-transform duration-300 ${isSearching ? 'animate-spin' : ''}`} />
                 {isSearching ? 'Searching...' : 'Search'}
               </Button>
             </div>
@@ -242,7 +242,7 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
                     key={taxon.id}
                     type="button"
                     onClick={() => selectSpecies(taxon)}
-                    className="w-full text-left px-3 py-2 hover:bg-green-50 border-b border-green-100 last:border-b-0"
+                    className="w-full text-left px-3 py-2 hover:bg-green-50 border-b border-green-100 last:border-b-0 transition-all duration-200 hover:scale-[1.02] hover:shadow-sm"
                   >
                     <div className="font-medium text-green-800">
                       {taxon.preferred_common_name || taxon.name}
@@ -299,9 +299,10 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
             type="button"
             variant="outline"
             onClick={getCurrentLocation}
-            className="w-full border-green-300 text-green-700 hover:bg-green-50"
+            className="w-full btn-outline-enhanced"
           >
-            📍 Use Current Location
+            <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
+            Use Current Location
           </Button>
 
           <div>
@@ -332,16 +333,23 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="flex-1"
+              className="flex-1 btn-outline-enhanced"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+              className="flex-1 btn-primary-enhanced"
             >
-              {isSubmitting ? 'Adding...' : 'Add Tree'}
+              {isSubmitting ? (
+                <span className="flex items-center">
+                  <span className="animate-spin mr-2">🌱</span>
+                  Adding...
+                </span>
+              ) : (
+                'Add Tree'
+              )}
             </Button>
           </div>
         </form>
