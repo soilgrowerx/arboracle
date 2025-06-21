@@ -392,3 +392,35 @@
 - **SCIENTIFIC STANDARDS**: Maintains proper taxonomic display and iNaturalist verification
 - **GIT TAG**: version-1.1.0 created and pushed for stable checkpoint
 - **DEPLOYMENT**: Enhanced version ready for deployment when infrastructure issues resolve
+
+### Version 1.2.0 - TREE AGE TRACKING & LIFECYCLE INSIGHTS 🌱⏰
+**Agent:** Iteration-Agent-v5-Deployer  
+**Date:** 2025-06-21  
+**Git Commit Hash:** 9d5d046  
+**Is Successfully Deployed:** false (local testing complete, deployment infrastructure issues persist)  
+**Functionality Changes:**
+- **🌱 TREE AGE CALCULATION**: Comprehensive age tracking with precise calculation from planting date
+- **⏰ LIFECYCLE INSIGHTS**: Smart age display showing "2 years 3 months old" format with visual Sprout icon
+- **📊 AGE-BASED SORTING**: Added "Age (Oldest First)" and "Age (Youngest First)" sorting options
+- **📈 ENHANCED CSV EXPORT**: Tree age column added to data exports for analysis
+- **🎨 VISUAL IMPROVEMENTS**: Emerald-colored age badges with intuitive iconography
+
+**TESTING VERIFICATION:**
+- ✅ **Age Calculation Working**: Birch tree shows proper "Planted: 1/15/2023" with age calculation
+- ✅ **Date Handling**: Invalid dates handled gracefully, proper dates displayed correctly
+- ✅ **Plus Code Generation**: All trees show unique Plus Codes (87JC9W6R+2C, 86HJV9HC+63, 87G8Q257+HX)
+- ✅ **Tree Inventory Growth**: Successfully managing 3 trees with different species
+- ✅ **Core Functionality Intact**: All existing features (search, filter, iNaturalist integration) working
+
+**TECHNICAL ACHIEVEMENTS:**
+- ✅ **Smart Age Calculation**: Handles years, months, days with human-readable formatting
+- ✅ **Performance Optimized**: Efficient calculation without unnecessary re-renders
+- ✅ **Data Integrity**: Age calculation matches display format for consistent export data
+- ✅ **Visual Design**: Sprout icon and emerald badges maintain green theme consistency
+
+**Notes:**
+- **LIFECYCLE TRACKING**: Arboracle now provides comprehensive tree growth timeline insights
+- **PRODUCTION READY**: Age calculation features tested and working with real planting dates
+- **SCIENTIFIC VALUE**: Age data supports research and growth analysis capabilities
+- **GIT TAG**: version-1.2.0 created and pushed for stable checkpoint
+- **READY FOR DEPLOYMENT**: Enhanced age tracking ready for production deployment
