@@ -4,9 +4,10 @@ import { Tree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlusCodeService } from '@/services/plusCodeService';
+import { calculateTreeAge } from '@/lib/utils';
 import { useState } from 'react';
 
 interface TreeCardProps {
@@ -39,6 +40,9 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
   // Get enhanced Plus Code info
   const plusCodeInfo = PlusCodeService.encode(tree.location.lat, tree.location.lng, 11);
   const displayCode = showFullCode ? tree.plus_code_global : tree.plus_code_local;
+  
+  // Calculate tree age
+  const treeAge = calculateTreeAge(tree.date_planted);
 
   return (
     <Card 
@@ -120,6 +124,16 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
         <div className="tree-info-item flex items-center gap-3 px-2">
           <Calendar size={18} className="text-green-600 flex-shrink-0" />
           <span className="text-sm text-green-700 font-medium">Planted: {formatDate(tree.date_planted)}</span>
+        </div>
+        
+        <div className="tree-info-item flex items-center gap-3 px-2">
+          <Sprout size={18} className="text-emerald-600 flex-shrink-0" />
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-emerald-700 font-medium">Age:</span>
+            <span className="text-sm font-semibold text-emerald-800 bg-emerald-50 px-2 py-1 rounded-full">
+              {treeAge.displayText}
+            </span>
+          </div>
         </div>
 
         {tree.notes && (

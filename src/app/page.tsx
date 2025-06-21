@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Filter, SortAsc, Map, Grid3X3, Download } from 'lucide-react';
+import { calculateTreeAge } from '@/lib/utils';
 
 export default function Home() {
   const [trees, setTrees] = useState<Tree[]>([]);
@@ -47,22 +48,27 @@ export default function Home() {
       'Longitude',
       'Plus Code',
       'Date Planted',
+      'Tree Age',
       'Date Added',
       'Notes'
     ];
 
     const csvContent = [
       headers.join(','),
-      ...trees.map(tree => [
-        `"${tree.commonName || tree.species}"`,
-        `"${tree.scientificName || ''}"`,
-        tree.location.lat,
-        tree.location.lng,
-        `"${tree.plus_code_local}"`,
-        `"${new Date(tree.date_planted).toLocaleDateString()}"`,
-        `"${new Date(tree.created_at).toLocaleDateString()}"`,
-        `"${tree.notes || ''}"`
-      ].join(','))
+      ...trees.map(tree => {
+        const treeAge = calculateTreeAge(tree.date_planted);
+        return [
+          `"${tree.commonName || tree.species}"`,
+          `"${tree.scientificName || ''}"`,
+          tree.location.lat,
+          tree.location.lng,
+          `"${tree.plus_code_local}"`,
+          `"${new Date(tree.date_planted).toLocaleDateString()}"`,
+          `"${treeAge.displayText}"`,
+          `"${new Date(tree.created_at).toLocaleDateString()}"`,
+          `"${tree.notes || ''}"`
+        ].join(',');
+      })
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -126,6 +132,20 @@ export default function Home() {
           const aName = a.scientificName || a.species;
           const bName = b.scientificName || b.species;
           return bName.localeCompare(aName);
+        });
+        break;
+      case 'age-oldest':
+        sorted.sort((a, b) => {
+          const aAge = calculateTreeAge(a.date_planted).totalDays;
+          const bAge = calculateTreeAge(b.date_planted).totalDays;
+          return bAge - aAge; // Older trees first (more days = older)
+        });
+        break;
+      case 'age-youngest':
+        sorted.sort((a, b) => {
+          const aAge = calculateTreeAge(a.date_planted).totalDays;
+          const bAge = calculateTreeAge(b.date_planted).totalDays;
+          return aAge - bAge; // Younger trees first (fewer days = younger)
         });
         break;
       default:
@@ -236,6 +256,8 @@ export default function Home() {
                     <SelectItem value="species-za">Species Name (Z-A)</SelectItem>
                     <SelectItem value="scientific-az">Scientific Name (A-Z)</SelectItem>
                     <SelectItem value="scientific-za">Scientific Name (Z-A)</SelectItem>
+                    <SelectItem value="age-oldest">Age (Oldest First)</SelectItem>
+                    <SelectItem value="age-youngest">Age (Youngest First)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
