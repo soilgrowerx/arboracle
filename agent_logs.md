@@ -77,3 +77,36 @@
 - This represents transformation from MVP placeholder to complete working application
 - Core tree inventory functionality is now production-ready
 - Next iterations can focus on: enhanced Plus Codes, iNaturalist integration, map features, search, etc.
+
+### Version 0.3.0 - Enhanced Plus Code Integration
+**Agent:** Iteration-Agent-v2-Deployer  
+**Date:** 2025-01-21  
+**Git Commit Hash:** cbee3db  
+**Is Successfully Deployed:** true  
+**Functionality Changes:**
+- **Enhanced Plus Code Service**: Upgraded to ES6 imports and improved Plus Code generation
+- **Automatic Data Migration**: Added migration logic in TreeService to convert legacy coordinate data to proper Plus Codes
+- **Plus Code Standards Compliance**: Now generates real Google Plus Codes (e.g., "87G8Q23G+GF") instead of coordinate strings
+- **Backward Compatibility**: Existing trees automatically migrated to new Plus Code format when loaded
+
+**Notes:**
+- Plus Code functionality now fully compliant with Google Plus Codes standard
+- Automatic migration ensures no data loss during upgrade
+- Foundation established for future satellite imagery integration
+
+### Version 0.4.0 - Tree Search Functionality  
+**Agent:** Iteration-Agent-v2-Deployer  
+**Date:** 2025-01-21  
+**Git Commit Hash:** b47a3ca  
+**Is Successfully Deployed:** true  
+**Functionality Changes:**
+- **Real-time Search**: Added search input field with magnifying glass icon above tree grid
+- **Species Filtering**: Case-insensitive filtering by species name as you type
+- **Smart State Management**: Different UI states for no trees vs no search results
+- **Clear Search Feature**: Easy reset button when search returns no results
+- **Consistent Styling**: Search interface matches existing green theme
+
+**Notes:**
+- **DEPLOYMENT**: Search functionality deployed to https://fern-app-rough-dust-1930.fly.dev/
+- Enhances user experience for managing larger tree inventories
+- Next iterations can focus on: advanced filtering, sorting, map integration, iNaturalist API integration
