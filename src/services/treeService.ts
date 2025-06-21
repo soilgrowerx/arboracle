@@ -76,7 +76,11 @@ export class TreeService {
       notes: formData.notes,
       images: formData.images,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      scientificName: formData.scientificName,
+      commonName: formData.commonName,
+      taxonomicRank: formData.taxonomicRank,
+      iNaturalistId: formData.iNaturalistId
     };
 
     trees.push(newTree);

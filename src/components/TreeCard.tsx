@@ -3,7 +3,7 @@
 import { Tree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Calendar, StickyNote } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle } from 'lucide-react';
 
 interface TreeCardProps {
   tree: Tree;
@@ -21,9 +21,24 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
       onClick={onClick}
     >
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold text-green-800 flex items-center gap-2">
-          <span className="text-green-600">🌳</span>
-          {tree.species}
+        <CardTitle className="text-lg font-semibold text-green-800">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-green-600">🌳</span>
+            {tree.commonName || tree.species}
+            {tree.iNaturalistId && (
+              <CheckCircle size={16} className="text-green-600" />
+            )}
+          </div>
+          {tree.scientificName && (
+            <div className="text-sm font-normal text-green-600 italic">
+              {tree.scientificName}
+              {tree.taxonomicRank && (
+                <span className="text-xs text-green-500 not-italic ml-2">
+                  ({tree.taxonomicRank})
+                </span>
+              )}
+            </div>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -50,6 +65,11 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
           {tree.images.length > 0 && (
             <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
               📸 {tree.images.length} photo{tree.images.length !== 1 ? 's' : ''}
+            </Badge>
+          )}
+          {tree.iNaturalistId && (
+            <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs">
+              🔬 iNaturalist verified
             </Badge>
           )}
           <Badge variant="outline" className="text-xs border-green-300 text-green-600">

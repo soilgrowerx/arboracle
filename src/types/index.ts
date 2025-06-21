@@ -12,6 +12,10 @@ export interface Tree {
   images: string[];
   created_at: string;
   updated_at: string;
+  scientificName?: string;
+  commonName?: string;
+  taxonomicRank?: string;
+  iNaturalistId?: number;
 }
 
 export interface User {
@@ -28,6 +32,10 @@ export interface TreeFormData {
   date_planted: string;
   notes?: string;
   images: string[];
+  scientificName?: string;
+  commonName?: string;
+  taxonomicRank?: string;
+  iNaturalistId?: number;
 }
 
 // Export iNaturalist types

@@ -34,7 +34,11 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
     location: { lat: 0, lng: 0 },
     date_planted: '',
     notes: '',
-    images: []
+    images: [],
+    scientificName: undefined,
+    commonName: undefined,
+    taxonomicRank: undefined,
+    iNaturalistId: undefined
   });
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -98,7 +102,11 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
         location: { lat: 0, lng: 0 },
         date_planted: '',
         notes: '',
-        images: []
+        images: [],
+        scientificName: undefined,
+        commonName: undefined,
+        taxonomicRank: undefined,
+        iNaturalistId: undefined
       });
       setShowSearchResults(false);
       setSearchResults([]);
@@ -171,7 +179,14 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
 
   const selectSpecies = (taxon: any) => {
     const speciesName = taxon.preferred_common_name || taxon.name;
-    setFormData(prev => ({ ...prev, species: speciesName }));
+    setFormData(prev => ({ 
+      ...prev, 
+      species: speciesName,
+      scientificName: taxon.name,
+      commonName: taxon.preferred_common_name,
+      taxonomicRank: taxon.rank,
+      iNaturalistId: taxon.id
+    }));
     setShowSearchResults(false);
     toast({
       title: "Species Selected",
