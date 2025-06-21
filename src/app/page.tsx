@@ -94,14 +94,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-green-200 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
+      <header className="header-gradient backdrop-blur-md border-b border-green-200/60 sticky top-0 z-40 shadow-lg">
+        <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-center">
-            <div className="flex items-center gap-3">
-              <div className="text-3xl">🌳</div>
-              <div>
-                <h1 className="text-2xl font-bold text-green-800">Arboracle</h1>
-                <p className="text-sm text-green-600">Your Digital Tree Inventory</p>
+            <div className="flex items-center gap-4 group">
+              <div className="text-4xl transform transition-transform duration-300 group-hover:scale-110 drop-shadow-lg">🌳</div>
+              <div className="text-center">
+                <h1 className="text-3xl font-bold brand-title tracking-tight leading-none mb-1">Arboracle</h1>
+                <p className="text-sm font-medium text-green-600/80 brand-subtitle tracking-wide uppercase letter-spacing-wide">Your Digital Tree Inventory</p>
               </div>
             </div>
           </div>
