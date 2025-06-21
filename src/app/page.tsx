@@ -7,12 +7,16 @@ import { TreeCard } from '@/components/TreeCard';
 import { AddTreeModal } from '@/components/AddTreeModal';
 import { Toaster } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Filter, SortAsc } from 'lucide-react';
 
 export default function Home() {
   const [trees, setTrees] = useState<Tree[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('date-newest');
+  const [filterBy, setFilterBy] = useState('all');
 
   const loadTrees = () => {
     setIsLoading(true);
@@ -29,10 +33,63 @@ export default function Home() {
     loadTrees();
   };
 
-  // Filter trees based on search term
-  const filteredTrees = trees.filter(tree =>
-    tree.species.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter and sort trees
+  const getFilteredAndSortedTrees = () => {
+    let filtered = trees;
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(tree =>
+        tree.species.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (tree.commonName && tree.commonName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (tree.scientificName && tree.scientificName.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    // Apply category filter
+    if (filterBy === 'inaturalist') {
+      filtered = filtered.filter(tree => tree.iNaturalistId);
+    } else if (filterBy === 'manual') {
+      filtered = filtered.filter(tree => !tree.iNaturalistId);
+    }
+
+    // Apply sorting
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case 'date-newest':
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'date-oldest':
+        sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'species-az':
+        sorted.sort((a, b) => (a.commonName || a.species).localeCompare(b.commonName || b.species));
+        break;
+      case 'species-za':
+        sorted.sort((a, b) => (b.commonName || b.species).localeCompare(a.commonName || a.species));
+        break;
+      case 'scientific-az':
+        sorted.sort((a, b) => {
+          const aName = a.scientificName || a.species;
+          const bName = b.scientificName || b.species;
+          return aName.localeCompare(bName);
+        });
+        break;
+      case 'scientific-za':
+        sorted.sort((a, b) => {
+          const aName = a.scientificName || a.species;
+          const bName = b.scientificName || b.species;
+          return bName.localeCompare(aName);
+        });
+        break;
+      default:
+        break;
+    }
+
+    return sorted;
+  };
+
+  const filteredTrees = getFilteredAndSortedTrees();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
@@ -67,18 +124,71 @@ export default function Home() {
           <AddTreeModal onTreeAdded={handleTreeAdded} />
         </div>
 
-        {/* Search Section */}
+        {/* Search and Filter Section */}
         {trees.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6 space-y-4">
+            {/* Search Bar */}
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600" size={20} />
               <Input
                 type="text"
-                placeholder="Search by species name..."
+                placeholder="Search by species or scientific name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 border-green-200 focus:border-green-400"
               />
+            </div>
+
+            {/* Sort and Filter Controls */}
+            <div className="flex flex-wrap gap-4 items-center">
+              {/* Sort Dropdown */}
+              <div className="flex items-center gap-2">
+                <SortAsc className="text-green-600" size={20} />
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-48 border-green-200 focus:border-green-400">
+                    <SelectValue placeholder="Sort by..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date-newest">Date Added (Newest)</SelectItem>
+                    <SelectItem value="date-oldest">Date Added (Oldest)</SelectItem>
+                    <SelectItem value="species-az">Species Name (A-Z)</SelectItem>
+                    <SelectItem value="species-za">Species Name (Z-A)</SelectItem>
+                    <SelectItem value="scientific-az">Scientific Name (A-Z)</SelectItem>
+                    <SelectItem value="scientific-za">Scientific Name (Z-A)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Filter Buttons */}
+              <div className="flex items-center gap-2">
+                <Filter className="text-green-600" size={20} />
+                <div className="flex gap-1">
+                  <Button
+                    variant={filterBy === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterBy('all')}
+                    className={filterBy === 'all' ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}
+                  >
+                    All Trees
+                  </Button>
+                  <Button
+                    variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterBy('inaturalist')}
+                    className={filterBy === 'inaturalist' ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}
+                  >
+                    🔬 iNaturalist
+                  </Button>
+                  <Button
+                    variant={filterBy === 'manual' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setFilterBy('manual')}
+                    className={filterBy === 'manual' ? 'bg-green-600 hover:bg-green-700' : 'border-green-300 text-green-700 hover:bg-green-50'}
+                  >
+                    ✏️ Manual
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -104,16 +214,22 @@ export default function Home() {
           <div className="text-center py-16">
             <div className="bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-12 shadow-lg max-w-md mx-auto">
               <div className="text-6xl mb-6">🔍</div>
-              <h3 className="text-2xl font-bold text-green-800 mb-4">No Trees Match Your Search</h3>
+              <h3 className="text-2xl font-bold text-green-800 mb-4">No Trees Match Your Criteria</h3>
               <p className="text-green-700 mb-6">
-                Try searching for a different species name or clear the search to see all trees.
+                Try adjusting your search, sort, or filter settings to see more trees.
               </p>
-              <button
-                onClick={() => setSearchTerm('')}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-              >
-                Clear Search
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterBy('all');
+                    setSortBy('date-newest');
+                  }}
+                  className="block w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                >
+                  Clear All Filters
+                </button>
+              </div>
             </div>
           </div>
         ) : (
