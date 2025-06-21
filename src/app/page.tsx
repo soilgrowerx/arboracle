@@ -18,6 +18,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date-newest');
   const [filterBy, setFilterBy] = useState('all');
+  const [editingTree, setEditingTree] = useState<Tree | undefined>(undefined);
 
   const loadTrees = () => {
     try {
@@ -35,6 +36,11 @@ export default function Home() {
 
   const handleTreeAdded = () => {
     loadTrees();
+    setEditingTree(undefined);
+  };
+
+  const handleEditTree = (tree: Tree) => {
+    setEditingTree(tree);
   };
 
   const exportToCSV = () => {
@@ -197,7 +203,11 @@ export default function Home() {
                 Export Data
               </Button>
             )}
-            <AddTreeModal onTreeAdded={handleTreeAdded} />
+            <AddTreeModal 
+              onTreeAdded={handleTreeAdded} 
+              editTree={editingTree}
+              isEditMode={!!editingTree}
+            />
           </div>
         </div>
 
@@ -286,7 +296,11 @@ export default function Home() {
               <p className="text-green-700 mb-6">
                 Start your digital forest by adding your first tree!
               </p>
-              <AddTreeModal onTreeAdded={handleTreeAdded} />
+              <AddTreeModal 
+              onTreeAdded={handleTreeAdded} 
+              editTree={editingTree}
+              isEditMode={!!editingTree}
+            />
             </div>
           </div>
         ) : filteredTrees.length === 0 ? (
@@ -320,6 +334,7 @@ export default function Home() {
                 onClick={() => {
                   console.log('Tree clicked:', tree.id);
                 }}
+                onEdit={handleEditTree}
               />
             ))}
           </div>

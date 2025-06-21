@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { TreeFormData } from '@/types';
+import { useState, useEffect } from 'react';
+import { TreeFormData, Tree } from '@/types';
 import { TreeService } from '@/services/treeService';
 import { iNaturalistService } from '@/services/inaturalistService';
 import {
@@ -20,10 +20,18 @@ import { Plus, Search } from 'lucide-react';
 
 interface AddTreeModalProps {
   onTreeAdded?: () => void;
+  editTree?: Tree;
+  isEditMode?: boolean;
 }
 
-export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
+export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddTreeModalProps) {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (isEditMode && editTree) {
+      setOpen(true);
+    }
+  }, [isEditMode, editTree]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -40,6 +48,22 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
     taxonomicRank: undefined,
     iNaturalistId: undefined
   });
+
+  useEffect(() => {
+    if (isEditMode && editTree) {
+      setFormData({
+        species: editTree.species,
+        location: editTree.location,
+        date_planted: editTree.date_planted,
+        notes: editTree.notes,
+        images: editTree.images,
+        scientificName: editTree.scientificName,
+        commonName: editTree.commonName,
+        taxonomicRank: editTree.taxonomicRank,
+        iNaturalistId: editTree.iNaturalistId
+      });
+    }
+  }, [isEditMode, editTree]);
   const [errors, setErrors] = useState<string[]>([]);
 
   const validateForm = (): string[] => {
@@ -89,25 +113,38 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
       
       setErrors([]);
 
-      const newTree = TreeService.addTree(formData);
-      
-      toast({
-        title: "Tree Added Successfully! 🌳",
-        description: `${newTree.species} has been added to your forest.`,
-      });
+      if (isEditMode && editTree) {
+        const updatedTree = TreeService.updateTree(editTree.id, formData);
+        if (updatedTree) {
+          toast({
+            title: "Tree Updated Successfully! 🌳",
+            description: `${updatedTree.species} has been updated.`,
+          });
+        }
+      } else {
+        const newTree = TreeService.addTree(formData);
+        toast({
+          title: "Tree Added Successfully! 🌳",
+          description: `${newTree.species} has been added to your forest.`,
+        });
+      }
       
       setOpen(false);
-      setFormData({
-        species: '',
-        location: { lat: 0, lng: 0 },
-        date_planted: '',
-        notes: '',
-        images: [],
-        scientificName: undefined,
-        commonName: undefined,
-        taxonomicRank: undefined,
-        iNaturalistId: undefined
-      });
+      
+      if (!isEditMode) {
+        setFormData({
+          species: '',
+          location: { lat: 0, lng: 0 },
+          date_planted: '',
+          notes: '',
+          images: [],
+          scientificName: undefined,
+          commonName: undefined,
+          taxonomicRank: undefined,
+          iNaturalistId: undefined
+        });
+      }
+      
       setShowSearchResults(false);
       setSearchResults([]);
       
@@ -196,16 +233,18 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="btn-primary-enhanced group">
-          <Plus size={16} className="mr-2 transition-transform duration-200 group-hover:rotate-90" />
-          Add Tree
-        </Button>
-      </DialogTrigger>
+      {!isEditMode && (
+        <DialogTrigger asChild>
+          <Button className="btn-primary-enhanced group">
+            <Plus size={16} className="mr-2 transition-transform duration-200 group-hover:rotate-90" />
+            Add Tree
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-green-800 flex items-center gap-2">
-            🌳 Add New Tree
+            🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
           </DialogTitle>
         </DialogHeader>
         
@@ -345,10 +384,10 @@ export function AddTreeModal({ onTreeAdded }: AddTreeModalProps) {
               {isSubmitting ? (
                 <span className="flex items-center">
                   <span className="animate-spin mr-2">🌱</span>
-                  Adding...
+                  {isEditMode ? 'Updating...' : 'Adding...'}
                 </span>
               ) : (
-                'Add Tree'
+                isEditMode ? 'Update Tree' : 'Add Tree'
               )}
             </Button>
           </div>

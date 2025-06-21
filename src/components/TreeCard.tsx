@@ -4,7 +4,7 @@ import { Tree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout, Pencil } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlusCodeService } from '@/services/plusCodeService';
 import { calculateTreeAge } from '@/lib/utils';
@@ -13,9 +13,10 @@ import { useState } from 'react';
 interface TreeCardProps {
   tree: Tree;
   onClick?: () => void;
+  onEdit?: (tree: Tree) => void;
 }
 
-export function TreeCard({ tree, onClick }: TreeCardProps) {
+export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
   const [showFullCode, setShowFullCode] = useState(false);
   const [copied, setCopied] = useState(false);
   
@@ -35,6 +36,11 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
   const toggleCodeFormat = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowFullCode(!showFullCode);
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit?.(tree);
   };
 
   // Get enhanced Plus Code info
@@ -64,6 +70,16 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
                 </div>
               )}
             </div>
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEdit}
+                className="h-8 w-8 p-0 hover:bg-green-100"
+              >
+                <Pencil size={14} className="text-green-600" />
+              </Button>
+            )}
           </div>
           {tree.scientificName && (
             <div className="tree-scientific-name rounded-md">
