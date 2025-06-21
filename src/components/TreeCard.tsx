@@ -17,62 +17,73 @@ export function TreeCard({ tree, onClick }: TreeCardProps) {
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow bg-green-50 border-green-200 hover:border-green-300"
+      className="cursor-pointer tree-card-enhanced"
       onClick={onClick}
     >
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-4 tree-card-header">
         <CardTitle className="text-lg font-semibold text-green-800">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-green-600">🌳</span>
-            {tree.commonName || tree.species}
-            {tree.iNaturalistId && (
-              <CheckCircle size={16} className="text-green-600" />
-            )}
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-2xl tree-icon-enhanced">🌳</span>
+            <div className="flex-1">
+              <div className="text-lg font-bold text-green-800 mb-1">
+                {tree.commonName || tree.species}
+              </div>
+              {tree.iNaturalistId && (
+                <div className="flex items-center gap-1">
+                  <CheckCircle size={14} className="text-green-600" />
+                  <span className="text-xs text-green-600 font-medium">Verified</span>
+                </div>
+              )}
+            </div>
           </div>
           {tree.scientificName && (
-            <div className="text-sm font-normal text-green-600 italic">
-              {tree.scientificName}
-              {tree.taxonomicRank && (
-                <span className="text-xs text-green-500 not-italic ml-2">
-                  ({tree.taxonomicRank})
-                </span>
-              )}
+            <div className="tree-scientific-name rounded-md">
+              <div className="text-sm font-medium text-green-700 italic">
+                {tree.scientificName}
+                {tree.taxonomicRank && (
+                  <span className="text-xs text-green-500 not-italic ml-2 bg-green-100 px-2 py-0.5 rounded-full">
+                    {tree.taxonomicRank}
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-center gap-2 text-sm text-green-700">
-          <MapPin size={16} />
-          <span className="font-mono text-xs bg-green-100 px-2 py-1 rounded">
+      <CardContent className="space-y-4 pt-4">
+        <div className="tree-info-item flex items-center gap-3 px-2">
+          <MapPin size={18} className="text-green-600 flex-shrink-0" />
+          <span className="tree-plus-code font-mono text-xs px-3 py-1.5 rounded-md">
             {tree.plus_code_local}
           </span>
         </div>
         
-        <div className="flex items-center gap-2 text-sm text-green-700">
-          <Calendar size={16} />
-          <span>Planted: {formatDate(tree.date_planted)}</span>
+        <div className="tree-info-item flex items-center gap-3 px-2">
+          <Calendar size={18} className="text-green-600 flex-shrink-0" />
+          <span className="text-sm text-green-700 font-medium">Planted: {formatDate(tree.date_planted)}</span>
         </div>
 
         {tree.notes && (
-          <div className="flex items-start gap-2 text-sm text-green-700">
-            <StickyNote size={16} className="mt-0.5 flex-shrink-0" />
-            <span className="line-clamp-2">{tree.notes}</span>
+          <div className="tree-info-item flex items-start gap-3 px-2">
+            <StickyNote size={18} className="mt-0.5 flex-shrink-0 text-green-600" />
+            <span className="text-sm text-green-700 line-clamp-2 leading-relaxed">{tree.notes}</span>
           </div>
         )}
 
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-2 pt-2">
           {tree.images.length > 0 && (
-            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">
-              📸 {tree.images.length} photo{tree.images.length !== 1 ? 's' : ''}
+            <Badge variant="secondary" className="tree-badge-enhanced bg-emerald-100 text-emerald-700 px-3 py-1.5">
+              <span className="mr-1">📸</span>
+              {tree.images.length} photo{tree.images.length !== 1 ? 's' : ''}
             </Badge>
           )}
           {tree.iNaturalistId && (
-            <Badge variant="secondary" className="bg-blue-100 text-blue-700 text-xs">
-              🔬 iNaturalist verified
+            <Badge variant="secondary" className="tree-badge-enhanced bg-blue-100 text-blue-700 text-xs px-3 py-1.5">
+              <span className="mr-1">🔬</span>
+              iNaturalist verified
             </Badge>
           )}
-          <Badge variant="outline" className="text-xs border-green-300 text-green-600">
+          <Badge variant="outline" className="tree-badge-enhanced text-xs border-green-300 text-green-600 px-3 py-1.5">
             Added {formatDate(tree.created_at)}
           </Badge>
         </div>
