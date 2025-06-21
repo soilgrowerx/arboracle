@@ -6,10 +6,13 @@ import { TreeService } from '@/services/treeService';
 import { TreeCard } from '@/components/TreeCard';
 import { AddTreeModal } from '@/components/AddTreeModal';
 import { Toaster } from '@/components/ui/toaster';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 export default function Home() {
   const [trees, setTrees] = useState<Tree[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const loadTrees = () => {
     setIsLoading(true);
@@ -25,6 +28,11 @@ export default function Home() {
   const handleTreeAdded = () => {
     loadTrees();
   };
+
+  // Filter trees based on search term
+  const filteredTrees = trees.filter(tree =>
+    tree.species.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
@@ -59,6 +67,22 @@ export default function Home() {
           <AddTreeModal onTreeAdded={handleTreeAdded} />
         </div>
 
+        {/* Search Section */}
+        {trees.length > 0 && (
+          <div className="mb-6">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600" size={20} />
+              <Input
+                type="text"
+                placeholder="Search by species name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 border-green-200 focus:border-green-400"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Trees Grid */}
         {isLoading ? (
           <div className="text-center py-12">
@@ -76,9 +100,25 @@ export default function Home() {
               <AddTreeModal onTreeAdded={handleTreeAdded} />
             </div>
           </div>
+        ) : filteredTrees.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-12 shadow-lg max-w-md mx-auto">
+              <div className="text-6xl mb-6">🔍</div>
+              <h3 className="text-2xl font-bold text-green-800 mb-4">No Trees Match Your Search</h3>
+              <p className="text-green-700 mb-6">
+                Try searching for a different species name or clear the search to see all trees.
+              </p>
+              <button
+                onClick={() => setSearchTerm('')}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              >
+                Clear Search
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {trees.map((tree) => (
+            {filteredTrees.map((tree) => (
               <TreeCard
                 key={tree.id}
                 tree={tree}
