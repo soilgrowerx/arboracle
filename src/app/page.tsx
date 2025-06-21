@@ -14,7 +14,6 @@ import { Search, Filter, SortAsc, Map, Grid3X3, Download } from 'lucide-react';
 
 export default function Home() {
   const [trees, setTrees] = useState<Tree[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date-newest');
   const [filterBy, setFilterBy] = useState('all');
@@ -27,18 +26,14 @@ export default function Home() {
     } catch (error) {
       console.error('Error loading trees:', error);
       setTrees([]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    setIsLoading(true);
     loadTrees();
   }, []);
 
   const handleTreeAdded = () => {
-    setIsLoading(true);
     loadTrees();
   };
 
@@ -282,12 +277,7 @@ export default function Home() {
         )}
 
         {/* Trees Grid */}
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🌱</div>
-            <p className="text-green-600">Loading your trees...</p>
-          </div>
-        ) : trees.length === 0 ? (
+        {trees.length === 0 ? (
           <div className="text-center py-16">
             <div className="bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-12 shadow-lg max-w-md mx-auto">
               <div className="text-6xl mb-6">🌱</div>
