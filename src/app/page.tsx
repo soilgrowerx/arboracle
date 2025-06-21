@@ -21,17 +21,24 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
 
   const loadTrees = () => {
-    setIsLoading(true);
-    const allTrees = TreeService.getAllTrees();
-    setTrees(allTrees);
-    setIsLoading(false);
+    try {
+      const allTrees = TreeService.getAllTrees();
+      setTrees(allTrees);
+    } catch (error) {
+      console.error('Error loading trees:', error);
+      setTrees([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
+    setIsLoading(true);
     loadTrees();
   }, []);
 
   const handleTreeAdded = () => {
+    setIsLoading(true);
     loadTrees();
   };
 
