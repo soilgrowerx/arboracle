@@ -112,88 +112,181 @@
   
   /* Enhanced Button Styles */
   .btn-enhanced {
-    @apply transform transition-all duration-200 ease-in-out;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .btn-enhanced:hover {
-    @apply scale-105;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-  
-  .btn-enhanced:active {
-    @apply scale-95;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  .btn-primary-enhanced {
-    @apply btn-enhanced;
-    background: linear-gradient(135deg, #16a34a, #15803d);
-    border: none;
-    color: white;
-  }
-  
-  .btn-primary-enhanced:hover {
-    background: linear-gradient(135deg, #15803d, #166534);
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-  }
-  
-  .btn-outline-enhanced {
-    @apply btn-enhanced;
-    border: 2px solid #16a34a;
-    background: rgba(255, 255, 255, 0.9);
-    color: #16a34a;
-    backdrop-filter: blur(4px);
-  }
-  
-  .btn-outline-enhanced:hover {
-    background: linear-gradient(135deg, rgba(22, 163, 74, 0.1), rgba(21, 128, 61, 0.1));
-    border-color: #15803d;
-    color: #15803d;
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
-  }
-  
-  .btn-filter-enhanced {
-    @apply btn-enhanced;
+    @apply transform transition-all duration-250 ease-in-out;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    font-weight: 500;
     position: relative;
     overflow: hidden;
   }
   
-  .btn-filter-enhanced::before {
+  .btn-enhanced::before {
     content: '';
     position: absolute;
     top: 0;
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s ease;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: transform 0.5s ease-in-out;
   }
   
-  .btn-filter-enhanced:hover::before {
-    left: 100%;
+  .btn-enhanced:hover {
+    @apply scale-105;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    transform: translateY(-1px) scale(1.05);
+  }
+  
+  .btn-enhanced:hover::before {
+    transform: translateX(200%);
+  }
+  
+  .btn-enhanced:active {
+    @apply scale-98;
+    transform: translateY(0px) scale(0.98);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  .btn-primary-enhanced {
+    @apply transform transition-all duration-200 ease-in-out;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-primary-enhanced:hover {
+    background: linear-gradient(135deg, #15803d, #166534, #14532d);
+    box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4);
+  }
+  
+  .btn-outline-enhanced {
+    @apply transform transition-all duration-200 ease-in-out;
+    border: 2px solid #16a34a;
+    background: rgba(255, 255, 255, 0.9);
+    color: #16a34a;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-outline-enhanced:hover {
+    background: linear-gradient(135deg, rgba(22, 163, 74, 0.12), rgba(21, 128, 61, 0.10));
+    border-color: #15803d;
+    color: #15803d;
+    box-shadow: 0 6px 16px rgba(22, 163, 74, 0.25);
+  }
+  
+  .btn-filter-enhanced {
+    @apply transform transition-all duration-200 ease-in-out;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-filter-enhanced:hover {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(16, 185, 129, 0.06));
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #15803d;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+  }
+  
+  .btn-filter-enhanced.active {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    border-color: #15803d;
+    color: white;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+  }
+  
+  .btn-filter-enhanced.active:hover {
+    background: linear-gradient(135deg, #15803d, #166534);
+    box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4);
   }
   
   .btn-search-enhanced {
-    @apply btn-enhanced;
+    @apply transform transition-all duration-200 ease-in-out;
     background: linear-gradient(135deg, #059669, #0d9488);
     border: none;
     color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
   .btn-search-enhanced:hover {
-    background: linear-gradient(135deg, #047857, #0f766e);
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+    background: linear-gradient(135deg, #047857, #0f766e, #134e4a);
+    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
   }
   
   .btn-search-enhanced:disabled {
     @apply opacity-60 cursor-not-allowed;
     transform: none;
+    background: linear-gradient(135deg, #6b7280, #9ca3af);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
   
   .btn-search-enhanced:disabled:hover {
     transform: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Toolbar Button Styles */
+  .btn-toolbar-enhanced {
+    @apply transform transition-all duration-200 ease-in-out;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1.5px solid rgba(34, 197, 94, 0.25);
+    color: #16a34a;
+    backdrop-filter: blur(6px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .btn-toolbar-enhanced:hover {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.06), rgba(16, 185, 129, 0.04));
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #15803d;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+  }
+  
+  .btn-toolbar-enhanced.active {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(16, 185, 129, 0.10));
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #15803d;
+    box-shadow: 0 3px 8px rgba(34, 197, 94, 0.2);
+  }
+  
+  /* Ghost Button Enhanced */
+  .btn-ghost-enhanced {
+    @apply transform transition-all duration-200 ease-in-out;
+    background: transparent;
+    border: none;
+    color: #16a34a;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-ghost-enhanced:hover {
+    background: rgba(34, 197, 94, 0.08);
+    color: #15803d;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.1);
+  }
+  
+  .btn-ghost-enhanced:active {
+    background: rgba(34, 197, 94, 0.12);
+    transform: scale(0.98);
+  }
+  
+  /* Add Tree Button Special Style */
+  .btn-add-tree {
+    @apply btn-primary-enhanced;
+    background: linear-gradient(135deg, #16a34a, #15803d, #059669);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  
+  .btn-add-tree:hover {
+    background: linear-gradient(135deg, #15803d, #166534, #047857);
+    box-shadow: 0 8px 20px rgba(22, 163, 74, 0.35);
+    transform: translateY(-2px) scale(1.05);
   }
   
   /* Enhanced TreeCard Styles */
