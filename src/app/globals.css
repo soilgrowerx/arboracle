@@ -612,6 +612,40 @@
     @apply text-xs sm:text-sm px-2 sm:px-3 py-2;
   }
 
+  /* Mobile layout fixes for scrolling */
+  .mobile-safe-layout {
+    @apply min-h-screen max-w-full overflow-x-hidden;
+  }
+
+  .mobile-container {
+    @apply px-2 sm:px-4 max-w-full overflow-x-hidden;
+  }
+
+  .mobile-header-compact {
+    @apply py-4 sm:py-6 lg:py-10;
+  }
+
+  .mobile-grid-safe {
+    @apply grid grid-cols-1 gap-3 sm:gap-4 max-w-full;
+  }
+
+  /* Map view mobile optimizations */
+  .map-controls-mobile {
+    @apply flex flex-col gap-2 sm:flex-row sm:gap-4 p-2 sm:p-4;
+  }
+
+  .map-legend-mobile {
+    @apply flex flex-col gap-2 sm:flex-row sm:gap-4 text-xs sm:text-sm;
+  }
+
+  .map-filter-mobile {
+    @apply w-full sm:w-auto text-xs sm:text-sm;
+  }
+
+  .map-container-mobile {
+    @apply h-[300px] sm:h-[400px] lg:h-[500px] min-h-[300px];
+  }
+
   .arboracle-gradient {
     @apply bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50;
   }
@@ -1547,6 +1581,78 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  /* Prevent horizontal scrolling on mobile */
+  overflow-x: hidden;
+  /* Ensure proper touch scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile viewport fixes */
+@media (max-width: 768px) {
+  html {
+    /* Prevent zoom on input focus */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  body {
+    /* Ensure full viewport height on mobile */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Fix for iOS viewport height */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Specific fixes for very small screens (320px) */
+@media (max-width: 320px) {
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  /* Ensure text doesn't become unreadable */
+  .mobile-text {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Compact header on very small screens */
+  .enhanced-header-section {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  /* Tighter spacing for action buttons */
+  .mobile-button {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Ensure map legend stays readable */
+  .map-legend-mobile {
+    font-size: 0.7rem;
+  }
+  
+  /* Stack navigation tabs on very small screens */
+  .tabs-list {
+    flex-direction: column;
+  }
+}
+
+/* Landscape orientation on mobile phones */
+@media (max-height: 600px) and (orientation: landscape) {
+  .enhanced-header-section {
+    position: relative;
+    padding: 0.5rem 0;
+  }
+  
+  .map-container-mobile {
+    height: 250px !important;
+  }
 }
 
 @layer base {

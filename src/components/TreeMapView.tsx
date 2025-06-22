@@ -274,22 +274,22 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
     <div className="space-y-4">
       {/* Map Controls - only show if no external filtering */}
       {!externalFilteredTrees && (
-      <div className="bg-white rounded-lg border border-green-200 p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-4 mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-green-800">🗺️ Map View</span>
-            <Badge variant="secondary" className="bg-green-100 text-green-700">
+      <div className="bg-white rounded-lg border border-green-200 mobile-card-content shadow-sm">
+        <div className="map-controls-mobile mb-3">
+          <div className="flex items-center gap-2 mb-2 sm:mb-0">
+            <span className="mobile-header font-semibold text-green-800">🗺️ Map View</span>
+            <Badge variant="secondary" className="bg-green-100 text-green-700 mobile-text">
               {filteredTrees.length} of {trees.length} trees
             </Badge>
           </div>
         </div>
         
-        <div className="flex flex-wrap gap-4">
+        <div className="map-controls-mobile">
           {/* Status Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">Status:</span>
+          <div className="flex items-center mobile-gap">
+            <span className="mobile-text text-gray-700 min-w-fit">Status:</span>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32 h-8">
+              <SelectTrigger className="map-filter-mobile touch-target">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -302,16 +302,16 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
           </div>
 
           {/* Species Filter */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-700">Species:</span>
+          <div className="flex items-center mobile-gap">
+            <span className="mobile-text text-gray-700 min-w-fit">Species:</span>
             <Select value={speciesFilter} onValueChange={setSpeciesFilter}>
-              <SelectTrigger className="w-40 h-8">
+              <SelectTrigger className="map-filter-mobile touch-target">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Species</SelectItem>
                 {uniqueSpecies.slice(0, 10).map(species => (
-                  <SelectItem key={species} value={species}>{species}</SelectItem>
+                  <SelectItem key={species} value={species} className="mobile-text">{species}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -326,7 +326,7 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
                 setStatusFilter('all');
                 setSpeciesFilter('all');
               }}
-              className="h-8"
+              className="touch-target mobile-button w-full sm:w-auto"
             >
               Reset Filters
             </Button>
@@ -336,44 +336,50 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
       )}
 
       {/* Map Legend & Controls */}
-      <div className="bg-white rounded-lg border border-green-200 p-3 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="text-sm font-semibold text-green-800">Legend:</span>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-green-600 border-2 border-white shadow-sm"></div>
-              <span className="text-sm text-gray-700">Verified</span>
+      <div className="bg-white rounded-lg border border-green-200 mobile-card-content shadow-sm">
+        <div className="map-legend-mobile">
+          <div className="map-legend-mobile">
+            <span className="mobile-text font-semibold text-green-800">Legend:</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-green-600 border-2 border-white shadow-sm"></div>
+              <span className="mobile-text text-gray-700">Verified</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-sm"></div>
-              <span className="text-sm text-gray-700">Manual</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-600 border-2 border-white shadow-sm"></div>
+              <span className="mobile-text text-gray-700">Manual</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full bg-orange-600 border-2 border-white shadow-sm"></div>
-              <span className="text-sm text-gray-700">Pending</span>
-            </div>
-            <div className="flex items-center gap-2 ml-4">
-              <span className="text-lg">🌱</span>
-              <span className="text-sm text-gray-600">Young (&lt;2y)</span>
-              <span className="text-lg">🌲</span>
-              <span className="text-sm text-gray-600">Medium (2-5y)</span>
-              <span className="text-lg">🌳</span>
-              <span className="text-sm text-gray-600">Mature (5y+)</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-orange-600 border-2 border-white shadow-sm"></div>
+              <span className="mobile-text text-gray-700">Pending</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
-            <span className="text-lg">🛰️</span>
-            <span className="font-medium">High-res satellite imagery & terrain maps - use</span>
-            <span className="inline-flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">
-              📋 Layer Control
-            </span>
-            <span className="font-medium">in top-right corner</span>
+          <div className="map-legend-mobile border-t sm:border-t-0 sm:border-l border-gray-200 pt-2 sm:pt-0 sm:pl-4">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-sm sm:text-lg">🌱</span>
+              <span className="mobile-text text-gray-600">Young</span>
+              <span className="text-sm sm:text-lg">🌲</span>
+              <span className="mobile-text text-gray-600">Medium</span>
+              <span className="text-sm sm:text-lg">🌳</span>
+              <span className="mobile-text text-gray-600">Mature</span>
+            </div>
+          </div>
+          <div className="map-legend-mobile border-t sm:border-t-0 pt-2 sm:pt-0">
+            <div className="flex items-center gap-1 sm:gap-2 mobile-text text-blue-600 bg-blue-50 px-2 sm:px-3 py-1 rounded-lg border border-blue-200">
+              <span className="text-sm sm:text-lg">🛰️</span>
+              <span className="font-medium hidden sm:inline">High-res satellite imagery & terrain maps - use</span>
+              <span className="font-medium sm:hidden">Use</span>
+              <span className="inline-flex items-center gap-1 bg-green-600 text-white px-1 sm:px-2 py-1 rounded text-xs font-semibold">
+                📋 <span className="hidden xs:inline">Layer Control</span>
+              </span>
+              <span className="font-medium hidden sm:inline">in top-right corner</span>
+              <span className="font-medium sm:hidden">for layers</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Map Container */}
-      <div className={`${externalFilteredTrees ? 'h-[600px]' : 'h-[500px]'} w-full rounded-lg overflow-hidden border border-green-200 shadow-sm relative`}>
+      <div className={`map-container-mobile w-full rounded-lg overflow-hidden border border-green-200 shadow-sm relative ${externalFilteredTrees ? 'sm:h-[600px]' : 'sm:h-[500px]'}`}>
         <MapContainer
           center={defaultCenter}
           zoom={showEmptyState ? 8 : 10}

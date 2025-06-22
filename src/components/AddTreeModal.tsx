@@ -400,13 +400,13 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     <Dialog open={open} onOpenChange={setOpen}>
       {!isEditMode && (
         <DialogTrigger asChild>
-          <Button className="w-full btn-primary-enhanced group py-2 sm:py-3 text-sm sm:text-base font-semibold">
+          <Button className="w-full btn-primary-enhanced group touch-target mobile-button font-semibold">
             <Plus size={14} className="mr-2 transition-transform duration-200 group-hover:rotate-90" />
             Add Tree
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[700px] max-h-[95vh] w-[95vw] sm:w-full overflow-y-auto p-3 sm:p-6">
+      <DialogContent className="mobile-modal sm:max-w-[700px] overflow-y-auto">
         <DialogHeader className="pb-2 sm:pb-4">
           <DialogTitle className="text-green-800 flex items-center gap-2 text-base sm:text-lg lg:text-xl">
             🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
@@ -439,10 +439,10 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   variant="outline"
                   onClick={searchSpecies}
                   disabled={isSearching}
-                  className="btn-search-enhanced w-full py-2 sm:py-3"
+                  className="btn-search-enhanced w-full touch-target mobile-button"
                 >
                   <Search size={14} className={`transition-transform duration-300 ${isSearching ? 'animate-spin' : ''}`} />
-                  <span className="ml-2 text-sm sm:text-base">{isSearching ? 'Searching...' : 'Search'}</span>
+                  <span className="ml-2 mobile-text">{isSearching ? 'Searching...' : 'Search'}</span>
                 </Button>
               </div>
               
@@ -550,7 +550,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 type="button"
                 variant="outline"
                 onClick={getCurrentLocation}
-                className="btn-outline-enhanced w-full py-2 sm:py-3 text-sm sm:text-base"
+                className="btn-outline-enhanced w-full touch-target mobile-button"
               >
                 <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
                 <span className="hidden xs:inline">Use Current Location</span>
@@ -560,7 +560,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 type="button"
                 variant="outline"
                 onClick={() => setShowLocationMap(!showLocationMap)}
-                className="btn-outline-enhanced w-full py-2 sm:py-3 text-sm sm:text-base"
+                className="btn-outline-enhanced w-full touch-target mobile-button"
               >
                 <Map size={14} className="mr-2" />
                 {showLocationMap ? 'Hide Map' : 'Pick on Map'}
@@ -736,22 +736,22 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full btn-primary-enhanced py-3 sm:py-4 text-sm sm:text-base font-semibold"
+              className="w-full btn-primary-enhanced touch-target mobile-button font-semibold"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center">
                   <span className="animate-spin mr-2">🌱</span>
-                  <span className="text-sm sm:text-base">{isEditMode ? 'Updating...' : 'Adding...'}</span>
+                  <span className="mobile-text">{isEditMode ? 'Updating...' : 'Adding...'}</span>
                 </span>
               ) : (
-                <span className="text-sm sm:text-base">{isEditMode ? 'Update Tree' : 'Add Tree'}</span>
+                <span className="mobile-text">{isEditMode ? 'Update Tree' : 'Add Tree'}</span>
               )}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="w-full btn-outline-enhanced py-2 sm:py-3 text-sm sm:text-base"
+              className="w-full btn-outline-enhanced touch-target mobile-button"
             >
               Cancel
             </Button>

@@ -269,23 +269,23 @@ export default function Home() {
   const filteredTrees = getFilteredAndSortedTrees();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+    <div className="mobile-safe-layout bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Header */}
-      <header className="enhanced-header-section sticky top-0 z-40 enhanced-header-shadow">
-        <div className="container mx-auto px-6 py-10">
+      <header className="enhanced-header-section sticky top-0 z-40 enhanced-header-shadow mobile-header-compact">
+        <div className="mobile-container mx-auto">
           <div className="flex items-center justify-center">
-            <div className="flex flex-col items-center gap-8 group text-center">
-              <div className="enhanced-tree-icon text-7xl transform transition-all duration-700 group-hover:scale-125 group-hover:rotate-12 drop-shadow-2xl filter float-animation">
+            <div className="flex flex-col items-center gap-4 sm:gap-6 lg:gap-8 group text-center">
+              <div className="enhanced-tree-icon text-4xl sm:text-5xl lg:text-7xl transform transition-all duration-700 group-hover:scale-125 group-hover:rotate-12 drop-shadow-2xl filter float-animation">
                 🌳
               </div>
-              <div className="space-y-4">
-                <h1 className="text-5xl lg:text-6xl font-bold enhanced-brand-title tracking-tight leading-none">
+              <div className="space-y-2 sm:space-y-3 lg:space-y-4">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold enhanced-brand-title tracking-tight leading-none">
                   Arboracle
                 </h1>
-                <p className="text-lg font-semibold text-green-600/90 enhanced-brand-subtitle tracking-wide uppercase letter-spacing-wide">
+                <p className="text-sm sm:text-base lg:text-lg font-semibold text-green-600/90 enhanced-brand-subtitle tracking-wide uppercase letter-spacing-wide">
                   Your Digital Tree Inventory
                 </p>
-                <p className="text-base text-green-700/80 font-medium max-w-lg mx-auto leading-relaxed enhanced-tagline">
+                <p className="text-sm sm:text-base text-green-700/80 font-medium max-w-xs sm:max-w-lg mx-auto leading-relaxed enhanced-tagline">
                   Cultivating knowledge, preserving nature, building tomorrow&apos;s forest legacy
                 </p>
               </div>
@@ -295,7 +295,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-10 dashboard-section">
+      <main className="mobile-container mx-auto py-4 sm:py-6 lg:py-10 dashboard-section">
         {/* Header Section with Add Button and View Toggle */}
         <div className="dashboard-card-enhanced p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 lg:mb-10">
           <div className="flex flex-col gap-4 sm:gap-6 mb-2">
@@ -308,19 +308,19 @@ export default function Home() {
                 }
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:gap-4">
+            <div className="mobile-stack">
               {/* Primary Actions Row */}
-              <div className="flex flex-col xs:flex-row gap-2 xs:gap-3">
-                <Link href="/map" className="flex-1">
+              <div className="mobile-grid-safe sm:grid-cols-2 gap-3">
+                <Link href="/map" className="w-full">
                   <Button
-                    className="w-full btn-enhanced bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-sm sm:text-base"
+                    className="w-full btn-enhanced bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold touch-target mobile-button"
                   >
                     <Map size={16} className="mr-2" />
                     <span className="hidden xs:inline">🗺️ View Map</span>
                     <span className="xs:hidden">Map</span>
                   </Button>
                 </Link>
-                <div className="flex-1">
+                <div className="w-full">
                   <AddTreeModal 
                     onTreeAdded={handleTreeAdded} 
                     editTree={editingTree}
@@ -329,36 +329,36 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Secondary Actions - Responsive grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+              {/* Secondary Actions - Mobile optimized grid */}
+              <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 sm:gap-3">
                 <Link href="/settings" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm"
+                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 touch-target mobile-button"
                   >
-                    <Settings size={14} className="mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Settings</span>
-                    <span className="sm:hidden">Config</span>
+                    <Settings size={14} className="mr-1 xs:mr-2" />
+                    <span className="hidden xs:inline">Settings</span>
+                    <span className="xs:hidden text-xs">Config</span>
                   </Button>
                 </Link>
                 <Link href="/knowledge" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm"
+                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 touch-target mobile-button"
                   >
-                    <BookOpen size={14} className="mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">🧠 Knowledge</span>
-                    <span className="sm:hidden">Learn</span>
+                    <BookOpen size={14} className="mr-1 xs:mr-2" />
+                    <span className="hidden xs:inline">🧠 Knowledge</span>
+                    <span className="xs:hidden text-xs">Learn</span>
                   </Button>
                 </Link>
                 <Link href="/admin" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full btn-outline-enhanced border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm"
+                    className="w-full btn-outline-enhanced border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 touch-target mobile-button"
                   >
-                    <Settings size={14} className="mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Admin</span>
-                    <span className="sm:hidden">Admin</span>
+                    <Settings size={14} className="mr-1 xs:mr-2" />
+                    <span className="hidden xs:inline">Admin</span>
+                    <span className="xs:hidden text-xs">Admin</span>
                   </Button>
                 </Link>
                 {trees.length > 0 && (
@@ -366,18 +366,18 @@ export default function Home() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="w-full btn-outline-enhanced px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm col-span-1"
+                        className="w-full btn-outline-enhanced touch-target mobile-button col-span-1"
                       >
-                        <Download size={14} className="mr-1 sm:mr-2" />
-                        <span className="hidden sm:inline">Export</span>
-                        <span className="sm:hidden">Export</span>
+                        <Download size={14} className="mr-1 xs:mr-2" />
+                        <span className="hidden xs:inline">Export</span>
+                        <span className="xs:hidden text-xs">Export</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="dashboard-card-enhanced">
-                      <DropdownMenuItem onClick={exportToCSV} className="py-2 sm:py-3 px-3 sm:px-4 text-sm">
+                      <DropdownMenuItem onClick={exportToCSV} className="mobile-padding text-sm">
                         📊 Export Tree Data (CSV)
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={exportEcosystemData} className="py-2 sm:py-3 px-3 sm:px-4 text-sm">
+                      <DropdownMenuItem onClick={exportEcosystemData} className="mobile-padding text-sm">
                         🌍 Export Ecosystem Data (CSV)
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -418,28 +418,28 @@ export default function Home() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="list" className="space-y-8">
+            <TabsContent value="list" className="space-y-4 sm:space-y-6 lg:space-y-8">
               {/* Search and Filter Section */}
-              <div className="dashboard-card-enhanced p-6 space-y-6 float-animation">
+              <div className="dashboard-card-enhanced mobile-card-content space-y-4 sm:space-y-6 float-animation">
                 {/* Search Bar */}
-                <div className="search-container-enhanced w-full sm:max-w-lg mx-auto">
-                  <Search className="search-icon-enhanced absolute left-4 top-1/2 transform -translate-y-1/2 text-green-600" size={22} />
+                <div className="search-container-enhanced w-full">
+                  <Search className="search-icon-enhanced absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-green-600" size={18} />
                   <Input
                     type="text"
-                    placeholder="Search by species or scientific name..."
+                    placeholder="Search by species..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input-enhanced pl-12 py-4 text-base"
+                    className="search-input-enhanced mobile-input pl-10 sm:pl-12"
                   />
                 </div>
 
                 {/* Sort and Filter Controls */}
-                <div className="flex flex-col lg:flex-row gap-6 lg:items-center lg:justify-between">
+                <div className="mobile-stack lg:flex-row lg:items-center lg:justify-between">
                   {/* Sort Dropdown */}
-                  <div className="flex items-center gap-3">
-                    <SortAsc className="text-green-600 flex-shrink-0 transition-transform duration-300 hover:scale-110" size={22} />
+                  <div className="flex items-center mobile-gap">
+                    <SortAsc className="text-green-600 flex-shrink-0 transition-transform duration-300 hover:scale-110 mobile-icon" />
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-full lg:w-64 btn-outline-enhanced py-3">
+                      <SelectTrigger className="w-full lg:w-64 btn-outline-enhanced mobile-button">
                         <SelectValue placeholder="Sort by..." />
                       </SelectTrigger>
                       <SelectContent className="dashboard-card-enhanced">
@@ -456,32 +456,32 @@ export default function Home() {
                   </div>
 
                   {/* Filter Buttons */}
-                  <div className="flex items-center gap-3">
-                    <Filter className="text-green-600 transition-transform duration-300 hover:scale-110 flex-shrink-0" size={22} />
+                  <div className="flex items-center mobile-gap">
+                    <Filter className="text-green-600 transition-transform duration-300 hover:scale-110 flex-shrink-0 mobile-icon" />
                     <div className="flex flex-wrap gap-2">
                       <Button
                         variant={filterBy === 'all' ? 'default' : 'outline'}
                         onClick={() => setFilterBy('all')}
-                        className={`btn-enhanced px-4 py-2 ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                        className={`btn-enhanced mobile-button touch-target ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                       >
                         All Trees
                       </Button>
                       <Button
                         variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
                         onClick={() => setFilterBy('inaturalist')}
-                        className={`btn-enhanced px-4 py-2 ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                        className={`btn-enhanced mobile-button touch-target ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                       >
-                        <span className="mr-2 transition-transform duration-300 hover:scale-110">🔬</span>
-                        <span className="hidden sm:inline">iNaturalist</span>
-                        <span className="sm:hidden">iNat</span>
+                        <span className="mr-1 xs:mr-2 transition-transform duration-300 hover:scale-110">🔬</span>
+                        <span className="hidden xs:inline">iNaturalist</span>
+                        <span className="xs:hidden mobile-text">iNat</span>
                       </Button>
                       <Button
                         variant={filterBy === 'manual' ? 'default' : 'outline'}
                         onClick={() => setFilterBy('manual')}
-                        className={`btn-enhanced px-4 py-2 ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                        className={`btn-enhanced mobile-button touch-target ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                       >
-                        <span className="mr-2 transition-transform duration-300 hover:scale-110">✏️</span>
-                        Manual
+                        <span className="mr-1 xs:mr-2 transition-transform duration-300 hover:scale-110">✏️</span>
+                        <span className="mobile-text">Manual</span>
                       </Button>
                     </div>
                   </div>
