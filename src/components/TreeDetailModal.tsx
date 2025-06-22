@@ -171,23 +171,27 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[90vh] w-[95vw] sm:w-full overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0 border-b pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">🌳</span>
-              <div>
-                <DialogTitle className="text-2xl font-bold text-green-800">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <span className="text-3xl sm:text-4xl flex-shrink-0">🌳</span>
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="text-xl sm:text-2xl font-bold text-green-800 leading-tight">
                   {tree.commonName || tree.species}
                 </DialogTitle>
                 {tree.scientificName && (
-                  <p className="text-lg italic text-green-600 mt-1">{tree.scientificName}</p>
+                  <p className="text-base sm:text-lg italic text-green-600 mt-1">{tree.scientificName}</p>
                 )}
-                <div className="flex items-center gap-3 mt-2">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
                   <div className="flex items-center gap-2">
                     {getVerificationStatusIcon()}
-                    <span className="text-sm font-medium text-gray-700">
-                      {getVerificationStatusText()}
+                    <span className="text-xs sm:text-sm font-medium text-gray-700">
+                      <span className="hidden sm:inline">{getVerificationStatusText()}</span>
+                      <span className="sm:hidden">
+                        {tree.verification_status === 'verified' ? 'Verified' : 
+                         tree.verification_status === 'manual' ? 'Manual' : 'Pending'}
+                      </span>
                     </span>
                   </div>
                   {tree.taxonomicRank && (

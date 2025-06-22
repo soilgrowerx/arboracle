@@ -363,6 +363,27 @@
 }
 
 @layer components {
+  /* Mobile responsive utilities */
+  .mobile-responsive {
+    @apply text-sm sm:text-base;
+  }
+  
+  .mobile-padding {
+    @apply px-3 sm:px-4 py-2 sm:py-3;
+  }
+  
+  .mobile-gap {
+    @apply gap-2 sm:gap-3;
+  }
+  
+  .mobile-text {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .mobile-icon {
+    @apply w-4 h-4 sm:w-5 sm:h-5;
+  }
+
   .arboracle-gradient {
     @apply bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50;
   }

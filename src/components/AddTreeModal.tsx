@@ -322,14 +322,14 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] w-[95vw] sm:w-full overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-green-800 flex items-center gap-2 text-xl">
+          <DialogTitle className="text-green-800 flex items-center gap-2 text-lg sm:text-xl">
             🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Tree Details Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
@@ -338,8 +338,8 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             </div>
             
             <div>
-              <Label htmlFor="species" className="text-green-700 font-medium">Species *</Label>
-              <div className="flex gap-2">
+              <Label htmlFor="species" className="text-green-700 font-medium text-sm sm:text-base">Species *</Label>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   id="species"
                   value={formData.species}
@@ -355,10 +355,10 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   variant="outline"
                   onClick={searchSpecies}
                   disabled={isSearching}
-                  className="btn-search-enhanced shrink-0"
+                  className="btn-search-enhanced shrink-0 w-full sm:w-auto"
                 >
                   <Search size={16} className={`transition-transform duration-300 ${isSearching ? 'animate-spin' : ''}`} />
-                  {isSearching ? 'Searching...' : 'Search'}
+                  <span className="ml-2">{isSearching ? 'Searching...' : 'Search'}</span>
                 </Button>
               </div>
               
@@ -414,9 +414,9 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               <h3 className="text-lg font-semibold text-green-800">Location Info</h3>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="latitude" className="text-green-700 font-medium">Latitude *</Label>
+                <Label htmlFor="latitude" className="text-green-700 font-medium text-sm sm:text-base">Latitude *</Label>
                 <Input
                   id="latitude"
                   type="number"
@@ -434,7 +434,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 />
               </div>
               <div>
-                <Label htmlFor="longitude" className="text-green-700 font-medium">Longitude *</Label>
+                <Label htmlFor="longitude" className="text-green-700 font-medium text-sm sm:text-base">Longitude *</Label>
                 <Input
                   id="longitude"
                   type="number"
@@ -453,21 +453,22 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={getCurrentLocation}
-                className="btn-outline-enhanced"
+                className="btn-outline-enhanced w-full"
               >
                 <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
-                Use Current Location
+                <span className="hidden xs:inline">Use Current Location</span>
+                <span className="xs:hidden">Current Location</span>
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowLocationMap(!showLocationMap)}
-                className="btn-outline-enhanced"
+                className="btn-outline-enhanced w-full"
               >
                 <Map size={16} className="mr-2" />
                 {showLocationMap ? 'Hide Map' : 'Pick on Map'}
@@ -544,9 +545,9 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               <h3 className="text-lg font-semibold text-green-800">Management Data</h3>
             </div>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="seed_source" className="text-green-700 font-medium">Seed Source</Label>
+                <Label htmlFor="seed_source" className="text-green-700 font-medium text-sm sm:text-base">Seed Source</Label>
                 <Input
                   id="seed_source"
                   value={formData.seed_source}
@@ -557,7 +558,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               </div>
               
               <div>
-                <Label htmlFor="nursery_stock_id" className="text-green-700 font-medium">Nursery Stock ID</Label>
+                <Label htmlFor="nursery_stock_id" className="text-green-700 font-medium text-sm sm:text-base">Nursery Stock ID</Label>
                 <Input
                   id="nursery_stock_id"
                   value={formData.nursery_stock_id}
@@ -636,22 +637,22 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             </div>
           </div>
 
-          <div className="flex gap-2 pt-4">
+          <div className="flex flex-col sm:flex-row gap-2 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              className="flex-1 btn-outline-enhanced"
+              className="flex-1 btn-outline-enhanced order-2 sm:order-1"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 btn-primary-enhanced"
+              className="flex-1 btn-primary-enhanced order-1 sm:order-2"
             >
               {isSubmitting ? (
-                <span className="flex items-center">
+                <span className="flex items-center justify-center">
                   <span className="animate-spin mr-2">🌱</span>
                   {isEditMode ? 'Updating...' : 'Adding...'}
                 </span>

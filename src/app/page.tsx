@@ -297,70 +297,82 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         {/* Header Section with Add Button and View Toggle */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-green-800">My Trees</h2>
-            <p className="text-green-600 mt-1">
-              {trees.length === 0 
-                ? "Start building your digital forest" 
-                : `Managing ${trees.length} tree${trees.length !== 1 ? 's' : ''}`
-              }
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            {/* Map View Button - Always visible as a key feature */}
-            <Link href="/map">
-              <Button
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold"
-              >
-                <Map size={18} className="mr-2" />
-                🗺️ View Map
-              </Button>
-            </Link>
-            <Link href="/settings">
-              <Button
-                variant="outline"
-                className="border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300"
-              >
-                <Settings size={16} className="mr-2" />
-                Settings
-              </Button>
-            </Link>
-            <Link href="/admin">
-              <Button
-                variant="outline"
-                className="border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300"
-              >
-                <Settings size={16} className="mr-2" />
-                Admin
-              </Button>
-            </Link>
-            {trees.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-green-800">My Trees</h2>
+              <p className="text-green-600 mt-1 text-sm sm:text-base">
+                {trees.length === 0 
+                  ? "Start building your digital forest" 
+                  : `Managing ${trees.length} tree${trees.length !== 1 ? 's' : ''}`
+                }
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              {/* Primary Actions - Always visible */}
+              <div className="flex gap-2">
+                <Link href="/map" className="flex-1 sm:flex-none">
+                  <Button
+                    className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold text-sm px-3"
+                  >
+                    <Map size={16} className="mr-2" />
+                    <span className="hidden xs:inline">🗺️ View Map</span>
+                    <span className="xs:hidden">Map</span>
+                  </Button>
+                </Link>
+                <AddTreeModal 
+                  onTreeAdded={handleTreeAdded} 
+                  editTree={editingTree}
+                  isEditMode={!!editingTree}
+                />
+              </div>
+              
+              {/* Secondary Actions - Collapsible on mobile */}
+              <div className="flex gap-2 sm:gap-3">
+                <Link href="/settings" className="flex-1 sm:flex-none">
                   <Button
                     variant="outline"
-                    className="border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300"
+                    className="w-full sm:w-auto border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 text-sm px-3"
                   >
-                    <Download size={16} className="mr-2" />
-                    Export Data
+                    <Settings size={14} className="mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Settings</span>
+                    <span className="sm:hidden">Settings</span>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={exportToCSV}>
-                    📊 Export Tree Data (CSV)
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={exportEcosystemData}>
-                    🌍 Export Ecosystem Data (CSV)
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            <AddTreeModal 
-              onTreeAdded={handleTreeAdded} 
-              editTree={editingTree}
-              isEditMode={!!editingTree}
-            />
+                </Link>
+                <Link href="/admin" className="flex-1 sm:flex-none">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300 text-sm px-3"
+                  >
+                    <Settings size={14} className="mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Admin</span>
+                    <span className="sm:hidden">Admin</span>
+                  </Button>
+                </Link>
+                {trees.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 text-sm px-3"
+                      >
+                        <Download size={14} className="mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">Export</span>
+                        <span className="sm:hidden">Export</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={exportToCSV}>
+                        📊 Export Tree Data (CSV)
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={exportEcosystemData}>
+                        🌍 Export Ecosystem Data (CSV)
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -398,7 +410,7 @@ export default function Home() {
               {/* Search and Filter Section */}
               <div className="space-y-4">
                 {/* Search Bar */}
-                <div className="search-container-enhanced max-w-md">
+                <div className="search-container-enhanced w-full sm:max-w-md">
                   <Search className="search-icon-enhanced absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600" size={20} />
                   <Input
                     type="text"
@@ -410,12 +422,12 @@ export default function Home() {
                 </div>
 
                 {/* Sort and Filter Controls */}
-                <div className="flex flex-wrap gap-4 items-center">
+                <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
                   {/* Sort Dropdown */}
                   <div className="flex items-center gap-2">
-                    <SortAsc className="text-green-600" size={20} />
+                    <SortAsc className="text-green-600 flex-shrink-0" size={20} />
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-48 border-green-200 focus:border-green-400">
+                      <SelectTrigger className="w-full sm:w-48 border-green-200 focus:border-green-400">
                         <SelectValue placeholder="Sort by..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -433,13 +445,13 @@ export default function Home() {
 
                   {/* Filter Buttons */}
                   <div className="flex items-center gap-2">
-                    <Filter className="text-green-600 transition-transform duration-300 hover:scale-110" size={20} />
-                    <div className="flex gap-1">
+                    <Filter className="text-green-600 transition-transform duration-300 hover:scale-110 flex-shrink-0" size={20} />
+                    <div className="flex flex-wrap gap-1">
                       <Button
                         variant={filterBy === 'all' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setFilterBy('all')}
-                        className={`btn-filter-enhanced ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                        className={`btn-filter-enhanced ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'} text-xs px-2 sm:px-3 sm:text-sm`}
                       >
                         All Trees
                       </Button>
@@ -447,16 +459,17 @@ export default function Home() {
                         variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setFilterBy('inaturalist')}
-                        className={`btn-filter-enhanced ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                        className={`btn-filter-enhanced ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'} text-xs px-2 sm:px-3 sm:text-sm`}
                       >
                         <span className="mr-1 transition-transform duration-300 hover:scale-110">🔬</span>
-                        iNaturalist
+                        <span className="hidden xs:inline">iNaturalist</span>
+                        <span className="xs:hidden">iNat</span>
                       </Button>
                       <Button
                         variant={filterBy === 'manual' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setFilterBy('manual')}
-                        className={`btn-filter-enhanced ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                        className={`btn-filter-enhanced ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'} text-xs px-2 sm:px-3 sm:text-sm`}
                       >
                         <span className="mr-1 transition-transform duration-300 hover:scale-110">✏️</span>
                         Manual
