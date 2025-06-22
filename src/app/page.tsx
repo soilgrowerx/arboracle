@@ -271,21 +271,21 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Header */}
-      <header className="enhanced-header-gradient backdrop-blur-md border-b border-green-200/60 sticky top-0 z-40 enhanced-header-shadow">
-        <div className="container mx-auto px-6 py-8">
+      <header className="enhanced-header-section sticky top-0 z-40 enhanced-header-shadow">
+        <div className="container mx-auto px-6 py-10">
           <div className="flex items-center justify-center">
-            <div className="flex flex-col items-center gap-6 group text-center">
-              <div className="enhanced-tree-icon text-6xl transform transition-all duration-500 group-hover:scale-125 group-hover:rotate-12 drop-shadow-2xl filter">
+            <div className="flex flex-col items-center gap-8 group text-center">
+              <div className="enhanced-tree-icon text-7xl transform transition-all duration-700 group-hover:scale-125 group-hover:rotate-12 drop-shadow-2xl filter float-animation">
                 🌳
               </div>
-              <div className="space-y-3">
-                <h1 className="text-4xl lg:text-5xl font-bold enhanced-brand-title tracking-tight leading-none">
+              <div className="space-y-4">
+                <h1 className="text-5xl lg:text-6xl font-bold enhanced-brand-title tracking-tight leading-none">
                   Arboracle
                 </h1>
-                <p className="text-base font-semibold text-green-600/90 enhanced-brand-subtitle tracking-wide uppercase letter-spacing-wide">
+                <p className="text-lg font-semibold text-green-600/90 enhanced-brand-subtitle tracking-wide uppercase letter-spacing-wide">
                   Your Digital Tree Inventory
                 </p>
-                <p className="text-sm text-green-700/80 font-medium max-w-md mx-auto leading-relaxed enhanced-tagline">
+                <p className="text-base text-green-700/80 font-medium max-w-lg mx-auto leading-relaxed enhanced-tagline">
                   Cultivating knowledge, preserving nature, building tomorrow&apos;s forest legacy
                 </p>
               </div>
@@ -295,27 +295,27 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-10 dashboard-section">
         {/* Header Section with Add Button and View Toggle */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-green-800">My Trees</h2>
-              <p className="text-green-600 mt-1 text-sm sm:text-base">
+        <div className="dashboard-card-enhanced p-8 mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-2">
+            <div className="float-animation">
+              <h2 className="text-3xl sm:text-4xl font-bold text-green-800 mb-2">My Trees</h2>
+              <p className="text-green-600 text-base sm:text-lg font-medium">
                 {trees.length === 0 
                   ? "Start building your digital forest" 
-                  : `Managing ${trees.length} tree${trees.length !== 1 ? 's' : ''}`
+                  : `Managing ${trees.length} tree${trees.length !== 1 ? 's' : ''} in your collection`
                 }
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {/* Primary Actions - Always visible */}
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 <Link href="/map" className="flex-1 sm:flex-none">
                   <Button
-                    className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold text-sm px-3"
+                    className="w-full sm:w-auto btn-enhanced bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3"
                   >
-                    <Map size={16} className="mr-2" />
+                    <Map size={18} className="mr-2" />
                     <span className="hidden xs:inline">🗺️ View Map</span>
                     <span className="xs:hidden">Map</span>
                   </Button>
@@ -327,14 +327,14 @@ export default function Home() {
                 />
               </div>
               
-              {/* Secondary Actions - Collapsible on mobile */}
-              <div className="flex gap-2 sm:gap-3">
+              {/* Secondary Actions - Enhanced styling */}
+              <div className="flex gap-3">
                 <Link href="/settings" className="flex-1 sm:flex-none">
                   <Button
                     variant="outline"
-                    className="w-full sm:w-auto border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 text-sm px-3"
+                    className="w-full sm:w-auto btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-4 py-3"
                   >
-                    <Settings size={14} className="mr-1 sm:mr-2" />
+                    <Settings size={16} className="mr-2" />
                     <span className="hidden sm:inline">Settings</span>
                     <span className="sm:hidden">Settings</span>
                   </Button>
@@ -342,9 +342,9 @@ export default function Home() {
                 <Link href="/admin" className="flex-1 sm:flex-none">
                   <Button
                     variant="outline"
-                    className="w-full sm:w-auto border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300 text-sm px-3"
+                    className="w-full sm:w-auto btn-outline-enhanced border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 px-4 py-3"
                   >
-                    <Settings size={14} className="mr-1 sm:mr-2" />
+                    <Settings size={16} className="mr-2" />
                     <span className="hidden sm:inline">Admin</span>
                     <span className="sm:hidden">Admin</span>
                   </Button>
@@ -354,18 +354,18 @@ export default function Home() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 text-sm px-3"
+                        className="btn-outline-enhanced px-4 py-3"
                       >
-                        <Download size={14} className="mr-1 sm:mr-2" />
+                        <Download size={16} className="mr-2" />
                         <span className="hidden sm:inline">Export</span>
                         <span className="sm:hidden">Export</span>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={exportToCSV}>
+                    <DropdownMenuContent className="dashboard-card-enhanced">
+                      <DropdownMenuItem onClick={exportToCSV} className="py-3 px-4">
                         📊 Export Tree Data (CSV)
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={exportEcosystemData}>
+                      <DropdownMenuItem onClick={exportEcosystemData} className="py-3 px-4">
                         🌍 Export Ecosystem Data (CSV)
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -382,55 +382,55 @@ export default function Home() {
         {/* View Tabs */}
         {trees.length > 0 && (
           <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-lg mx-auto mb-6 bg-green-50 border border-green-200">
+            <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-10 dashboard-card-enhanced p-2 bg-transparent border-0">
               <TabsTrigger 
                 value="list" 
-                className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+                className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:btn-primary-enhanced data-[state=active]:text-white transition-all duration-300"
               >
-                <List size={16} />
+                <List size={18} />
                 List View
               </TabsTrigger>
               <TabsTrigger 
                 value="map" 
-                className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white font-semibold hover:bg-blue-50 border-2 border-transparent data-[state=active]:border-blue-400"
+                className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white transition-all duration-300"
               >
-                <Map size={16} />
+                <Map size={18} />
                 🗺️ Map View
               </TabsTrigger>
               <TabsTrigger 
                 value="analytics" 
-                className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+                className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:btn-primary-enhanced data-[state=active]:text-white transition-all duration-300"
               >
-                <BarChart3 size={16} />
+                <BarChart3 size={18} />
                 Analytics
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="list" className="space-y-6">
+            <TabsContent value="list" className="space-y-8">
               {/* Search and Filter Section */}
-              <div className="space-y-4">
+              <div className="dashboard-card-enhanced p-6 space-y-6 float-animation">
                 {/* Search Bar */}
-                <div className="search-container-enhanced w-full sm:max-w-md">
-                  <Search className="search-icon-enhanced absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600" size={20} />
+                <div className="search-container-enhanced w-full sm:max-w-lg mx-auto">
+                  <Search className="search-icon-enhanced absolute left-4 top-1/2 transform -translate-y-1/2 text-green-600" size={22} />
                   <Input
                     type="text"
                     placeholder="Search by species or scientific name..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input-enhanced pl-10"
+                    className="search-input-enhanced pl-12 py-4 text-base"
                   />
                 </div>
 
                 {/* Sort and Filter Controls */}
-                <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+                <div className="flex flex-col lg:flex-row gap-6 lg:items-center lg:justify-between">
                   {/* Sort Dropdown */}
-                  <div className="flex items-center gap-2">
-                    <SortAsc className="text-green-600 flex-shrink-0" size={20} />
+                  <div className="flex items-center gap-3">
+                    <SortAsc className="text-green-600 flex-shrink-0 transition-transform duration-300 hover:scale-110" size={22} />
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-full sm:w-48 border-green-200 focus:border-green-400">
+                      <SelectTrigger className="w-full lg:w-64 btn-outline-enhanced py-3">
                         <SelectValue placeholder="Sort by..." />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="dashboard-card-enhanced">
                         <SelectItem value="date-newest">Date Added (Newest)</SelectItem>
                         <SelectItem value="date-oldest">Date Added (Oldest)</SelectItem>
                         <SelectItem value="species-az">Species Name (A-Z)</SelectItem>
@@ -444,34 +444,31 @@ export default function Home() {
                   </div>
 
                   {/* Filter Buttons */}
-                  <div className="flex items-center gap-2">
-                    <Filter className="text-green-600 transition-transform duration-300 hover:scale-110 flex-shrink-0" size={20} />
-                    <div className="flex flex-wrap gap-1">
+                  <div className="flex items-center gap-3">
+                    <Filter className="text-green-600 transition-transform duration-300 hover:scale-110 flex-shrink-0" size={22} />
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         variant={filterBy === 'all' ? 'default' : 'outline'}
-                        size="sm"
                         onClick={() => setFilterBy('all')}
-                        className={`btn-filter-enhanced ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'} text-xs px-2 sm:px-3 sm:text-sm`}
+                        className={`btn-enhanced px-4 py-2 ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                       >
                         All Trees
                       </Button>
                       <Button
                         variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
-                        size="sm"
                         onClick={() => setFilterBy('inaturalist')}
-                        className={`btn-filter-enhanced ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'} text-xs px-2 sm:px-3 sm:text-sm`}
+                        className={`btn-enhanced px-4 py-2 ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                       >
-                        <span className="mr-1 transition-transform duration-300 hover:scale-110">🔬</span>
-                        <span className="hidden xs:inline">iNaturalist</span>
-                        <span className="xs:hidden">iNat</span>
+                        <span className="mr-2 transition-transform duration-300 hover:scale-110">🔬</span>
+                        <span className="hidden sm:inline">iNaturalist</span>
+                        <span className="sm:hidden">iNat</span>
                       </Button>
                       <Button
                         variant={filterBy === 'manual' ? 'default' : 'outline'}
-                        size="sm"
                         onClick={() => setFilterBy('manual')}
-                        className={`btn-filter-enhanced ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'} text-xs px-2 sm:px-3 sm:text-sm`}
+                        className={`btn-enhanced px-4 py-2 ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
                       >
-                        <span className="mr-1 transition-transform duration-300 hover:scale-110">✏️</span>
+                        <span className="mr-2 transition-transform duration-300 hover:scale-110">✏️</span>
                         Manual
                       </Button>
                     </div>
@@ -481,21 +478,21 @@ export default function Home() {
 
               {/* Trees Grid */}
               {filteredTrees.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-12 shadow-lg max-w-md mx-auto">
-                    <div className="text-6xl mb-6">🔍</div>
-                    <h3 className="text-2xl font-bold text-green-800 mb-4">No Trees Match Your Criteria</h3>
-                    <p className="text-green-700 mb-6">
-                      Try adjusting your search, sort, or filter settings to see more trees.
+                <div className="text-center py-20">
+                  <div className="dashboard-card-enhanced p-16 max-w-lg mx-auto float-animation">
+                    <div className="text-8xl mb-8 float-animation">🔍</div>
+                    <h3 className="text-3xl font-bold text-green-800 mb-6">No Trees Match Your Criteria</h3>
+                    <p className="text-green-700 mb-8 text-lg leading-relaxed">
+                      Try adjusting your search, sort, or filter settings to discover more trees in your collection.
                     </p>
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       <button
                         onClick={() => {
                           setSearchTerm('');
                           setFilterBy('all');
                           setSortBy('date-newest');
                         }}
-                        className="block w-full px-4 py-2 btn-primary-enhanced rounded-md"
+                        className="block w-full btn-primary-enhanced py-4 px-8 text-lg"
                       >
                         Clear All Filters
                       </button>
@@ -503,14 +500,15 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredTrees.map((tree) => (
-                    <TreeCard
-                      key={tree.id}
-                      tree={tree}
-                      onClick={() => handleTreeClick(tree)}
-                      onEdit={handleEditTree}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {filteredTrees.map((tree, index) => (
+                    <div key={tree.id} className={`grid-fade-in`} style={{animationDelay: `${index * 0.1}s`}}>
+                      <TreeCard
+                        tree={tree}
+                        onClick={() => handleTreeClick(tree)}
+                        onEdit={handleEditTree}
+                      />
+                    </div>
                   ))}
                 </div>
               )}
@@ -528,27 +526,31 @@ export default function Home() {
 
         {/* Empty State - Show when no trees */}
         {trees.length === 0 && (
-          <div className="text-center py-16">
-            <div className="bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-12 shadow-lg max-w-md mx-auto">
-              <div className="text-6xl mb-6">🌱</div>
-              <h3 className="text-2xl font-bold text-green-800 mb-4">No Trees Yet</h3>
-              <p className="text-green-700 mb-6">
-                Start your digital forest by adding your first tree!
+          <div className="text-center py-24">
+            <div className="dashboard-card-enhanced p-20 max-w-2xl mx-auto float-animation">
+              <div className="text-9xl mb-10 float-animation">🌱</div>
+              <h3 className="text-4xl font-bold text-green-800 mb-6">Welcome to Your Digital Forest</h3>
+              <p className="text-green-700 mb-10 text-xl leading-relaxed">
+                Begin your journey of cultivating knowledge and preserving nature by adding your first tree to the collection!
               </p>
-              <div className="space-y-3">
+              <div className="space-y-6">
                 <AddTreeModal 
                   onTreeAdded={handleTreeAdded} 
                   editTree={editingTree}
                   isEditMode={!!editingTree}
                 />
-                <div className="text-sm text-green-600 mb-2">or</div>
+                <div className="flex items-center justify-center gap-4">
+                  <div className="h-px bg-green-200 flex-1"></div>
+                  <span className="text-green-600 font-medium px-4">or</span>
+                  <div className="h-px bg-green-200 flex-1"></div>
+                </div>
                 <Link href="/map">
                   <Button
                     variant="outline"
-                    className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                    className="w-full btn-outline-enhanced py-4 px-8 text-lg border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
                   >
-                    <Map size={16} className="mr-2" />
-                    🗺️ View Map & Add Trees by Location
+                    <Map size={20} className="mr-3" />
+                    🗺️ Explore Map & Add Trees by Location
                   </Button>
                 </Link>
               </div>
