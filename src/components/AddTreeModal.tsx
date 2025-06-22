@@ -64,6 +64,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showLocationMap, setShowLocationMap] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [managementActionsInput, setManagementActionsInput] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
 
   useEffect(() => {
     if (isEditMode && editTree) {
+      const managementActions = editTree.management_actions || [];
       setFormData({
         species: editTree.species,
         location: { lat: editTree.lat, lng: editTree.lng },
@@ -103,11 +105,12 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         seed_source: editTree.seed_source || '',
         nursery_stock_id: editTree.nursery_stock_id || '',
         condition_notes: editTree.condition_notes || '',
-        management_actions: editTree.management_actions || [],
+        management_actions: managementActions,
         iNaturalist_link: editTree.iNaturalist_link || '',
         verification_status: editTree.verification_status || 'pending',
         associated_species: editTree.associated_species || []
       });
+      setManagementActionsInput(managementActions.join(', '));
     }
   }, [isEditMode, editTree]);
   const [errors, setErrors] = useState<string[]>([]);
@@ -196,6 +199,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           verification_status: 'pending',
           associated_species: []
         });
+        setManagementActionsInput('');
       }
       
       setShowSearchResults(false);
@@ -580,15 +584,18 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               <Label htmlFor="management_actions" className="text-green-700 font-medium">Management Actions</Label>
               <Textarea
                 id="management_actions"
-                value={Array.isArray(formData.management_actions) ? formData.management_actions.join(', ') : ''}
+                value={managementActionsInput}
                 onChange={(e) => {
-                  // Process the input and store as array while preserving typing experience
-                  const inputValue = e.target.value;
+                  // Update input field immediately for smooth typing
+                  setManagementActionsInput(e.target.value);
+                }}
+                onBlur={(e) => {
+                  // Process into array format when user finishes editing
+                  const inputValue = e.target.value.trim();
                   if (inputValue === '') {
                     setFormData(prev => ({ ...prev, management_actions: [] }));
                   } else {
-                    // Split by comma and trim only leading/trailing spaces, preserving internal spaces
-                    const actions = inputValue.split(',').map(action => action.trim()).filter(action => action);
+                    const actions = inputValue.split(',').map(action => action.trim()).filter(action => action.length > 0);
                     setFormData(prev => ({ ...prev, management_actions: actions }));
                   }
                 }}
