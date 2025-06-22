@@ -21,9 +21,10 @@ export function TreeStatistics({ trees }: TreeStatisticsProps) {
   
   const averageAge = trees.length > 0 
     ? trees.reduce((sum, tree) => {
+        if (!tree.date_planted) return sum;
         const age = calculateTreeAge(tree.date_planted);
         return sum + age.totalDays;
-      }, 0) / trees.length / 365 // Convert to years
+      }, 0) / trees.filter(tree => tree.date_planted).length / 365 // Convert to years
     : 0;
 
   const stats = [

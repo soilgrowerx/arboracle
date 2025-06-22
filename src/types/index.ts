@@ -5,9 +5,11 @@ export interface Tree {
     lat: number;
     lng: number;
   };
-  plus_code_global: string;
-  plus_code_local: string;
-  date_planted: string;
+  latitude?: number;
+  longitude?: number;
+  plus_code_global?: string;
+  plus_code_local?: string;
+  date_planted?: string;
   notes?: string;
   images: string[];
   created_at: string;
@@ -16,6 +18,11 @@ export interface Tree {
   commonName?: string;
   taxonomicRank?: string;
   iNaturalistId?: number;
+  seed_source?: string;
+  condition_notes?: string;
+  management_actions?: string[];
+  nursery_stock_id?: string;
+  inaturalist_observation_url?: string;
 }
 
 export interface User {
@@ -29,13 +36,20 @@ export interface TreeFormData {
     lat: number;
     lng: number;
   };
-  date_planted: string;
+  latitude?: number;
+  longitude?: number;
+  date_planted?: string;
   notes?: string;
   images: string[];
   scientificName?: string;
   commonName?: string;
   taxonomicRank?: string;
   iNaturalistId?: number;
+  seed_source?: string;
+  condition_notes?: string;
+  management_actions?: string[];
+  nursery_stock_id?: string;
+  inaturalist_observation_url?: string;
 }
 
 // Export iNaturalist types

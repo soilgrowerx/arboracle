@@ -45,10 +45,10 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
 
   // Get enhanced Plus Code info
   const plusCodeInfo = PlusCodeService.encode(tree.location.lat, tree.location.lng, 11);
-  const displayCode = showFullCode ? tree.plus_code_global : tree.plus_code_local;
+  const displayCode = showFullCode ? (tree.plus_code_global || plusCodeInfo.global) : (tree.plus_code_local || plusCodeInfo.local);
   
   // Calculate tree age
-  const treeAge = calculateTreeAge(tree.date_planted);
+  const treeAge = tree.date_planted ? calculateTreeAge(tree.date_planted) : { displayText: 'Unknown', totalDays: 0 };
 
   return (
     <Card 
@@ -139,7 +139,7 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
         
         <div className="tree-info-item flex items-center gap-3 px-2">
           <Calendar size={18} className="text-green-600 flex-shrink-0" />
-          <span className="text-sm text-green-700 font-medium">Planted: {formatDate(tree.date_planted)}</span>
+          <span className="text-sm text-green-700 font-medium">Planted: {tree.date_planted ? formatDate(tree.date_planted) : 'Unknown'}</span>
         </div>
         
         <div className="tree-info-item flex items-center gap-3 px-2">

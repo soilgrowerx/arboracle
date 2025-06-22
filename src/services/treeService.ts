@@ -141,8 +141,8 @@ export class TreeService {
     return trees.filter(tree => 
       tree.species.toLowerCase().includes(lowercaseQuery) ||
       (tree.notes && tree.notes.toLowerCase().includes(lowercaseQuery)) ||
-      tree.plus_code_global.includes(query.toUpperCase()) ||
-      tree.plus_code_local.includes(query.toUpperCase())
+      (tree.plus_code_global && tree.plus_code_global.includes(query.toUpperCase())) ||
+      (tree.plus_code_local && tree.plus_code_local.includes(query.toUpperCase()))
     );
   }
 }

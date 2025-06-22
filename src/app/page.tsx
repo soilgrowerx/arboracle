@@ -61,14 +61,14 @@ export default function Home() {
     const csvContent = [
       headers.join(','),
       ...trees.map(tree => {
-        const treeAge = calculateTreeAge(tree.date_planted);
+        const treeAge = tree.date_planted ? calculateTreeAge(tree.date_planted) : { displayText: 'Unknown', totalDays: 0 };
         return [
           `"${tree.commonName || tree.species}"`,
           `"${tree.scientificName || ''}"`,
           tree.location.lat,
           tree.location.lng,
-          `"${tree.plus_code_local}"`,
-          `"${new Date(tree.date_planted).toLocaleDateString()}"`,
+          `"${tree.plus_code_local || ''}"`,
+          `"${tree.date_planted ? new Date(tree.date_planted).toLocaleDateString() : 'Unknown'}"`,
           `"${treeAge.displayText}"`,
           `"${new Date(tree.created_at).toLocaleDateString()}"`,
           `"${tree.notes || ''}"`
@@ -141,15 +141,15 @@ export default function Home() {
         break;
       case 'age-oldest':
         sorted.sort((a, b) => {
-          const aAge = calculateTreeAge(a.date_planted).totalDays;
-          const bAge = calculateTreeAge(b.date_planted).totalDays;
+          const aAge = a.date_planted ? calculateTreeAge(a.date_planted).totalDays : 0;
+          const bAge = b.date_planted ? calculateTreeAge(b.date_planted).totalDays : 0;
           return bAge - aAge; // Older trees first (more days = older)
         });
         break;
       case 'age-youngest':
         sorted.sort((a, b) => {
-          const aAge = calculateTreeAge(a.date_planted).totalDays;
-          const bAge = calculateTreeAge(b.date_planted).totalDays;
+          const aAge = a.date_planted ? calculateTreeAge(a.date_planted).totalDays : 0;
+          const bAge = b.date_planted ? calculateTreeAge(b.date_planted).totalDays : 0;
           return aAge - bAge; // Younger trees first (fewer days = younger)
         });
         break;

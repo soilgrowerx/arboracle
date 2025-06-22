@@ -78,4 +78,27 @@ export class iNaturalistService {
     
     return photo.url.replace('/square/', `/${sizeMap[size]}/`);
   }
+
+  static async searchTreeSpecies(query: string): Promise<any[]> {
+    try {
+      const response = await axios.get(`${INATURALIST_API_BASE}/taxa`, {
+        params: {
+          q: query,
+          rank: 'species',
+          iconic_taxa: 'Plantae',
+          per_page: 20
+        }
+      });
+
+      // Filter results to only return taxa where iconic_taxon_name === "Plantae" AND rank === "species"
+      const results = response.data.results || [];
+      return results.filter((taxon: any) => 
+        taxon.iconic_taxon_name === 'Plantae' && 
+        taxon.rank === 'species'
+      );
+    } catch (error) {
+      console.error('Error searching tree species:', error);
+      return [];
+    }
+  }
 }
