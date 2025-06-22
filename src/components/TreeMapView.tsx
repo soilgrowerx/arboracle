@@ -31,10 +31,24 @@ const TILE_LAYERS: TileLayerConfig[] = [
     checked: true
   },
   {
-    name: "🛰️ Satellite",
+    name: "🛰️ Satellite (High-Res)",
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-    maxZoom: 18,
+    attribution: 'Satellite &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+    maxZoom: 19,
+    type: 'base'
+  },
+  {
+    name: "🌍 Satellite + Streets",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution: 'Hybrid view &copy; Esri &mdash; Satellite imagery with street overlays',
+    maxZoom: 19,
+    type: 'base'
+  },
+  {
+    name: "🗺️ Terrain",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    attribution: 'Terrain &copy; Esri &mdash; Topographic map with elevation data',
+    maxZoom: 19,
     type: 'base'
   },
   {
@@ -52,12 +66,32 @@ const TILE_LAYERS: TileLayerConfig[] = [
     opacity: 0.8,
     className: 'transportation-overlay',
     type: 'overlay'
+  },
+  {
+    name: "🌿 Forest Coverage (Beta)",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/World_Navigation_Charts/MapServer/tile/{z}/{y}/{x}",
+    attribution: 'Forest data &copy; Esri &mdash; Vegetation and land cover information',
+    opacity: 0.7,
+    className: 'forest-overlay',
+    type: 'overlay'
   }
-  // Future Earth Engine layers can be added here:
+  // Future Earth Engine layers for Genesis Sprint III:
   // {
-  //   name: "🌍 NDVI Analysis",
+  //   name: "🌱 NDVI Vegetation Index",
   //   url: "https://earthengine.googleapis.com/v1alpha/projects/{projectId}/maps/{mapId}/tiles/{z}/{x}/{y}",
-  //   attribution: 'Earth Engine NDVI Analysis',
+  //   attribution: 'Earth Engine NDVI Analysis - Vegetation health monitoring',
+  //   type: 'overlay'
+  // },
+  // {
+  //   name: "💧 Water Capacity Analysis",
+  //   url: "https://earthengine.googleapis.com/v1alpha/projects/{projectId}/maps/{mapId}/tiles/{z}/{x}/{y}", 
+  //   attribution: 'Earth Engine Water Analysis - Soil moisture and water retention',
+  //   type: 'overlay'
+  // },
+  // {
+  //   name: "🌡️ Carbon Storage Potential",
+  //   url: "https://earthengine.googleapis.com/v1alpha/projects/{projectId}/maps/{mapId}/tiles/{z}/{x}/{y}",
+  //   attribution: 'Earth Engine Carbon Analysis - CO2 sequestration mapping',
   //   type: 'overlay'
   // }
 ];
@@ -329,7 +363,11 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
           </div>
           <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
             <span className="text-lg">🛰️</span>
-            <span className="font-medium">Satellite view available - use layer control (top-right)</span>
+            <span className="font-medium">High-res satellite imagery & terrain maps - use</span>
+            <span className="inline-flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">
+              📋 Layer Control
+            </span>
+            <span className="font-medium">in top-right corner</span>
           </div>
         </div>
       </div>
@@ -344,21 +382,52 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
         >
           <LayersControl position="topright">
             {/* Dynamically render base layers */}
-            {TILE_LAYERS.filter(layer => layer.type === 'base').map((layer) => (
-              <BaseLayer 
-                key={layer.name}
-                checked={layer.checked}
-                name={layer.name}
-              >
-                <TileLayer
-                  attribution={layer.attribution}
-                  url={layer.url}
-                  maxZoom={layer.maxZoom}
-                  opacity={layer.opacity}
-                  className={layer.className}
-                />
-              </BaseLayer>
-            ))}
+            {TILE_LAYERS.filter(layer => layer.type === 'base').map((layer) => {
+              // Special handling for hybrid satellite + streets view
+              if (layer.name === "🌍 Satellite + Streets") {
+                return (
+                  <BaseLayer 
+                    key={layer.name}
+                    checked={layer.checked}
+                    name={layer.name}
+                  >
+                    <>
+                      {/* Satellite base */}
+                      <TileLayer
+                        attribution={layer.attribution}
+                        url={layer.url}
+                        maxZoom={layer.maxZoom}
+                        opacity={1}
+                      />
+                      {/* Street labels overlay */}
+                      <TileLayer
+                        attribution="Street labels &copy; OpenStreetMap"
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        maxZoom={19}
+                        opacity={0.6}
+                        className="hybrid-labels"
+                      />
+                    </>
+                  </BaseLayer>
+                );
+              }
+              
+              return (
+                <BaseLayer 
+                  key={layer.name}
+                  checked={layer.checked}
+                  name={layer.name}
+                >
+                  <TileLayer
+                    attribution={layer.attribution}
+                    url={layer.url}
+                    maxZoom={layer.maxZoom}
+                    opacity={layer.opacity}
+                    className={layer.className}
+                  />
+                </BaseLayer>
+              );
+            })}
             
             {/* Dynamically render overlay layers */}
             {TILE_LAYERS.filter(layer => layer.type === 'overlay').map((layer) => (

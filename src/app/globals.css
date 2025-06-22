@@ -41,23 +41,73 @@
   border: 1px solid rgba(34, 197, 94, 0.2) !important;
   border-radius: 12px !important;
   box-shadow: 0 4px 16px rgba(34, 197, 94, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  padding: 8px !important;
-  min-width: 180px !important;
+  padding: 12px !important;
+  min-width: 220px !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 .leaflet-control-layers-toggle {
   background: linear-gradient(135deg, #16a34a, #15803d) !important;
   border-radius: 8px !important;
-  color: white !important;
-  border: none !important;
-  width: 36px !important;
-  height: 36px !important;
+  width: 40px !important;
+  height: 40px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27L11.99 18.54zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z'/%3E%3C/svg%3E") !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: 20px !important;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 16px !important;
+}
+
+.leaflet-control-layers-base {
+  margin-bottom: 8px !important;
+}
+
+.leaflet-control-layers-overlays {
+  border-top: 1px solid rgba(34, 197, 94, 0.2) !important;
+  padding-top: 8px !important;
+  margin-top: 8px !important;
+}
+
+.leaflet-control-layers label {
+  font-weight: 500 !important;
+  color: #374151 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  padding: 4px 0 !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
-  font-size: 16px !important;
-  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3) !important;
-  transition: all 0.2s ease !important;
+  gap: 8px !important;
+}
+
+.leaflet-control-layers label:hover {
+  color: #16a34a !important;
+}
+
+.leaflet-control-layers input[type="radio"],
+.leaflet-control-layers input[type="checkbox"] {
+  margin-right: 8px !important;
+  accent-color: #16a34a !important;
+  transform: scale(1.1) !important;
+}
+
+/* Satellite layer styling enhancements */
+.hybrid-labels {
+  filter: contrast(1.2) brightness(0.9) !important;
+}
+
+.forest-overlay {
+  mix-blend-mode: multiply !important;
+}
+
+.transportation-overlay {
+  filter: saturate(1.3) !important;
+}
+
+.labels-overlay {
+  filter: contrast(1.1) !important;
 }
 
 .leaflet-control-layers-toggle:hover {
