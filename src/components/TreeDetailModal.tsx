@@ -12,10 +12,9 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Calendar, StickyNote, CheckCircle, Clock, Shield, Sprout, ExternalLink, Edit, Leaf, TreePine, Database, Microscope, X, Copy, MessageCircle, ThumbsUp, ThumbsDown, Send, User } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle, Clock, Shield, Sprout, ExternalLink, Edit, Leaf, TreePine, Database, Microscope, X, Copy } from 'lucide-react';
 import { PlusCodeService } from '@/services/plusCodeService';
 import { calculateTreeAge } from '@/lib/utils';
 import Image from 'next/image';
@@ -28,55 +27,8 @@ interface TreeDetailModalProps {
   onEdit?: (tree: Tree) => void;
 }
 
-interface Comment {
-  id: string;
-  author: string;
-  authorRole: string;
-  content: string;
-  timestamp: string;
-  votes: { up: number; down: number };
-  userVote: 'up' | 'down' | null;
-  type: 'identification' | 'general';
-}
-
-// Mock comments data - in real implementation, this would come from an API
-const mockComments: Comment[] = [
-  {
-    id: '1',
-    author: 'Dr. Sarah Chen',
-    authorRole: 'Forest Ecologist',
-    content: 'This is a beautiful specimen! The bark characteristics and leaf shape strongly confirm this is Quercus alba. The age estimation looks accurate based on trunk diameter.',
-    timestamp: '2024-03-20T10:30:00Z',
-    votes: { up: 12, down: 1 },
-    userVote: 'up' as const,
-    type: 'identification' as const
-  },
-  {
-    id: '2', 
-    author: 'Mike Rodriguez',
-    authorRole: 'Community Member',
-    content: 'I have a similar oak in my backyard. Have you noticed any acorn production yet? Mine started producing around year 8.',
-    timestamp: '2024-03-19T15:45:00Z',
-    votes: { up: 5, down: 0 },
-    userVote: null,
-    type: 'general' as const
-  },
-  {
-    id: '3',
-    author: 'TreeBot AI',
-    authorRole: 'AI Assistant',
-    content: 'Based on the provided data, this tree shows excellent health indicators. Consider monitoring for oak wilt symptoms and maintain proper soil drainage for optimal growth.',
-    timestamp: '2024-03-18T09:15:00Z', 
-    votes: { up: 8, down: 2 },
-    userVote: null,
-    type: 'general' as const
-  }
-];
-
 export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailModalProps) {
-  const [activeTab, setActiveTab] = useState('ecosystem');
-  const [newComment, setNewComment] = useState('');
-  const [comments, setComments] = useState<Comment[]>(mockComments);
+  const [activeTab, setActiveTab] = useState('overview');
 
   if (!tree) return null;
 
@@ -92,57 +44,6 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
   const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng, 11);
   const ecosystemStats = EcosystemService.getEcosystemStatistics(tree.id);
 
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-    
-    const comment: Comment = {
-      id: Date.now().toString(),
-      author: 'Current User',
-      authorRole: 'Community Member',
-      content: newComment,
-      timestamp: new Date().toISOString(),
-      votes: { up: 0, down: 0 },
-      userVote: null,
-      type: 'general'
-    };
-    
-    setComments([comment, ...comments]);
-    setNewComment('');
-  };
-
-  const handleVote = (commentId: string, voteType: 'up' | 'down') => {
-    setComments(comments.map(comment => {
-      if (comment.id === commentId) {
-        const newVotes = { ...comment.votes };
-        const oldVote = comment.userVote;
-        
-        // Remove old vote if exists
-        if (oldVote) {
-          newVotes[oldVote]--;
-        }
-        
-        // Add new vote if different from old vote
-        if (oldVote !== voteType) {
-          newVotes[voteType]++;
-          return { ...comment, votes: newVotes, userVote: voteType };
-        } else {
-          return { ...comment, votes: newVotes, userVote: null };
-        }
-      }
-      return comment;
-    }));
-  };
-
-  const formatCommentDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
-    return date.toLocaleDateString();
-  };
 
   const getVerificationStatusIcon = () => {
     switch (tree.verification_status) {
@@ -238,26 +139,34 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
 
         <div className="flex-1 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-5 mb-4 flex-shrink-0 bg-green-50 border border-green-200">
-              <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
-                <TreePine size={16} />
-                Overview
+            <TabsList className="grid w-full grid-cols-4 mb-6 flex-shrink-0 bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 border border-green-200 rounded-xl p-1">
+              <TabsTrigger 
+                value="overview" 
+                className="flex items-center gap-2 rounded-lg px-4 py-3 font-semibold transition-all duration-200 data-[state=active]:bg-white data-[state=active]:text-green-700 data-[state=active]:shadow-md text-green-600 hover:text-green-700 hover:bg-white/50"
+              >
+                <TreePine size={18} />
+                <span className="hidden sm:inline">Overview</span>
               </TabsTrigger>
-              <TabsTrigger value="ecosystem" className="flex items-center gap-2 data-[state=active]:bg-emerald-600 data-[state=active]:text-white font-semibold">
-                <Leaf size={16} />
-                🌍 Ecosystem
+              <TabsTrigger 
+                value="taxonomy" 
+                className="flex items-center gap-2 rounded-lg px-4 py-3 font-semibold transition-all duration-200 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-md text-blue-600 hover:text-blue-700 hover:bg-white/50"
+              >
+                <Microscope size={18} />
+                <span className="hidden sm:inline">Taxonomy</span>
               </TabsTrigger>
-              <TabsTrigger value="management" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
-                <Database size={16} />
-                Management
+              <TabsTrigger 
+                value="management" 
+                className="flex items-center gap-2 rounded-lg px-4 py-3 font-semibold transition-all duration-200 data-[state=active]:bg-white data-[state=active]:text-amber-700 data-[state=active]:shadow-md text-amber-600 hover:text-amber-700 hover:bg-white/50"
+              >
+                <Database size={18} />
+                <span className="hidden sm:inline">Management</span>
               </TabsTrigger>
-              <TabsTrigger value="scientific" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
-                <Microscope size={16} />
-                Scientific
-              </TabsTrigger>
-              <TabsTrigger value="comments" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                <MessageCircle size={16} />
-                Comments ({comments.length})
+              <TabsTrigger 
+                value="ecosystem" 
+                className="flex items-center gap-2 rounded-lg px-4 py-3 font-semibold transition-all duration-200 data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-md text-emerald-600 hover:text-emerald-700 hover:bg-white/50"
+              >
+                <Leaf size={18} />
+                <span className="hidden sm:inline">Ecosystem</span>
               </TabsTrigger>
             </TabsList>
 
@@ -440,36 +349,51 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
               <TabsContent value="management" className="space-y-6 mt-0">
                 <Card>
                   <CardHeader>
-                    <CardTitle>🌲 Forestry Management Data</CardTitle>
+                    <CardTitle className="flex items-center gap-3">
+                      <span className="text-2xl">🌲</span>
+                      <span>Forestry Management Data</span>
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    {tree.seed_source && (
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Seed Source</p>
-                        <p className="text-sm text-gray-600">{tree.seed_source}</p>
-                      </div>
-                    )}
-                    
-                    {tree.nursery_stock_id && (
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Nursery Stock ID</p>
-                        <p className="text-sm text-gray-600 font-mono">{tree.nursery_stock_id}</p>
-                      </div>
-                    )}
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {tree.seed_source && (
+                        <div>
+                          <p className="text-sm font-semibold text-amber-700 mb-2">Seed Source</p>
+                          <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                            <p className="text-base text-gray-800">{tree.seed_source}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {tree.nursery_stock_id && (
+                        <div>
+                          <p className="text-sm font-semibold text-amber-700 mb-2">Nursery Stock ID</p>
+                          <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                            <p className="text-base text-gray-800 font-mono">{tree.nursery_stock_id}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     
                     {tree.condition_notes && (
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Condition Notes</p>
-                        <p className="text-sm text-gray-600">{tree.condition_notes}</p>
+                        <p className="text-sm font-semibold text-amber-700 mb-2">Condition Notes</p>
+                        <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                          <p className="text-base text-gray-800 leading-relaxed">{tree.condition_notes}</p>
+                        </div>
                       </div>
                     )}
                     
                     {tree.management_actions && tree.management_actions.length > 0 && (
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2">Management Actions</p>
-                        <div className="flex flex-wrap gap-2">
+                        <p className="text-sm font-semibold text-amber-700 mb-3">Management Actions</p>
+                        <div className="flex flex-wrap gap-3">
                           {tree.management_actions.map((action, index) => (
-                            <Badge key={index} variant="secondary" className="bg-green-100 text-green-700">
+                            <Badge 
+                              key={index} 
+                              variant="secondary" 
+                              className="bg-amber-100 text-amber-800 border border-amber-300 text-sm px-4 py-2"
+                            >
                               {action}
                             </Badge>
                           ))}
@@ -478,9 +402,10 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                     )}
 
                     {!tree.seed_source && !tree.nursery_stock_id && !tree.condition_notes && (!tree.management_actions || tree.management_actions.length === 0) && (
-                      <div className="text-center py-8 text-gray-500">
-                        <p>No management data recorded for this tree.</p>
-                        <p className="text-sm mt-2">Click &quot;Edit Tree&quot; to add forestry management information.</p>
+                      <div className="text-center py-12 text-amber-600 bg-amber-50 rounded-lg border border-amber-200">
+                        <div className="text-4xl mb-4">🌱</div>
+                        <p className="text-lg font-medium mb-2">No management data recorded</p>
+                        <p className="text-sm">Click "Edit Tree" to add forestry management information</p>
                       </div>
                     )}
                   </CardContent>
@@ -517,7 +442,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                 />
               </TabsContent>
 
-              <TabsContent value="scientific" className="space-y-6 mt-0">
+              <TabsContent value="taxonomy" className="space-y-6 mt-0">
                 {/* Enhanced Taxonomic Display */}
                 {tree.taxonomy ? (
                   <TaxonomicDisplay taxonomy={tree.taxonomy} variant="full" />
@@ -525,25 +450,38 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                   /* Fallback for trees without full taxonomy */
                   <Card>
                     <CardHeader>
-                      <CardTitle>🔬 Scientific Classification</CardTitle>
+                      <CardTitle className="flex items-center gap-3">
+                        <span className="text-2xl">🔬</span>
+                        <span>Scientific Classification</span>
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Scientific Name</p>
-                        <p className="text-sm text-gray-600 italic">{tree.scientificName || 'Not specified'}</p>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-blue-700 mb-2">Scientific Name</p>
+                          <p className="text-base text-gray-800 italic font-serif bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            {tree.scientificName || 'Not specified'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-blue-700 mb-2">Common Name</p>
+                          <p className="text-base text-gray-800 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            {tree.commonName || tree.species}
+                          </p>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Common Name</p>
-                        <p className="text-sm text-gray-600">{tree.commonName || tree.species}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Taxonomic Rank</p>
-                        <p className="text-sm text-gray-600">{tree.taxonomicRank || 'Not specified'}</p>
+                        <p className="text-sm font-semibold text-blue-700 mb-2">Taxonomic Rank</p>
+                        <p className="text-base text-gray-800 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          {tree.taxonomicRank || 'Not specified'}
+                        </p>
                       </div>
                       {tree.iNaturalistId && (
                         <div>
-                          <p className="text-sm font-medium text-gray-700 mb-1">iNaturalist ID</p>
-                          <p className="text-sm text-gray-600 font-mono">{tree.iNaturalistId}</p>
+                          <p className="text-sm font-semibold text-blue-700 mb-2">iNaturalist ID</p>
+                          <p className="text-base text-gray-800 font-mono bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            {tree.iNaturalistId}
+                          </p>
                         </div>
                       )}
                     </CardContent>
@@ -554,31 +492,38 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                 {tree.iNaturalistId && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>🏷️ iNaturalist Integration</CardTitle>
+                      <CardTitle className="flex items-center gap-3">
+                        <span className="text-2xl">🏷️</span>
+                        <span>iNaturalist Integration</span>
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">iNaturalist ID</p>
-                        <p className="text-sm text-gray-600 font-mono">{tree.iNaturalistId}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Species Verification</p>
-                        <div className="flex items-center gap-2">
-                          {tree.verification_status === 'verified' && (
-                            <Badge className="bg-green-100 text-green-800">
-                              ✅ iNaturalist Verified
-                            </Badge>
-                          )}
-                          {tree.verification_status === 'manual' && (
-                            <Badge className="bg-blue-100 text-blue-800">
-                              🔵 Manually Verified
-                            </Badge>
-                          )}
-                          {tree.verification_status === 'pending' && (
-                            <Badge className="bg-yellow-100 text-yellow-800">
-                              🟡 Pending Verification
-                            </Badge>
-                          )}
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-blue-700 mb-2">Database ID</p>
+                          <p className="text-base text-gray-800 font-mono bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            {tree.iNaturalistId}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-blue-700 mb-2">Verification Status</p>
+                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            {tree.verification_status === 'verified' && (
+                              <Badge className="bg-green-100 text-green-800 text-sm px-4 py-2">
+                                ✅ iNaturalist Verified
+                              </Badge>
+                            )}
+                            {tree.verification_status === 'manual' && (
+                              <Badge className="bg-blue-100 text-blue-800 text-sm px-4 py-2">
+                                🔵 Manually Verified
+                              </Badge>
+                            )}
+                            {tree.verification_status === 'pending' && (
+                              <Badge className="bg-yellow-100 text-yellow-800 text-sm px-4 py-2">
+                                🟡 Pending Verification
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -588,10 +533,15 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                 {tree.description && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>📖 Species Description</CardTitle>
+                      <CardTitle className="flex items-center gap-3">
+                        <span className="text-2xl">📖</span>
+                        <span>Species Description</span>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-700 leading-relaxed">{tree.description}</p>
+                      <div className="prose prose-sm max-w-none bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <p className="text-gray-700 leading-relaxed">{tree.description}</p>
+                      </div>
                     </CardContent>
                   </Card>
                 )}
@@ -599,10 +549,15 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                 {tree.distribution_info && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>🌍 Distribution Information</CardTitle>
+                      <CardTitle className="flex items-center gap-3">
+                        <span className="text-2xl">🌍</span>
+                        <span>Distribution Information</span>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-700">{tree.distribution_info}</p>
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <p className="text-gray-700 leading-relaxed">{tree.distribution_info}</p>
+                      </div>
                     </CardContent>
                   </Card>
                 )}
@@ -610,12 +565,17 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                 {tree.conservation_status && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>🛡️ Conservation Status</CardTitle>
+                      <CardTitle className="flex items-center gap-3">
+                        <span className="text-2xl">🛡️</span>
+                        <span>Conservation Status</span>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <Badge variant="outline" className="text-sm">
-                        {tree.conservation_status}
-                      </Badge>
+                      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <Badge variant="outline" className="text-base px-4 py-2 bg-white border-blue-300 text-blue-700">
+                          {tree.conservation_status}
+                        </Badge>
+                      </div>
                     </CardContent>
                   </Card>
                 )}
@@ -623,13 +583,16 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                 {tree.photos && tree.photos.length > 0 && (
                   <Card>
                     <CardHeader>
-                      <CardTitle>📷 Scientific Photos from iNaturalist</CardTitle>
+                      <CardTitle className="flex items-center gap-3">
+                        <span className="text-2xl">📷</span>
+                        <span>Scientific Photos from iNaturalist</span>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {tree.photos.slice(0, 6).map((photo) => (
                           <div key={photo.id} className="space-y-2">
-                            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
+                            <div className="aspect-square bg-blue-50 rounded-lg overflow-hidden relative border border-blue-200">
                               <Image
                                 src={photo.size_variants?.medium || photo.url}
                                 alt="Species photo"
@@ -639,7 +602,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                               />
                             </div>
                             {photo.attribution && (
-                              <p className="text-xs text-gray-500 truncate">© {photo.attribution}</p>
+                              <p className="text-xs text-blue-600 truncate">© {photo.attribution}</p>
                             )}
                           </div>
                         ))}
@@ -649,130 +612,6 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                 )}
               </TabsContent>
 
-              {/* Comments Tab */}
-              <TabsContent value="comments" className="space-y-6 mt-0">
-                {/* Add Comment Section */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageCircle size={20} className="text-blue-600" />
-                      Add Comment
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <Textarea
-                      placeholder="Share your thoughts about this tree, ask questions, or provide identification help..."
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      rows={3}
-                      className="border-blue-200 focus:border-blue-400"
-                    />
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-600">
-                        Help improve tree identification by sharing your expertise!
-                      </div>
-                      <Button
-                        onClick={handleAddComment}
-                        disabled={!newComment.trim()}
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                      >
-                        <Send size={16} className="mr-2" />
-                        Post Comment
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Comments List */}
-                <div className="space-y-4">
-                  {comments.length === 0 ? (
-                    <Card>
-                      <CardContent className="p-8 text-center">
-                        <MessageCircle size={48} className="mx-auto mb-4 text-gray-400" />
-                        <h3 className="text-lg font-semibold text-gray-600 mb-2">No comments yet</h3>
-                        <p className="text-gray-500 mb-4">Be the first to share your thoughts about this tree!</p>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    comments.map((comment) => (
-                      <Card key={comment.id} className="border-l-4 border-l-blue-200">
-                        <CardContent className="p-4">
-                          {/* Comment Header */}
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                                <User size={16} className="text-white" />
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-gray-800">{comment.author}</span>
-                                  {comment.type === 'identification' && (
-                                    <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
-                                      🔬 Species ID
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-gray-600">
-                                  <span>{comment.authorRole}</span>
-                                  <span>•</span>
-                                  <span>{formatCommentDate(comment.timestamp)}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Comment Content */}
-                          <p className="text-gray-700 mb-4 leading-relaxed">{comment.content}</p>
-
-                          {/* Voting Section */}
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleVote(comment.id, 'up')}
-                                className={`h-8 px-2 hover:bg-green-100 ${
-                                  comment.userVote === 'up' ? 'bg-green-100 text-green-700' : 'text-gray-600'
-                                }`}
-                              >
-                                <ThumbsUp size={14} className="mr-1" />
-                                {comment.votes.up}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleVote(comment.id, 'down')}
-                                className={`h-8 px-2 hover:bg-red-100 ${
-                                  comment.userVote === 'down' ? 'bg-red-100 text-red-700' : 'text-gray-600'
-                                }`}
-                              >
-                                <ThumbsDown size={14} className="mr-1" />
-                                {comment.votes.down}
-                              </Button>
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              Helpful to {comment.votes.up - comment.votes.down > 0 ? comment.votes.up - comment.votes.down : 0} people
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                </div>
-
-                {/* Community Guidelines */}
-                <Card className="bg-blue-50 border-blue-200">
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold text-blue-800 mb-2">💡 Community Guidelines</h4>
-                    <ul className="text-sm text-blue-700 space-y-1">
-                      <li>• Share helpful insights about tree identification, care, or ecological relationships</li>
-                      <li>• Be respectful and constructive in your feedback</li>
-                      <li>• Vote up helpful comments to promote quality contributions</li>
-                      <li>• Include scientific sources when making identification claims</li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </TabsContent>
             </div>
           </Tabs>
         </div>
