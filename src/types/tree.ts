@@ -14,6 +14,14 @@ export interface Tree {
   commonName?: string;
   taxonomicRank?: string;
   iNaturalistId?: number;
+  // Full taxonomic hierarchy
+  kingdom?: string;
+  phylum?: string;
+  class?: string;
+  order?: string;
+  family?: string;
+  genus?: string;
+  species_binomial?: string;
   // Enhanced forestry management fields
   seed_source?: string;
   nursery_stock_id?: string;
@@ -21,6 +29,13 @@ export interface Tree {
   management_actions?: string[];
   iNaturalist_link?: string;
   verification_status: 'verified' | 'manual' | 'pending';
+  // New expansion fields
+  land_owner?: string;
+  site_name?: string;
+  nursery_name?: string;
+  height_cm?: number;
+  dbh_cm?: number;
+  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
   // Enhanced species data from iNaturalist
   description?: string;
   distribution_info?: string;
@@ -68,6 +83,14 @@ export interface TreeFormData {
   commonName?: string;
   taxonomicRank?: string;
   iNaturalistId?: number;
+  // Full taxonomic hierarchy
+  kingdom?: string;
+  phylum?: string;
+  class?: string;
+  order?: string;
+  family?: string;
+  genus?: string;
+  species_binomial?: string;
   // Enhanced forestry management fields
   seed_source?: string;
   nursery_stock_id?: string;
@@ -75,6 +98,13 @@ export interface TreeFormData {
   management_actions?: string[];
   iNaturalist_link?: string;
   verification_status?: 'verified' | 'manual' | 'pending';
+  // New expansion fields
+  land_owner?: string;
+  site_name?: string;
+  nursery_name?: string;
+  height_cm?: number;
+  dbh_cm?: number;
+  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
   // Associated ecosystem species
   associated_species?: AssociatedSpecies[];
 }

@@ -11,7 +11,7 @@ export interface PlusCodeResult {
 const olc = new OpenLocationCode();
 
 export class PlusCodeService {
-  static encode(latitude: number, longitude: number, precision: number = 11): PlusCodeResult {
+  static encode(latitude: number, longitude: number, precision: number = 12): PlusCodeResult {
     const global = olc.encode(latitude, longitude, precision);
     const local = olc.encode(latitude, longitude, 10); // 10-character code for local use
     const short = olc.shorten(global, latitude, longitude);

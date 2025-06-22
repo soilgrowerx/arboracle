@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Plus, Search, MapPin, Map } from 'lucide-react';
 
@@ -85,7 +86,22 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     management_actions: [],
     iNaturalist_link: '',
     verification_status: 'pending',
-    associated_species: []
+    associated_species: [],
+    // New expansion fields
+    land_owner: '',
+    site_name: '',
+    nursery_name: '',
+    height_cm: undefined,
+    dbh_cm: undefined,
+    health_status: undefined,
+    // Taxonomic hierarchy
+    kingdom: '',
+    phylum: '',
+    class: '',
+    order: '',
+    family: '',
+    genus: '',
+    species_binomial: ''
   });
 
   useEffect(() => {
@@ -106,7 +122,22 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         management_actions: editTree.management_actions || [],
         iNaturalist_link: editTree.iNaturalist_link || '',
         verification_status: editTree.verification_status || 'pending',
-        associated_species: editTree.associated_species || []
+        associated_species: editTree.associated_species || [],
+        // New expansion fields
+        land_owner: editTree.land_owner || '',
+        site_name: editTree.site_name || '',
+        nursery_name: editTree.nursery_name || '',
+        height_cm: editTree.height_cm,
+        dbh_cm: editTree.dbh_cm,
+        health_status: editTree.health_status,
+        // Taxonomic hierarchy
+        kingdom: editTree.kingdom || '',
+        phylum: editTree.phylum || '',
+        class: editTree.class || '',
+        order: editTree.order || '',
+        family: editTree.family || '',
+        genus: editTree.genus || '',
+        species_binomial: editTree.species_binomial || ''
       });
     }
   }, [isEditMode, editTree]);
@@ -194,7 +225,22 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           management_actions: [],
           iNaturalist_link: '',
           verification_status: 'pending',
-          associated_species: []
+          associated_species: [],
+          // New expansion fields
+          land_owner: '',
+          site_name: '',
+          nursery_name: '',
+          height_cm: undefined,
+          dbh_cm: undefined,
+          health_status: undefined,
+          // Taxonomic hierarchy
+          kingdom: '',
+          phylum: '',
+          class: '',
+          order: '',
+          family: '',
+          genus: '',
+          species_binomial: ''
         });
       }
       
@@ -299,7 +345,15 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
       taxonomicRank: taxon.rank,
       iNaturalistId: taxon.id,
       iNaturalist_link: iNaturalistLink,
-      verification_status: 'verified'
+      verification_status: 'verified',
+      // Populate taxonomic hierarchy if available
+      kingdom: taxon.ancestors?.find((a: any) => a.rank === 'kingdom')?.name || '',
+      phylum: taxon.ancestors?.find((a: any) => a.rank === 'phylum')?.name || '',
+      class: taxon.ancestors?.find((a: any) => a.rank === 'class')?.name || '',
+      order: taxon.ancestors?.find((a: any) => a.rank === 'order')?.name || '',
+      family: taxon.ancestors?.find((a: any) => a.rank === 'family')?.name || '',
+      genus: taxon.ancestors?.find((a: any) => a.rank === 'genus')?.name || '',
+      species_binomial: taxon.rank === 'species' ? taxon.name : ''
     }));
     setShowSearchResults(false);
     toast({
@@ -533,6 +587,146 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             )}
           </div>
 
+          {/* Enhanced Tree Data Section */}
+          <div className="border-t border-green-100 pt-6 space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-lg">📊</span>
+              <h3 className="text-lg font-semibold text-green-800">Enhanced Tree Data</h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="land_owner" className="text-green-700 font-medium">Land Owner</Label>
+                <Input
+                  id="land_owner"
+                  value={formData.land_owner}
+                  onChange={(e) => setFormData(prev => ({ ...prev, land_owner: e.target.value }))}
+                  placeholder="e.g., City Parks, Private Owner..."
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="site_name" className="text-green-700 font-medium">Site Name</Label>
+                <Input
+                  id="site_name"
+                  value={formData.site_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, site_name: e.target.value }))}
+                  placeholder="e.g., Central Park, Backyard..."
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <Label htmlFor="nursery_name" className="text-green-700 font-medium">Nursery Name</Label>
+                <Input
+                  id="nursery_name"
+                  value={formData.nursery_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, nursery_name: e.target.value }))}
+                  placeholder="Source nursery..."
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="height_cm" className="text-green-700 font-medium">Height (cm)</Label>
+                <Input
+                  id="height_cm"
+                  type="number"
+                  value={formData.height_cm || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, height_cm: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                  placeholder="Height in cm"
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="dbh_cm" className="text-green-700 font-medium">DBH (cm)</Label>
+                <Input
+                  id="dbh_cm"
+                  type="number"
+                  step="0.1"
+                  value={formData.dbh_cm || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, dbh_cm: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                  placeholder="Diameter at breast height"
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="health_status" className="text-green-700 font-medium">Health Status</Label>
+              <Select value={formData.health_status || ''} onValueChange={(value: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead') => setFormData(prev => ({ ...prev, health_status: value }))}>
+                <SelectTrigger className="border-green-200 focus:border-green-400">
+                  <SelectValue placeholder="Select health status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Excellent">🌟 Excellent</SelectItem>
+                  <SelectItem value="Good">🌱 Good</SelectItem>
+                  <SelectItem value="Fair">⚠️ Fair</SelectItem>
+                  <SelectItem value="Poor">🔸 Poor</SelectItem>
+                  <SelectItem value="Dead">💀 Dead</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Taxonomic Hierarchy Section */}
+          {(formData.kingdom || formData.phylum || formData.class || formData.order || formData.family || formData.genus) && (
+            <div className="border-t border-green-100 pt-6 space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">🔬</span>
+                <h3 className="text-lg font-semibold text-green-800">Scientific Classification</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {formData.kingdom && (
+                  <div>
+                    <Label className="text-green-700 font-medium">Kingdom</Label>
+                    <Input value={formData.kingdom} readOnly className="bg-green-50 border-green-200" />
+                  </div>
+                )}
+                
+                {formData.phylum && (
+                  <div>
+                    <Label className="text-green-700 font-medium">Phylum</Label>
+                    <Input value={formData.phylum} readOnly className="bg-green-50 border-green-200" />
+                  </div>
+                )}
+                
+                {formData.class && (
+                  <div>
+                    <Label className="text-green-700 font-medium">Class</Label>
+                    <Input value={formData.class} readOnly className="bg-green-50 border-green-200" />
+                  </div>
+                )}
+                
+                {formData.order && (
+                  <div>
+                    <Label className="text-green-700 font-medium">Order</Label>
+                    <Input value={formData.order} readOnly className="bg-green-50 border-green-200" />
+                  </div>
+                )}
+                
+                {formData.family && (
+                  <div>
+                    <Label className="text-green-700 font-medium">Family</Label>
+                    <Input value={formData.family} readOnly className="bg-green-50 border-green-200" />
+                  </div>
+                )}
+                
+                {formData.genus && (
+                  <div>
+                    <Label className="text-green-700 font-medium">Genus</Label>
+                    <Input value={formData.genus} readOnly className="bg-green-50 border-green-200" />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Management Data Section */}
           <div className="border-t border-green-100 pt-6 space-y-4">
             <div className="flex items-center gap-2 mb-4">
@@ -582,8 +776,15 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 id="management_actions"
                 value={Array.isArray(formData.management_actions) ? formData.management_actions.join(', ') : formData.management_actions}
                 onChange={(e) => {
-                  const actions = e.target.value.split(',').map(action => action.trim()).filter(action => action);
-                  setFormData(prev => ({ ...prev, management_actions: actions }));
+                  const value = e.target.value;
+                  // If the field contains commas, treat as comma-separated list
+                  if (value.includes(',')) {
+                    const actions = value.split(',').map(action => action.trim()).filter(action => action);
+                    setFormData(prev => ({ ...prev, management_actions: actions }));
+                  } else {
+                    // Otherwise treat as a single value or space-separated words
+                    setFormData(prev => ({ ...prev, management_actions: value ? [value] : [] }));
+                  }
                 }}
                 placeholder="Watering, pruning, fertilizing, pest control... (separate with commas)"
                 rows={2}

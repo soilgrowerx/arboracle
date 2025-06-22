@@ -1000,6 +1000,83 @@
     animation: card-entrance 0.4s ease-out;
   }
 
+  /* Mobile responsive fixes */
+  @media (max-width: 768px) {
+    .tree-card-enhanced {
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      border-radius: 8px;
+    }
+    
+    .tree-card-enhanced:hover {
+      transform: translateY(-1px) scale(1.01);
+    }
+    
+    .tree-card-header {
+      padding: 0.75rem;
+    }
+    
+    .popup-title {
+      font-size: 16px;
+    }
+    
+    .enhanced-popup-content {
+      min-width: 240px !important;
+      max-width: 260px !important;
+    }
+    
+    .popup-header {
+      padding: 12px !important;
+    }
+    
+    .popup-content {
+      padding: 12px !important;
+    }
+    
+    .popup-footer {
+      padding: 8px 12px !important;
+    }
+    
+    .info-grid {
+      gap: 8px;
+    }
+    
+    .info-item {
+      padding: 6px 8px;
+    }
+    
+    .view-details-btn {
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+    
+    /* TreeDetailModal responsive fixes */
+    .max-w-6xl {
+      max-width: 95vw !important;
+    }
+    
+    .grid-cols-1.md\\:grid-cols-2 {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .grid-cols-1.md\\:grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+
+  /* Modal layering fix */
+  [data-radix-dialog-overlay] {
+    z-index: 9998 !important;
+  }
+  
+  [data-radix-dialog-content] {
+    z-index: 9999 !important;
+  }
+  
+  .leaflet-container {
+    z-index: 1 !important;
+  }
+
   /* Enhanced Search Input Styles */
   .search-input-enhanced {
     @apply transition-all duration-300 ease-in-out;

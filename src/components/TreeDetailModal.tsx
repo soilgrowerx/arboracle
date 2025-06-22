@@ -88,7 +88,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
   };
 
   const treeAge = calculateTreeAge(tree.date_planted);
-  const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng, 11);
+  const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng, 12);
   const ecosystemStats = EcosystemService.getEcosystemStatistics(tree.id);
 
   const handleAddComment = () => {
@@ -171,7 +171,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col z-50">
         <DialogHeader className="flex-shrink-0 border-b pb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -533,6 +533,162 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Full Taxonomic Hierarchy */}
+                {(tree.kingdom || tree.phylum || tree.class || tree.order || tree.family || tree.genus) && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>🧬 Complete Taxonomic Hierarchy</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 gap-4">
+                        {tree.kingdom && (
+                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                            <span className="text-2xl">👑</span>
+                            <div>
+                              <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Kingdom</p>
+                              <p className="font-semibold text-blue-800">{tree.kingdom}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {tree.phylum && (
+                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                            <span className="text-2xl">🧬</span>
+                            <div>
+                              <p className="text-xs font-medium text-purple-600 uppercase tracking-wide">Phylum</p>
+                              <p className="font-semibold text-purple-800">{tree.phylum}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {tree.class && (
+                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
+                            <span className="text-2xl">🏛️</span>
+                            <div>
+                              <p className="text-xs font-medium text-indigo-600 uppercase tracking-wide">Class</p>
+                              <p className="font-semibold text-indigo-800">{tree.class}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {tree.order && (
+                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg border border-teal-200">
+                            <span className="text-2xl">📋</span>
+                            <div>
+                              <p className="text-xs font-medium text-teal-600 uppercase tracking-wide">Order</p>
+                              <p className="font-semibold text-teal-800">{tree.order}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {tree.family && (
+                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                            <span className="text-2xl">👨‍👩‍👧‍👦</span>
+                            <div>
+                              <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Family</p>
+                              <p className="font-semibold text-emerald-800">{tree.family}</p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {tree.genus && (
+                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+                            <span className="text-2xl">🌿</span>
+                            <div>
+                              <p className="text-xs font-medium text-green-600 uppercase tracking-wide">Genus</p>
+                              <p className="font-semibold text-green-800">{tree.genus}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Enhanced Tree Data */}
+                {(tree.land_owner || tree.site_name || tree.nursery_name || tree.height_cm || tree.dbh_cm || tree.health_status) && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>📊 Enhanced Tree Data</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        {tree.land_owner && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-1">Land Owner</p>
+                            <p className="text-sm text-gray-600">{tree.land_owner}</p>
+                          </div>
+                        )}
+                        
+                        {tree.site_name && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-1">Site Name</p>
+                            <p className="text-sm text-gray-600">{tree.site_name}</p>
+                          </div>
+                        )}
+                        
+                        {tree.nursery_name && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-1">Nursery Name</p>
+                            <p className="text-sm text-gray-600">{tree.nursery_name}</p>
+                          </div>
+                        )}
+                        
+                        {tree.health_status && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-1">Health Status</p>
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">
+                                {tree.health_status === 'Excellent' && '🌟'}
+                                {tree.health_status === 'Good' && '🌱'}
+                                {tree.health_status === 'Fair' && '⚠️'}
+                                {tree.health_status === 'Poor' && '🔸'}
+                                {tree.health_status === 'Dead' && '💀'}
+                              </span>
+                              <span className={`text-sm font-medium ${
+                                tree.health_status === 'Excellent' ? 'text-green-600' :
+                                tree.health_status === 'Good' ? 'text-emerald-600' :
+                                tree.health_status === 'Fair' ? 'text-yellow-600' :
+                                tree.health_status === 'Poor' ? 'text-orange-600' :
+                                'text-red-600'
+                              }`}>{tree.health_status}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {(tree.height_cm || tree.dbh_cm) && (
+                        <div className="border-t border-gray-200 pt-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-3">Physical Measurements</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            {tree.height_cm && (
+                              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                                <span className="text-2xl">📏</span>
+                                <div>
+                                  <p className="text-xs font-medium text-green-600 uppercase tracking-wide">Height</p>
+                                  <p className="font-semibold text-green-800">{tree.height_cm} cm</p>
+                                  <p className="text-xs text-green-600">({(tree.height_cm / 100).toFixed(2)} m)</p>
+                                </div>
+                              </div>
+                            )}
+                            
+                            {tree.dbh_cm && (
+                              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                                <span className="text-2xl">⭕</span>
+                                <div>
+                                  <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">DBH</p>
+                                  <p className="font-semibold text-blue-800">{tree.dbh_cm} cm</p>
+                                  <p className="text-xs text-blue-600">Diameter at Breast Height</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
 
                 {tree.description && (
                   <Card>
