@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Tree } from '@/types';
 import { EcosystemManagement } from '@/components/EcosystemManagement';
+import { EcosystemService } from '@/services/ecosystemService';
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,7 @@ interface TreeDetailModalProps {
 }
 
 export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailModalProps) {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('ecosystem');
 
   if (!tree) return null;
 
@@ -40,6 +41,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
 
   const treeAge = calculateTreeAge(tree.date_planted);
   const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng, 11);
+  const ecosystemStats = EcosystemService.getEcosystemStatistics(tree.id);
 
   const getVerificationStatusIcon = () => {
     switch (tree.verification_status) {
@@ -93,6 +95,11 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                       {tree.taxonomicRank}
                     </Badge>
                   )}
+                  {ecosystemStats.totalSpecies > 0 && (
+                    <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-300">
+                      🌍 {ecosystemStats.totalSpecies} ecosystem species
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -121,20 +128,20 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
 
         <div className="flex-1 overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-4 mb-4 flex-shrink-0">
-              <TabsTrigger value="overview" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-4 mb-4 flex-shrink-0 bg-green-50 border border-green-200">
+              <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
                 <TreePine size={16} />
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="management" className="flex items-center gap-2">
+              <TabsTrigger value="ecosystem" className="flex items-center gap-2 data-[state=active]:bg-emerald-600 data-[state=active]:text-white font-semibold">
+                <Leaf size={16} />
+                🌍 Manage Ecosystem
+              </TabsTrigger>
+              <TabsTrigger value="management" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
                 <Database size={16} />
                 Management
               </TabsTrigger>
-              <TabsTrigger value="ecosystem" className="flex items-center gap-2">
-                <Leaf size={16} />
-                Ecosystem
-              </TabsTrigger>
-              <TabsTrigger value="scientific" className="flex items-center gap-2">
+              <TabsTrigger value="scientific" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
                 <Microscope size={16} />
                 Scientific Data
               </TabsTrigger>
@@ -142,6 +149,34 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
 
             <div className="flex-1 overflow-y-auto">
               <TabsContent value="overview" className="space-y-6 mt-0">
+                {/* Quick Stats Banner */}
+                <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 border border-green-200 rounded-lg p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                    <div className="space-y-2">
+                      <div className="text-2xl">📍</div>
+                      <div className="text-sm font-medium text-green-700">Location Verified</div>
+                      <div className="text-xs text-green-600">Plus Code System</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-2xl">🕐</div>
+                      <div className="text-sm font-medium text-green-700">Age: {treeAge.displayText}</div>
+                      <div className="text-xs text-green-600">Since {formatDate(tree.date_planted)}</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-2xl">{getVerificationStatusIcon()}</div>
+                      <div className="text-sm font-medium text-green-700">{getVerificationStatusText()}</div>
+                      <div className="text-xs text-green-600">Data Quality</div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-2xl">🌍</div>
+                      <div className="text-sm font-medium text-green-700">Ecosystem</div>
+                      <div className="text-xs text-green-600">
+                        {ecosystemStats.totalSpecies > 0 ? `${ecosystemStats.totalSpecies} species documented` : 'No species yet'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card>
                     <CardHeader>
@@ -288,6 +323,29 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
               </TabsContent>
 
               <TabsContent value="ecosystem" className="mt-0">
+                <div className="bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 border border-emerald-200 rounded-lg p-6 mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="text-3xl">🌍</div>
+                    <div>
+                      <h3 className="text-xl font-bold text-emerald-800">Tree Ecosystem Management</h3>
+                      <p className="text-emerald-600 text-sm">Manage species interactions and ecological relationships</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div className="bg-white/70 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
+                      <div className="text-2xl mb-2">🤝</div>
+                      <div className="text-sm font-medium text-emerald-700">Symbiotic Relations</div>
+                    </div>
+                    <div className="bg-white/70 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
+                      <div className="text-2xl mb-2">🌺</div>
+                      <div className="text-sm font-medium text-emerald-700">Pollinators & Dispersers</div>
+                    </div>
+                    <div className="bg-white/70 backdrop-blur-sm rounded-lg p-4 border border-emerald-200">
+                      <div className="text-2xl mb-2">🔬</div>
+                      <div className="text-sm font-medium text-emerald-700">Scientific Documentation</div>
+                    </div>
+                  </div>
+                </div>
                 <EcosystemManagement 
                   treeId={tree.id} 
                   treeName={tree.commonName || tree.species}

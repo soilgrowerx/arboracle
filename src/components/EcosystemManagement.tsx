@@ -278,7 +278,7 @@ function EcosystemSpeciesCard({ species, onEdit, onDelete }: EcosystemSpeciesCar
   const relationshipInfo = EcosystemService.getRelationshipDisplayInfo(species.relationship);
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 border-green-200 hover:border-green-300">
+    <Card className="hover:shadow-xl transition-all duration-300 border-green-200 hover:border-green-300 bg-gradient-to-br from-white via-green-50/30 to-emerald-50/20 backdrop-blur-sm hover:scale-[1.02] transform">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -301,11 +301,13 @@ function EcosystemSpeciesCard({ species, onEdit, onDelete }: EcosystemSpeciesCar
       
       <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary" className={`${categoryInfo.color} bg-opacity-10`}>
-            {categoryInfo.emoji} {categoryInfo.label}
+          <Badge variant="secondary" className={`${categoryInfo.color} bg-opacity-20 border border-current transition-all duration-200 hover:scale-105`}>
+            <span className="text-lg mr-1">{categoryInfo.emoji}</span>
+            {categoryInfo.label}
           </Badge>
-          <Badge variant="outline" className={`${relationshipInfo.color} border-current`}>
-            {relationshipInfo.emoji} {relationshipInfo.label}
+          <Badge variant="outline" className={`${relationshipInfo.color} border-2 border-current bg-white/80 backdrop-blur-sm transition-all duration-200 hover:scale-105 font-medium`}>
+            <span className="text-base mr-1">{relationshipInfo.emoji}</span>
+            {relationshipInfo.label}
           </Badge>
         </div>
 
