@@ -264,14 +264,15 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[425px] max-h-[80vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-green-800 flex items-center gap-2">
             🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="overflow-y-auto flex-1 pr-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="species" className="text-green-700">Species *</Label>
             <div className="flex gap-2">
@@ -478,6 +479,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             </Button>
           </div>
         </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
