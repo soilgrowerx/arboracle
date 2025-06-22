@@ -24,6 +24,7 @@ import { Plus, Search, MapPin, Map } from 'lucide-react';
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+const useMapEvents = dynamic(() => import('react-leaflet').then(mod => mod.useMapEvents), { ssr: false });
 
 interface AddTreeModalProps {
   onTreeAdded?: () => void;
@@ -31,23 +32,46 @@ interface AddTreeModalProps {
   isEditMode?: boolean;
 }
 
-// Map click handler component
+// Map click handler component - improved version
 function LocationPicker({ position, onLocationSelect }: { position: [number, number] | null, onLocationSelect: (lat: number, lng: number) => void }) {
-  const { useMapEvents } = require('react-leaflet');
+  const [isClient, setIsClient] = useState(false);
   
-  const map = useMapEvents({
-    click: (e: any) => {
-      onLocationSelect(e.latlng.lat, e.latlng.lng);
-    },
-  });
-
   useEffect(() => {
-    if (position) {
-      map.setView(position, map.getZoom());
-    }
-  }, [position, map]);
+    setIsClient(true);
+  }, []);
+  
+  if (!isClient) return null;
+  
+  const MapEventsHandler = () => {
+    const { useMapEvents } = require('react-leaflet');
+    
+    const map = useMapEvents({
+      click: (e: any) => {
+        onLocationSelect(e.latlng.lat, e.latlng.lng);
+      },
+      ready: () => {
+        // Ensure map is properly sized when ready
+        setTimeout(() => {
+          map.invalidateSize();
+        }, 200);
+      },
+    });
 
-  return position ? <Marker position={position} /> : null;
+    useEffect(() => {
+      if (position && map) {
+        map.setView(position, map.getZoom());
+      }
+    }, [map]); // position is a prop from outer scope, not a state variable
+
+    return null;
+  };
+
+  return (
+    <>
+      <MapEventsHandler />
+      {position ? <Marker position={position} /> : null}
+    </>
+  );
 }
 
 export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddTreeModalProps) {
@@ -70,6 +94,26 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Handle map size invalidation when modal opens/closes
+  useEffect(() => {
+    if (showLocationMap && isClient) {
+      // Delay to allow modal animation to complete
+      const timer = setTimeout(() => {
+        // Force all leaflet maps to invalidate their size
+        if (typeof window !== 'undefined' && window.L) {
+          const maps = Object.values(window.L._mapById || {});
+          maps.forEach((map: any) => {
+            if (map && map.invalidateSize) {
+              map.invalidateSize();
+            }
+          });
+        }
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showLocationMap, isClient]);
   const [formData, setFormData] = useState<TreeFormData>({
     species: '',
     location: { lat: 0, lng: 0 },
@@ -481,18 +525,27 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 <div className="bg-green-50 px-4 py-2 border-b border-green-200">
                   <p className="text-sm text-green-700 font-medium">📍 Click on the map to set tree location</p>
                 </div>
-                <div className="h-64 w-full">
+                <div className="h-64 w-full relative">
                   <MapContainer
                     center={formData.location.lat !== 0 && formData.location.lng !== 0 
                       ? [formData.location.lat, formData.location.lng] 
                       : [40.7128, -74.0060]} // Default to NYC
                     zoom={13}
-                    style={{ height: '100%', width: '100%' }}
+                    style={{ height: '100%', width: '100%', minHeight: '256px' }}
                     className="leaflet-container"
+                    key={`map-${showLocationMap}`} // Force re-render when map shows/hides
+                    whenReady={(map) => {
+                      // Force map to invalidate size after it's ready
+                      setTimeout(() => {
+                        map.target.invalidateSize();
+                      }, 100);
+                    }}
                   >
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      maxZoom={19}
+                      minZoom={1}
                     />
                     <LocationPicker
                       position={formData.location.lat !== 0 && formData.location.lng !== 0 

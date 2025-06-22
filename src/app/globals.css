@@ -8,6 +8,25 @@
 /* Ensure modals appear above Leaflet maps */
 .leaflet-container {
   z-index: 1 !important;
+  /* Ensure proper map rendering */
+  height: 100% !important;
+  width: 100% !important;
+  background-color: #f0f0f0;
+}
+
+/* Fix for map loading issues in modals */
+.leaflet-container .leaflet-tile {
+  pointer-events: auto;
+}
+
+/* Ensure map tiles load properly */
+.leaflet-tile-container {
+  pointer-events: auto;
+}
+
+/* Modal map specific fixes */
+[data-radix-dialog-content] .leaflet-container {
+  position: relative !important;
 }
 
 /* Ensure all Radix UI modals have proper z-index */
