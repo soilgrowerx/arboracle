@@ -12,8 +12,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, MapPin, Calendar, StickyNote, CheckCircle, Clock, Shield, Sprout, ExternalLink, Edit, Leaf, TreePine, Database, Microscope, Copy } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, MapPin, Calendar, StickyNote, CheckCircle, Clock, Shield, Sprout, ExternalLink, Edit, Leaf, TreePine, Database, Microscope, Copy, MessageCircle, ThumbsUp, ThumbsDown, Send, User } from 'lucide-react';
 import Link from 'next/link';
+
+interface Comment {
+  id: string;
+  author: string;
+  authorRole: string;
+  content: string;
+  timestamp: string;
+  votes: { up: number; down: number };
+  userVote: 'up' | 'down' | null;
+  type: 'identification' | 'general';
+}
 
 export default function TreeDetailPage() {
   const params = useParams();
@@ -21,6 +33,8 @@ export default function TreeDetailPage() {
   const [tree, setTree] = useState<Tree | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
 
   useEffect(() => {
     const loadTree = () => {
@@ -28,6 +42,12 @@ export default function TreeDetailPage() {
         if (params.id) {
           const foundTree = TreeService.getTreeById(params.id as string);
           setTree(foundTree || null);
+          
+          // Load comments for this tree
+          const savedComments = localStorage.getItem(`comments_${params.id}`);
+          if (savedComments) {
+            setComments(JSON.parse(savedComments));
+          }
         }
       } catch (error) {
         console.error('Error loading tree:', error);
@@ -38,6 +58,67 @@ export default function TreeDetailPage() {
 
     loadTree();
   }, [params.id]);
+
+  const saveComments = (updatedComments: Comment[]) => {
+    if (params.id) {
+      localStorage.setItem(`comments_${params.id}`, JSON.stringify(updatedComments));
+      setComments(updatedComments);
+    }
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim() || !params.id) return;
+    
+    const comment: Comment = {
+      id: Date.now().toString(),
+      author: 'Current User',
+      authorRole: 'Community Member',
+      content: newComment,
+      timestamp: new Date().toISOString(),
+      votes: { up: 0, down: 0 },
+      userVote: null,
+      type: 'general'
+    };
+    
+    const updatedComments = [comment, ...comments];
+    saveComments(updatedComments);
+    setNewComment('');
+  };
+
+  const handleVote = (commentId: string, voteType: 'up' | 'down') => {
+    const updatedComments = comments.map(comment => {
+      if (comment.id === commentId) {
+        const newVotes = { ...comment.votes };
+        const oldVote = comment.userVote;
+        
+        // Remove old vote if exists
+        if (oldVote) {
+          newVotes[oldVote]--;
+        }
+        
+        // Add new vote if different from old vote
+        if (oldVote !== voteType) {
+          newVotes[voteType]++;
+          return { ...comment, votes: newVotes, userVote: voteType };
+        } else {
+          return { ...comment, votes: newVotes, userVote: null };
+        }
+      }
+      return comment;
+    });
+    saveComments(updatedComments);
+  };
+
+  const formatCommentDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
+    return date.toLocaleDateString();
+  };
 
   if (loading) {
     return (
@@ -204,7 +285,7 @@ export default function TreeDetailPage() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6 bg-green-50 border border-green-200">
+          <TabsList className="grid w-full grid-cols-5 mb-6 bg-green-50 border border-green-200">
             <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
               <TreePine size={16} />
               Overview
@@ -220,6 +301,10 @@ export default function TreeDetailPage() {
             <TabsTrigger value="scientific" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
               <Microscope size={16} />
               Scientific
+            </TabsTrigger>
+            <TabsTrigger value="community" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <MessageCircle size={16} />
+              💬 Community ({comments.length})
             </TabsTrigger>
           </TabsList>
 
@@ -483,6 +568,130 @@ export default function TreeDetailPage() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="community" className="space-y-6">
+            {/* Add Comment Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle size={20} className="text-blue-600" />
+                  Add Comment
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Textarea
+                  placeholder="Share your thoughts about this tree, ask questions, or provide identification help..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  rows={3}
+                  className="border-blue-200 focus:border-blue-400"
+                />
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Help improve tree identification by sharing your expertise!
+                  </div>
+                  <Button
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim()}
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                  >
+                    <Send size={16} className="mr-2" />
+                    Post Comment
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Comments List */}
+            <div className="space-y-4">
+              {comments.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <MessageCircle size={48} className="mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">No comments yet</h3>
+                    <p className="text-gray-500 mb-4">Be the first to share your thoughts about this tree!</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                comments.map((comment) => (
+                  <Card key={comment.id} className="border-l-4 border-l-blue-200">
+                    <CardContent className="p-4">
+                      {/* Comment Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                            <User size={16} className="text-white" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-gray-800">{comment.author}</span>
+                              {comment.type === 'identification' && (
+                                <Badge variant="secondary" className="bg-green-100 text-green-700 text-xs">
+                                  🔬 Species ID
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <span>{comment.authorRole}</span>
+                              <span>•</span>
+                              <span>{formatCommentDate(comment.timestamp)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Comment Content */}
+                      <p className="text-gray-700 mb-4 leading-relaxed">{comment.content}</p>
+
+                      {/* Voting Section */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleVote(comment.id, 'up')}
+                            className={`h-8 px-2 hover:bg-green-100 ${
+                              comment.userVote === 'up' ? 'bg-green-100 text-green-700' : 'text-gray-600'
+                            }`}
+                          >
+                            <ThumbsUp size={14} className="mr-1" />
+                            {comment.votes.up}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleVote(comment.id, 'down')}
+                            className={`h-8 px-2 hover:bg-red-100 ${
+                              comment.userVote === 'down' ? 'bg-red-100 text-red-700' : 'text-gray-600'
+                            }`}
+                          >
+                            <ThumbsDown size={14} className="mr-1" />
+                            {comment.votes.down}
+                          </Button>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Helpful to {Math.max(comment.votes.up - comment.votes.down, 0)} people
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+
+            {/* Community Guidelines */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <h4 className="font-semibold text-blue-800 mb-2">💡 Community Guidelines</h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• Share helpful insights about tree identification, care, or ecological relationships</li>
+                  <li>• Be respectful and constructive in your feedback</li>
+                  <li>• Vote up helpful comments to promote quality contributions</li>
+                  <li>• Include scientific sources when making identification claims</li>
+                </ul>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>
