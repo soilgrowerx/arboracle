@@ -5,6 +5,16 @@
 /* Leaflet CSS */
 @import 'leaflet/dist/leaflet.css';
 
+/* Ensure modals appear above Leaflet maps */
+.leaflet-container {
+  z-index: 1 !important;
+}
+
+/* Ensure all Radix UI modals have proper z-index */
+[data-radix-popper-content-wrapper] {
+  z-index: 10001 !important;
+}
+
 /* Custom Leaflet Styles */
 .leaflet-popup-content-wrapper {
   border-radius: 12px !important;
