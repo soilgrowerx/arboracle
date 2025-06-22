@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Plus, Search, MapPin, Map } from 'lucide-react';
+import { TaxonomyBreadcrumb } from '@/components/TaxonomicDisplay';
 
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
@@ -127,6 +128,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     commonName: undefined,
     taxonomicRank: undefined,
     iNaturalistId: undefined,
+    taxonomy: undefined,
     seed_source: '',
     nursery_stock_id: '',
     condition_notes: '',
@@ -149,6 +151,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         commonName: editTree.commonName,
         taxonomicRank: editTree.taxonomicRank,
         iNaturalistId: editTree.iNaturalistId,
+        taxonomy: editTree.taxonomy,
         seed_source: editTree.seed_source || '',
         nursery_stock_id: editTree.nursery_stock_id || '',
         condition_notes: editTree.condition_notes || '',
@@ -238,6 +241,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           commonName: undefined,
           taxonomicRank: undefined,
           iNaturalistId: undefined,
+          taxonomy: undefined,
           seed_source: '',
           nursery_stock_id: '',
           condition_notes: '',
@@ -338,25 +342,58 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     }
   };
 
-  const selectSpecies = (taxon: any) => {
+  const selectSpecies = async (taxon: any) => {
     const speciesName = taxon.preferred_common_name || taxon.name;
     const iNaturalistLink = `https://www.inaturalist.org/taxa/${taxon.id}`;
     
-    setFormData(prev => ({ 
-      ...prev, 
-      species: speciesName,
-      scientificName: taxon.name,
-      commonName: taxon.preferred_common_name,
-      taxonomicRank: taxon.rank,
-      iNaturalistId: taxon.id,
-      iNaturalist_link: iNaturalistLink,
-      verification_status: 'verified'
-    }));
-    setShowSearchResults(false);
-    toast({
-      title: "Species Selected",
-      description: `Selected: ${speciesName}`,
-    });
+    try {
+      // Get detailed taxonomic information
+      const detailedTaxon = await iNaturalistService.getDetailedTaxonWithHierarchy(taxon.id);
+      const taxonomy = detailedTaxon ? detailedTaxon.taxonomy : iNaturalistService.parseTaxonomicHierarchy(taxon);
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        species: speciesName,
+        scientificName: taxon.name,
+        commonName: taxon.preferred_common_name,
+        taxonomicRank: taxon.rank,
+        iNaturalistId: taxon.id,
+        taxonomy: taxonomy,
+        iNaturalist_link: iNaturalistLink,
+        verification_status: 'verified',
+        // Enhanced data from detailed taxon info
+        description: detailedTaxon?.description,
+        distribution_info: detailedTaxon?.distribution_info,
+        conservation_status: detailedTaxon?.conservation_status,
+        photos: detailedTaxon?.enhanced_photos
+      }));
+      setShowSearchResults(false);
+      toast({
+        title: "Species Selected",
+        description: `Selected: ${speciesName} with full taxonomic data`,
+      });
+    } catch (error) {
+      console.error('Error getting detailed taxon info:', error);
+      // Fallback to basic taxonomic parsing
+      const taxonomy = iNaturalistService.parseTaxonomicHierarchy(taxon);
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        species: speciesName,
+        scientificName: taxon.name,
+        commonName: taxon.preferred_common_name,
+        taxonomicRank: taxon.rank,
+        iNaturalistId: taxon.id,
+        taxonomy: taxonomy,
+        iNaturalist_link: iNaturalistLink,
+        verification_status: 'verified'
+      }));
+      setShowSearchResults(false);
+      toast({
+        title: "Species Selected",
+        description: `Selected: ${speciesName}`,
+      });
+    }
   };
 
   return (
@@ -410,22 +447,30 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               </div>
               
               {showSearchResults && searchResults.length > 0 && (
-                <div className="mt-2 max-h-40 overflow-y-auto border border-green-200 rounded-md bg-white shadow-sm">
-                  {searchResults.map((taxon) => (
-                    <button
-                      key={taxon.id}
-                      type="button"
-                      onClick={() => selectSpecies(taxon)}
-                      className="w-full text-left px-4 py-3 hover:bg-green-50 border-b border-green-100 last:border-b-0 transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
-                    >
-                      <div className="font-medium text-green-800">
-                        {taxon.preferred_common_name || taxon.name}
-                      </div>
-                      <div className="text-sm text-green-600">
-                        {taxon.name} • {taxon.rank}
-                      </div>
-                    </button>
-                  ))}
+                <div className="mt-2 max-h-60 overflow-y-auto border border-green-200 rounded-md bg-white shadow-sm">
+                  {searchResults.map((taxon) => {
+                    const taxonomy = iNaturalistService.parseTaxonomicHierarchy(taxon);
+                    return (
+                      <button
+                        key={taxon.id}
+                        type="button"
+                        onClick={() => selectSpecies(taxon)}
+                        className="w-full text-left px-4 py-3 hover:bg-green-50 border-b border-green-100 last:border-b-0 transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
+                      >
+                        <div className="font-medium text-green-800 mb-1">
+                          {taxon.preferred_common_name || taxon.name}
+                        </div>
+                        <div className="text-sm text-green-600 mb-2">
+                          <span className="italic font-serif">{taxon.name}</span> • <span className="text-xs bg-green-100 px-2 py-0.5 rounded-full">{taxon.rank}</span>
+                        </div>
+                        {taxonomy && (
+                          <div className="mt-1">
+                            <TaxonomyBreadcrumb taxonomy={taxonomy} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
