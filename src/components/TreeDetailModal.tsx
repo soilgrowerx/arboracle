@@ -405,7 +405,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                       <div className="text-center py-12 text-amber-600 bg-amber-50 rounded-lg border border-amber-200">
                         <div className="text-4xl mb-4">🌱</div>
                         <p className="text-lg font-medium mb-2">No management data recorded</p>
-                        <p className="text-sm">Click "Edit Tree" to add forestry management information</p>
+                        <p className="text-sm">Click &quot;Edit Tree&quot; to add forestry management information</p>
                       </div>
                     )}
                   </CardContent>
