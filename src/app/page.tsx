@@ -319,6 +319,15 @@ export default function Home() {
                 </Button>
               </Link>
             )}
+            <Link href="/settings">
+              <Button
+                variant="outline"
+                className="border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300"
+              >
+                <Settings size={16} className="mr-2" />
+                Settings
+              </Button>
+            </Link>
             <Link href="/admin">
               <Button
                 variant="outline"
