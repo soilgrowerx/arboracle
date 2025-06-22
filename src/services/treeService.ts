@@ -1,5 +1,6 @@
 import { Tree, TreeFormData } from '@/types';
 import { PlusCodeService } from './plusCodeService';
+import { iNaturalistService } from './inaturalistService';
 import { v4 as uuidv4 } from 'uuid';
 
 const STORAGE_KEY = 'arboracle_trees';
@@ -80,7 +81,12 @@ export class TreeService {
       scientificName: formData.scientificName,
       commonName: formData.commonName,
       taxonomicRank: formData.taxonomicRank,
-      iNaturalistId: formData.iNaturalistId
+      iNaturalistId: formData.iNaturalistId,
+      // Enhanced forestry management fields
+      seed_source: formData.seed_source,
+      condition_notes: formData.condition_notes,
+      management_actions: formData.management_actions || [],
+      nursery_stock_id: formData.nursery_stock_id
     };
 
     trees.push(newTree);
@@ -141,8 +147,45 @@ export class TreeService {
     return trees.filter(tree => 
       tree.species.toLowerCase().includes(lowercaseQuery) ||
       (tree.notes && tree.notes.toLowerCase().includes(lowercaseQuery)) ||
+      (tree.scientificName && tree.scientificName.toLowerCase().includes(lowercaseQuery)) ||
+      (tree.commonName && tree.commonName.toLowerCase().includes(lowercaseQuery)) ||
+      (tree.seed_source && tree.seed_source.toLowerCase().includes(lowercaseQuery)) ||
+      (tree.condition_notes && tree.condition_notes.toLowerCase().includes(lowercaseQuery)) ||
+      (tree.nursery_stock_id && tree.nursery_stock_id.toLowerCase().includes(lowercaseQuery)) ||
       tree.plus_code_global.includes(query.toUpperCase()) ||
       tree.plus_code_local.includes(query.toUpperCase())
     );
+  }
+
+  static async enrichTreeWithSpeciesData(tree: Tree): Promise<Tree> {
+    if (!tree.iNaturalistId) return tree;
+
+    try {
+      const detailedInfo = await iNaturalistService.getDetailedTaxonInfo(tree.iNaturalistId);
+      if (detailedInfo) {
+        return {
+          ...tree,
+          description: detailedInfo.description,
+          distribution_info: detailedInfo.distribution_info,
+          conservation_status: detailedInfo.conservation_status,
+          photos: detailedInfo.enhanced_photos,
+          updated_at: new Date().toISOString()
+        };
+      }
+    } catch (error) {
+      console.error('Error enriching tree with species data:', error);
+    }
+    
+    return tree;
+  }
+
+  static async enrichAllTreesWithSpeciesData(): Promise<Tree[]> {
+    const trees = this.getAllTrees();
+    const enrichedTrees = await Promise.all(
+      trees.map(tree => this.enrichTreeWithSpeciesData(tree))
+    );
+    
+    this.saveTrees(enrichedTrees);
+    return enrichedTrees;
   }
 }
