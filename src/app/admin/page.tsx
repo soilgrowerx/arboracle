@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Tree } from '@/types';
 import { TreeService } from '@/services/treeService';
 import { Button } from '@/components/ui/button';
@@ -14,11 +14,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadTrees();
-  }, []);
-
-  const loadTrees = () => {
+  const loadTrees = useCallback(() => {
     try {
       const allTrees = TreeService.getAllTrees();
       setTrees(allTrees);
@@ -32,7 +28,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadTrees();
+  }, [loadTrees]);
 
   const handleDeleteTree = (treeId: string, species: string) => {
     if (confirm(`Are you sure you want to delete the ${species} tree? This action cannot be undone.`)) {

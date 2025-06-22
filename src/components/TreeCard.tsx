@@ -4,9 +4,10 @@ import { Tree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout, Pencil, ExternalLink, AlertTriangle, Clock, Shield } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout, Pencil, ExternalLink, AlertTriangle, Clock, Shield, Leaf } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlusCodeService } from '@/services/plusCodeService';
+import { EcosystemService } from '@/services/ecosystemService';
 import { calculateTreeAge } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -95,6 +96,10 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
   
   // Calculate tree age
   const treeAge = calculateTreeAge(tree.date_planted);
+  
+  // Get ecosystem species count and statistics
+  const ecosystemSpeciesCount = EcosystemService.getEcosystemSpeciesCount(tree.id);
+  const ecosystemStats = EcosystemService.getEcosystemStatistics(tree.id);
 
   return (
     <Card 
@@ -262,6 +267,43 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
               <div className="text-xs text-green-600">
                 <span className="font-medium">Actions:</span> {tree.management_actions.slice(0, 3).join(', ')}
                 {tree.management_actions.length > 3 && <span className="text-green-500"> +{tree.management_actions.length - 3} more</span>}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Ecosystem Species Indicator */}
+        {ecosystemSpeciesCount > 0 && (
+          <div className="border-t border-green-100 pt-3 mt-3 space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Leaf size={16} className="text-emerald-600" />
+              <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Ecosystem Species</span>
+            </div>
+            
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 px-3 py-1">
+                🌍 {ecosystemSpeciesCount} species
+              </Badge>
+              {ecosystemStats.verifiedCount > 0 && (
+                <Badge variant="outline" className="border-emerald-300 text-emerald-600 px-2 py-1 text-xs">
+                  ✓ {ecosystemStats.verifiedCount} verified
+                </Badge>
+              )}
+            </div>
+            
+            {Object.keys(ecosystemStats.categoryCounts).length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {Object.entries(ecosystemStats.categoryCounts).map(([category, count]) => {
+                  const categoryInfo = EcosystemService.getCategoryDisplayInfo(category);
+                  return (
+                    <div
+                      key={category}
+                      className={`text-xs ${categoryInfo.color} bg-opacity-10 px-2 py-1 rounded-full border border-current border-opacity-20`}
+                    >
+                      {categoryInfo.emoji} {count}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

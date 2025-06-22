@@ -40,6 +40,11 @@ export class TreeService {
           migratedTree.management_actions = [];
         }
         
+        // Ensure ecosystemSpecies is an array
+        if (!Array.isArray(tree.ecosystemSpecies)) {
+          migratedTree.ecosystemSpecies = [];
+        }
+        
         return migratedTree as Tree;
       });
       
@@ -203,5 +208,23 @@ export class TreeService {
     
     this.saveTrees(enrichedTrees);
     return enrichedTrees;
+  }
+
+  static updateTreeEcosystemSpecies(treeId: string, ecosystemSpecies: any[]): Tree | null {
+    const trees = this.getAllTrees();
+    const index = trees.findIndex(tree => tree.id === treeId);
+    
+    if (index === -1) return null;
+
+    const updatedTree = {
+      ...trees[index],
+      ecosystemSpecies,
+      updated_at: new Date().toISOString()
+    };
+
+    trees[index] = updatedTree;
+    this.saveTrees(trees);
+    
+    return updatedTree;
   }
 }

@@ -26,11 +26,63 @@ export interface Tree {
   distribution_info?: string;
   conservation_status?: string;
   photos?: EnhancedPhoto[];
+  // Tree Ecosystem Management
+  ecosystemSpecies?: EcosystemSpecies[];
 }
 
 export interface User {
   id: string;
   name: string;
+}
+
+// Tree Ecosystem Management Types
+export interface EcosystemSpecies {
+  id: string;
+  treeId: string;
+  speciesName: string;
+  scientificName?: string;
+  category: EcosystemCategory;
+  relationship: EcosystemRelationship;
+  observationDate: string;
+  notes?: string;
+  iNaturalistId?: number;
+  isVerified: boolean;
+  photos?: EnhancedPhoto[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type EcosystemCategory = 
+  | 'plant' 
+  | 'fungus' 
+  | 'animal' 
+  | 'insect' 
+  | 'bird' 
+  | 'microorganism' 
+  | 'other';
+
+export type EcosystemRelationship = 
+  | 'symbiotic' 
+  | 'parasitic' 
+  | 'commensal' 
+  | 'predatory' 
+  | 'pollinator' 
+  | 'seed_disperser' 
+  | 'epiphytic' 
+  | 'competitive' 
+  | 'neutral' 
+  | 'beneficial' 
+  | 'detrimental';
+
+export interface EcosystemSpeciesFormData {
+  speciesName: string;
+  scientificName?: string;
+  category: EcosystemCategory;
+  relationship: EcosystemRelationship;
+  observationDate: string;
+  notes?: string;
+  iNaturalistId?: number;
+  isVerified?: boolean;
 }
 
 export interface EnhancedPhoto {

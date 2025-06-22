@@ -7,6 +7,7 @@ import { TreeCard } from '@/components/TreeCard';
 import { AddTreeModal } from '@/components/AddTreeModal';
 import { TreeStatistics } from '@/components/TreeStatistics';
 import { TreeMapView } from '@/components/TreeMapView';
+import { TreeDetailModal } from '@/components/TreeDetailModal';
 import { Toaster } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState('date-newest');
   const [filterBy, setFilterBy] = useState('all');
   const [editingTree, setEditingTree] = useState<Tree | undefined>(undefined);
+  const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [activeView, setActiveView] = useState('list');
 
   const loadTrees = () => {
@@ -48,10 +50,11 @@ export default function Home() {
   };
 
   const handleTreeSelect = (tree: Tree) => {
-    // For now, switch to list view and could highlight the tree
-    setActiveView('list');
-    // Could implement highlighting or scrolling to tree later
-    console.log('Selected tree from map:', tree);
+    setSelectedTree(tree);
+  };
+
+  const handleTreeClick = (tree: Tree) => {
+    setSelectedTree(tree);
   };
 
   const exportToCSV = () => {
@@ -355,9 +358,7 @@ export default function Home() {
                     <TreeCard
                       key={tree.id}
                       tree={tree}
-                      onClick={() => {
-                        console.log('Tree clicked:', tree.id);
-                      }}
+                      onClick={() => handleTreeClick(tree)}
                       onEdit={handleEditTree}
                     />
                   ))}
@@ -406,6 +407,14 @@ export default function Home() {
       </footer>
 
       <Toaster />
+      
+      {/* Tree Detail Modal */}
+      <TreeDetailModal
+        tree={selectedTree}
+        isOpen={!!selectedTree}
+        onClose={() => setSelectedTree(null)}
+        onEdit={handleEditTree}
+      />
     </div>
   );
 }
