@@ -286,7 +286,7 @@ export default function Home() {
                   Your Digital Tree Inventory
                 </p>
                 <p className="text-sm text-green-700/80 font-medium max-w-md mx-auto leading-relaxed enhanced-tagline">
-                  Cultivating knowledge, preserving nature, building tomorrow's forest legacy
+                  Cultivating knowledge, preserving nature, building tomorrow&apos;s forest legacy
                 </p>
               </div>
             </div>

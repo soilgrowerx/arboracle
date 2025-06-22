@@ -268,71 +268,115 @@ export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
             position={[tree.lat, tree.lng]}
             icon={createTreeIcon(tree)}
           >
-            <Popup className="tree-popup">
-              <div className="p-3 min-w-56">
-                <div className="flex items-start gap-2 mb-3">
-                  <span className="text-xl">{calculateTreeAge(tree.date_planted).totalDays >= 1825 ? '🌳' : calculateTreeAge(tree.date_planted).totalDays >= 730 ? '🌲' : '🌱'}</span>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-green-800 text-base leading-tight">
-                      {tree.commonName || tree.species}
-                    </h3>
-                    {tree.scientificName && (
-                      <p className="text-sm italic text-green-600 mt-1">
-                        {tree.scientificName}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-1 mt-1">
-                      {tree.verification_status === 'verified' && <span className="text-xs text-green-600">✅ Verified</span>}
-                      {tree.verification_status === 'manual' && <span className="text-xs text-blue-600">🔵 Manual</span>}
-                      {tree.verification_status === 'pending' && <span className="text-xs text-orange-600">🟡 Pending</span>}
+            <Popup className="enhanced-tree-popup" maxWidth={320} minWidth={280}>
+              <div className="enhanced-popup-content">
+                {/* Header Section with Gradient */}
+                <div className="popup-header">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="tree-icon-large">
+                      {calculateTreeAge(tree.date_planted).totalDays >= 1825 ? '🌳' : calculateTreeAge(tree.date_planted).totalDays >= 730 ? '🌲' : '🌱'}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="popup-title">
+                        {tree.commonName || tree.species}
+                      </h3>
+                      {tree.scientificName && (
+                        <p className="popup-scientific-name">
+                          {tree.scientificName}
+                        </p>
+                      )}
+                    </div>
+                    <div className="status-indicator">
+                      {tree.verification_status === 'verified' && <span className="status-verified">✅</span>}
+                      {tree.verification_status === 'manual' && <span className="status-manual">🔵</span>}
+                      {tree.verification_status === 'pending' && <span className="status-pending">🟡</span>}
                     </div>
                   </div>
-                </div>
-                
-                <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <span>📅</span>
-                    <span>Planted: {formatDate(tree.date_planted)}</span>
-                  </div>
                   
-                  <div className="flex items-center gap-2">
-                    <span>🌱</span>
-                    <span>Age: {calculateTreeAge(tree.date_planted).displayText}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <span>📍</span>
-                    <span className="font-mono text-xs bg-gray-100 px-1 rounded">
-                      {tree.plus_code_local}
-                    </span>
-                  </div>
-
+                  {/* Health Status Indicator */}
                   {(() => {
                     const ecosystemCount = EcosystemService.getEcosystemSpeciesCount(tree.id);
-                    return ecosystemCount > 0 && (
-                      <div className="flex items-center gap-2">
-                        <span>🌍</span>
-                        <span>{ecosystemCount} ecosystem species</span>
+                    const age = calculateTreeAge(tree.date_planted);
+                    const hasScientificName = !!tree.scientificName;
+                    const isVerified = tree.verification_status === 'verified';
+                    
+                    // Calculate simple health score
+                    let healthScore = 0;
+                    if (isVerified) healthScore += 30;
+                    if (hasScientificName) healthScore += 20;
+                    if (age.totalDays > 365) healthScore += 25;
+                    if (ecosystemCount > 0) healthScore += 25;
+                    
+                    const getHealthStatus = () => {
+                      if (healthScore >= 80) return { label: 'Excellent', emoji: '💚', color: 'text-green-600' };
+                      if (healthScore >= 60) return { label: 'Good', emoji: '💛', color: 'text-yellow-600' };
+                      if (healthScore >= 40) return { label: 'Fair', emoji: '🧡', color: 'text-orange-600' };
+                      return { label: 'Basic', emoji: '❤️', color: 'text-red-600' };
+                    };
+                    
+                    const health = getHealthStatus();
+                    
+                    return (
+                      <div className="health-indicator">
+                        <span className={`health-emoji ${health.color}`}>{health.emoji}</span>
+                        <span className={`health-text ${health.color}`}>Data Quality: {health.label}</span>
                       </div>
                     );
                   })()}
-                  
-                  {tree.condition_notes && (
-                    <div className="flex items-start gap-2 mt-2">
-                      <span>🩺</span>
-                      <span className="text-xs text-gray-500 line-clamp-2">
-                        {tree.condition_notes}
-                      </span>
+                </div>
+
+                {/* Content Section */}
+                <div className="popup-content">
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <span className="info-icon">📅</span>
+                      <span className="info-text">Planted: {formatDate(tree.date_planted)}</span>
                     </div>
-                  )}
+                    
+                    <div className="info-item">
+                      <span className="info-icon">🕐</span>
+                      <span className="info-text">Age: {calculateTreeAge(tree.date_planted).displayText}</span>
+                    </div>
+                    
+                    <div className="info-item">
+                      <span className="info-icon">📍</span>
+                      <div className="plus-code-container">
+                        <div className="plus-code-label">Plus Code:</div>
+                        <div className="plus-code-global">{tree.plus_code_global}</div>
+                        <div className="plus-code-local">{tree.plus_code_local}</div>
+                      </div>
+                    </div>
+
+                    {(() => {
+                      const ecosystemCount = EcosystemService.getEcosystemSpeciesCount(tree.id);
+                      return ecosystemCount > 0 && (
+                        <div className="info-item">
+                          <span className="info-icon">🌍</span>
+                          <span className="info-text">{ecosystemCount} ecosystem species documented</span>
+                        </div>
+                      );
+                    })()}
+                    
+                    {tree.condition_notes && (
+                      <div className="info-item condition-notes">
+                        <span className="info-icon">🩺</span>
+                        <span className="info-text">{tree.condition_notes}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
-                <button
-                  onClick={() => onTreeSelect?.(tree)}
-                  className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1.5 rounded transition-colors duration-200"
-                >
-                  View Details
-                </button>
+                {/* Action Button */}
+                <div className="popup-footer">
+                  <button
+                    onClick={() => onTreeSelect?.(tree)}
+                    className="view-details-btn"
+                  >
+                    <span className="btn-icon">🔍</span>
+                    <span className="btn-text">View Full Details</span>
+                    <span className="btn-arrow">→</span>
+                  </button>
+                </div>
               </div>
             </Popup>
           </Marker>
