@@ -96,9 +96,10 @@ function MapBounds({ trees }: { trees: Tree[] }) {
 
 interface TreeMapViewProps {
   onTreeSelect?: (tree: Tree) => void;
+  filteredTrees?: Tree[];
 }
 
-export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
+export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees }: TreeMapViewProps) {
   const [trees, setTrees] = useState<Tree[]>([]);
   const [filteredTrees, setFilteredTrees] = useState<Tree[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,8 +128,13 @@ export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
     loadTrees();
   }, []);
 
-  // Filter trees based on status and species
+  // Filter trees based on status and species (only if external filtered trees not provided)
   useEffect(() => {
+    if (externalFilteredTrees) {
+      setFilteredTrees(externalFilteredTrees);
+      return;
+    }
+
     let filtered = trees;
 
     // Filter by status
@@ -144,7 +150,7 @@ export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
     }
 
     setFilteredTrees(filtered);
-  }, [trees, statusFilter, speciesFilter]);
+  }, [trees, statusFilter, speciesFilter, externalFilteredTrees]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Unknown';
@@ -186,7 +192,8 @@ export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
 
   return (
     <div className="space-y-4">
-      {/* Map Controls */}
+      {/* Map Controls - only show if no external filtering */}
+      {!externalFilteredTrees && (
       <div className="bg-white rounded-lg border border-green-200 p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-4 mb-3">
           <div className="flex items-center gap-2">
@@ -246,6 +253,7 @@ export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
           )}
         </div>
       </div>
+      )}
 
       {/* Map Legend */}
       <div className="bg-white rounded-lg border border-green-200 p-3 shadow-sm">
@@ -275,7 +283,7 @@ export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
       </div>
 
       {/* Map Container */}
-      <div className="h-[500px] w-full rounded-lg overflow-hidden border border-green-200 shadow-sm">
+      <div className={`${externalFilteredTrees ? 'h-[600px]' : 'h-[500px]'} w-full rounded-lg overflow-hidden border border-green-200 shadow-sm`}>
       <MapContainer
         center={defaultCenter}
         zoom={10}
@@ -393,16 +401,26 @@ export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
                   </div>
                 </div>
                 
-                {/* Action Button */}
+                {/* Action Buttons */}
                 <div className="popup-footer">
-                  <button
-                    onClick={() => onTreeSelect?.(tree)}
-                    className="view-details-btn"
-                  >
-                    <span className="btn-icon">🔍</span>
-                    <span className="btn-text">View Full Details</span>
-                    <span className="btn-arrow">→</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => onTreeSelect?.(tree)}
+                      className="view-details-btn"
+                    >
+                      <span className="btn-icon">🔍</span>
+                      <span className="btn-text">Details</span>
+                    </button>
+                    {tree.iNaturalist_link && (
+                      <button
+                        onClick={() => window.open(tree.iNaturalist_link, '_blank', 'noopener,noreferrer')}
+                        className="view-details-btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                      >
+                        <span className="btn-icon">🔬</span>
+                        <span className="btn-text">iNaturalist</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </Popup>

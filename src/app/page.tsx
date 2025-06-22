@@ -308,6 +308,17 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            {trees.length > 0 && (
+              <Link href="/map">
+                <Button
+                  variant="outline"
+                  className="border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
+                >
+                  <Map size={16} className="mr-2" />
+                  Full Map View
+                </Button>
+              </Link>
+            )}
             <Link href="/admin">
               <Button
                 variant="outline"
