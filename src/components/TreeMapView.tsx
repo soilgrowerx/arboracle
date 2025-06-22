@@ -168,17 +168,8 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
     );
   }
 
-  if (trees.length === 0) {
-    return (
-      <div className="h-96 bg-green-50 rounded-lg flex items-center justify-center border-2 border-dashed border-green-200">
-        <div className="text-center text-green-600">
-          <div className="text-4xl mb-2">🗺️</div>
-          <h3 className="text-lg font-medium mb-1">No Trees with Coordinates</h3>
-          <p className="text-sm">Add trees with GPS coordinates to see them on the map</p>
-        </div>
-      </div>
-    );
-  }
+  // Show empty state overlay if no trees, but still show the map
+  const showEmptyState = trees.length === 0;
 
   // Get unique species for filter
   const uniqueSpecies = [...new Set(trees.map(tree => tree.commonName || tree.species))];
@@ -283,27 +274,27 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
       </div>
 
       {/* Map Container */}
-      <div className={`${externalFilteredTrees ? 'h-[600px]' : 'h-[500px]'} w-full rounded-lg overflow-hidden border border-green-200 shadow-sm`}>
-      <MapContainer
-        center={defaultCenter}
-        zoom={10}
-        style={{ height: '100%', width: '100%' }}
-        className="leaflet-container"
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
-        <MapBounds trees={filteredTrees} />
-        
-        {filteredTrees.map((tree) => (
-          <Marker
-            key={tree.id}
-            position={[tree.lat, tree.lng]}
-            icon={createTreeIcon(tree)}
-          >
-            <Popup className="enhanced-tree-popup" maxWidth={320} minWidth={280}>
+      <div className={`${externalFilteredTrees ? 'h-[600px]' : 'h-[500px]'} w-full rounded-lg overflow-hidden border border-green-200 shadow-sm relative`}>
+        <MapContainer
+          center={defaultCenter}
+          zoom={showEmptyState ? 8 : 10}
+          style={{ height: '100%', width: '100%' }}
+          className="leaflet-container"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          
+          {!showEmptyState && <MapBounds trees={filteredTrees} />}
+          
+          {filteredTrees.map((tree) => (
+            <Marker
+              key={tree.id}
+              position={[tree.lat, tree.lng]}
+              icon={createTreeIcon(tree)}
+            >
+              <Popup className="enhanced-tree-popup" maxWidth={320} minWidth={280}>
               <div className="enhanced-popup-content">
                 {/* Header Section with Gradient */}
                 <div className="popup-header">
@@ -427,6 +418,22 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
           </Marker>
         ))}
       </MapContainer>
+      
+      {/* Empty State Overlay */}
+      {showEmptyState && (
+        <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center rounded-lg">
+          <div className="text-center text-green-600 p-8">
+            <div className="text-6xl mb-4">🗺️</div>
+            <h3 className="text-xl font-bold text-green-800 mb-2">Interactive Map Ready</h3>
+            <p className="text-green-700 mb-4">
+              Your map is ready! Add trees with GPS coordinates to see them plotted here.
+            </p>
+            <div className="text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg p-3">
+              💡 <strong>Tip:</strong> Click &quot;Add Tree&quot; and use the map picker to place your first tree!
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
