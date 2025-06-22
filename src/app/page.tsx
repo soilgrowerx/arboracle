@@ -12,7 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, SortAsc, Download, List, Map } from 'lucide-react';
+import { Search, Filter, SortAsc, Download, List, Map, Settings } from 'lucide-react';
+import Link from 'next/link';
 import { calculateTreeAge } from '@/lib/utils';
 
 export default function Home() {
@@ -203,6 +204,15 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Link href="/admin">
+              <Button
+                variant="outline"
+                className="border-orange-200 text-orange-700 hover:bg-orange-50 hover:border-orange-300"
+              >
+                <Settings size={16} className="mr-2" />
+                Admin
+              </Button>
+            </Link>
             {trees.length > 0 && (
               <Button
                 onClick={exportToCSV}
