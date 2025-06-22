@@ -271,14 +271,23 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Header */}
-      <header className="header-gradient backdrop-blur-md border-b border-green-200/60 sticky top-0 z-40 shadow-lg">
-        <div className="container mx-auto px-6 py-6">
+      <header className="enhanced-header-gradient backdrop-blur-md border-b border-green-200/60 sticky top-0 z-40 enhanced-header-shadow">
+        <div className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-center">
-            <div className="flex items-center gap-4 group">
-              <div className="text-4xl transform transition-transform duration-300 group-hover:scale-110 drop-shadow-lg">🌳</div>
-              <div className="text-center">
-                <h1 className="text-3xl font-bold brand-title tracking-tight leading-none mb-1">Arboracle</h1>
-                <p className="text-sm font-medium text-green-600/80 brand-subtitle tracking-wide uppercase letter-spacing-wide">Your Digital Tree Inventory</p>
+            <div className="flex flex-col items-center gap-6 group text-center">
+              <div className="enhanced-tree-icon text-6xl transform transition-all duration-500 group-hover:scale-125 group-hover:rotate-12 drop-shadow-2xl filter">
+                🌳
+              </div>
+              <div className="space-y-3">
+                <h1 className="text-4xl lg:text-5xl font-bold enhanced-brand-title tracking-tight leading-none">
+                  Arboracle
+                </h1>
+                <p className="text-base font-semibold text-green-600/90 enhanced-brand-subtitle tracking-wide uppercase letter-spacing-wide">
+                  Your Digital Tree Inventory
+                </p>
+                <p className="text-sm text-green-700/80 font-medium max-w-md mx-auto leading-relaxed enhanced-tagline">
+                  Cultivating knowledge, preserving nature, building tomorrow's forest legacy
+                </p>
               </div>
             </div>
           </div>
