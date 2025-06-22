@@ -6,11 +6,13 @@ import { TreeService } from '@/services/treeService';
 import { TreeCard } from '@/components/TreeCard';
 import { AddTreeModal } from '@/components/AddTreeModal';
 import { TreeStatistics } from '@/components/TreeStatistics';
+import { TreeMapView } from '@/components/TreeMapView';
 import { Toaster } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, SortAsc, Download } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Filter, SortAsc, Download, List, Map } from 'lucide-react';
 import { calculateTreeAge } from '@/lib/utils';
 
 export default function Home() {
@@ -19,6 +21,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState('date-newest');
   const [filterBy, setFilterBy] = useState('all');
   const [editingTree, setEditingTree] = useState<Tree | undefined>(undefined);
+  const [activeView, setActiveView] = useState('list');
 
   const loadTrees = () => {
     try {
@@ -43,6 +46,13 @@ export default function Home() {
     setEditingTree(tree);
   };
 
+  const handleTreeSelect = (tree: Tree) => {
+    // For now, switch to list view and could highlight the tree
+    setActiveView('list');
+    // Could implement highlighting or scrolling to tree later
+    console.log('Selected tree from map:', tree);
+  };
+
   const exportToCSV = () => {
     if (trees.length === 0) return;
 
@@ -65,8 +75,8 @@ export default function Home() {
         return [
           `"${tree.commonName || tree.species}"`,
           `"${tree.scientificName || ''}"`,
-          tree.location.lat,
-          tree.location.lng,
+          tree.lat,
+          tree.lng,
           `"${tree.plus_code_local}"`,
           `"${new Date(tree.date_planted).toLocaleDateString()}"`,
           `"${treeAge.displayText}"`,
@@ -214,81 +224,145 @@ export default function Home() {
         {/* Statistics Dashboard */}
         <TreeStatistics trees={trees} />
 
-        {/* Search and Filter Section */}
+        {/* View Tabs */}
         {trees.length > 0 && (
-          <div className="mb-6 space-y-4">
-            {/* Search Bar */}
-            <div className="search-container-enhanced max-w-md">
-              <Search className="search-icon-enhanced absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600" size={20} />
-              <Input
-                type="text"
-                placeholder="Search by species or scientific name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input-enhanced pl-10"
-              />
-            </div>
+          <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-6 bg-green-50 border border-green-200">
+              <TabsTrigger 
+                value="list" 
+                className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+              >
+                <List size={16} />
+                List View
+              </TabsTrigger>
+              <TabsTrigger 
+                value="map" 
+                className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+              >
+                <Map size={16} />
+                Map View
+              </TabsTrigger>
+            </TabsList>
 
-            {/* Sort and Filter Controls */}
-            <div className="flex flex-wrap gap-4 items-center">
-              {/* Sort Dropdown */}
-              <div className="flex items-center gap-2">
-                <SortAsc className="text-green-600" size={20} />
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48 border-green-200 focus:border-green-400">
-                    <SelectValue placeholder="Sort by..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="date-newest">Date Added (Newest)</SelectItem>
-                    <SelectItem value="date-oldest">Date Added (Oldest)</SelectItem>
-                    <SelectItem value="species-az">Species Name (A-Z)</SelectItem>
-                    <SelectItem value="species-za">Species Name (Z-A)</SelectItem>
-                    <SelectItem value="scientific-az">Scientific Name (A-Z)</SelectItem>
-                    <SelectItem value="scientific-za">Scientific Name (Z-A)</SelectItem>
-                    <SelectItem value="age-oldest">Age (Oldest First)</SelectItem>
-                    <SelectItem value="age-youngest">Age (Youngest First)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <TabsContent value="list" className="space-y-6">
+              {/* Search and Filter Section */}
+              <div className="space-y-4">
+                {/* Search Bar */}
+                <div className="search-container-enhanced max-w-md">
+                  <Search className="search-icon-enhanced absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600" size={20} />
+                  <Input
+                    type="text"
+                    placeholder="Search by species or scientific name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input-enhanced pl-10"
+                  />
+                </div>
 
-              {/* Filter Buttons */}
-              <div className="flex items-center gap-2">
-                <Filter className="text-green-600 transition-transform duration-300 hover:scale-110" size={20} />
-                <div className="flex gap-1">
-                  <Button
-                    variant={filterBy === 'all' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFilterBy('all')}
-                    className={`btn-filter-enhanced ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
-                  >
-                    All Trees
-                  </Button>
-                  <Button
-                    variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFilterBy('inaturalist')}
-                    className={`btn-filter-enhanced ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
-                  >
-                    <span className="mr-1 transition-transform duration-300 hover:scale-110">🔬</span>
-                    iNaturalist
-                  </Button>
-                  <Button
-                    variant={filterBy === 'manual' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setFilterBy('manual')}
-                    className={`btn-filter-enhanced ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
-                  >
-                    <span className="mr-1 transition-transform duration-300 hover:scale-110">✏️</span>
-                    Manual
-                  </Button>
+                {/* Sort and Filter Controls */}
+                <div className="flex flex-wrap gap-4 items-center">
+                  {/* Sort Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <SortAsc className="text-green-600" size={20} />
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-48 border-green-200 focus:border-green-400">
+                        <SelectValue placeholder="Sort by..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="date-newest">Date Added (Newest)</SelectItem>
+                        <SelectItem value="date-oldest">Date Added (Oldest)</SelectItem>
+                        <SelectItem value="species-az">Species Name (A-Z)</SelectItem>
+                        <SelectItem value="species-za">Species Name (Z-A)</SelectItem>
+                        <SelectItem value="scientific-az">Scientific Name (A-Z)</SelectItem>
+                        <SelectItem value="scientific-za">Scientific Name (Z-A)</SelectItem>
+                        <SelectItem value="age-oldest">Age (Oldest First)</SelectItem>
+                        <SelectItem value="age-youngest">Age (Youngest First)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filter Buttons */}
+                  <div className="flex items-center gap-2">
+                    <Filter className="text-green-600 transition-transform duration-300 hover:scale-110" size={20} />
+                    <div className="flex gap-1">
+                      <Button
+                        variant={filterBy === 'all' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilterBy('all')}
+                        className={`btn-filter-enhanced ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                      >
+                        All Trees
+                      </Button>
+                      <Button
+                        variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilterBy('inaturalist')}
+                        className={`btn-filter-enhanced ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                      >
+                        <span className="mr-1 transition-transform duration-300 hover:scale-110">🔬</span>
+                        iNaturalist
+                      </Button>
+                      <Button
+                        variant={filterBy === 'manual' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFilterBy('manual')}
+                        className={`btn-filter-enhanced ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                      >
+                        <span className="mr-1 transition-transform duration-300 hover:scale-110">✏️</span>
+                        Manual
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+
+              {/* Trees Grid */}
+              {filteredTrees.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-12 shadow-lg max-w-md mx-auto">
+                    <div className="text-6xl mb-6">🔍</div>
+                    <h3 className="text-2xl font-bold text-green-800 mb-4">No Trees Match Your Criteria</h3>
+                    <p className="text-green-700 mb-6">
+                      Try adjusting your search, sort, or filter settings to see more trees.
+                    </p>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => {
+                          setSearchTerm('');
+                          setFilterBy('all');
+                          setSortBy('date-newest');
+                        }}
+                        className="block w-full px-4 py-2 btn-primary-enhanced rounded-md"
+                      >
+                        Clear All Filters
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredTrees.map((tree) => (
+                    <TreeCard
+                      key={tree.id}
+                      tree={tree}
+                      onClick={() => {
+                        console.log('Tree clicked:', tree.id);
+                      }}
+                      onEdit={handleEditTree}
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="map" className="space-y-6">
+              <TreeMapView onTreeSelect={handleTreeSelect} />
+            </TabsContent>
+          </Tabs>
         )}
 
-        {/* Trees Grid */}
-        {trees.length === 0 ? (
+        {/* Empty State - Show when no trees */}
+        {trees.length === 0 && (
           <div className="text-center py-16">
             <div className="bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-12 shadow-lg max-w-md mx-auto">
               <div className="text-6xl mb-6">🌱</div>
@@ -297,46 +371,11 @@ export default function Home() {
                 Start your digital forest by adding your first tree!
               </p>
               <AddTreeModal 
-              onTreeAdded={handleTreeAdded} 
-              editTree={editingTree}
-              isEditMode={!!editingTree}
-            />
-            </div>
-          </div>
-        ) : filteredTrees.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="bg-white/70 backdrop-blur-sm border border-green-200 rounded-lg p-12 shadow-lg max-w-md mx-auto">
-              <div className="text-6xl mb-6">🔍</div>
-              <h3 className="text-2xl font-bold text-green-800 mb-4">No Trees Match Your Criteria</h3>
-              <p className="text-green-700 mb-6">
-                Try adjusting your search, sort, or filter settings to see more trees.
-              </p>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    setFilterBy('all');
-                    setSortBy('date-newest');
-                  }}
-                  className="block w-full px-4 py-2 btn-primary-enhanced rounded-md"
-                >
-                  Clear All Filters
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredTrees.map((tree) => (
-              <TreeCard
-                key={tree.id}
-                tree={tree}
-                onClick={() => {
-                  console.log('Tree clicked:', tree.id);
-                }}
-                onEdit={handleEditTree}
+                onTreeAdded={handleTreeAdded} 
+                editTree={editingTree}
+                isEditMode={!!editingTree}
               />
-            ))}
+            </div>
           </div>
         )}
       </main>

@@ -46,21 +46,29 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     scientificName: undefined,
     commonName: undefined,
     taxonomicRank: undefined,
-    iNaturalistId: undefined
+    iNaturalistId: undefined,
+    seed_source: '',
+    nursery_stock_id: '',
+    condition_notes: '',
+    management_actions: []
   });
 
   useEffect(() => {
     if (isEditMode && editTree) {
       setFormData({
         species: editTree.species,
-        location: editTree.location,
+        location: { lat: editTree.lat, lng: editTree.lng },
         date_planted: editTree.date_planted,
         notes: editTree.notes,
         images: editTree.images,
         scientificName: editTree.scientificName,
         commonName: editTree.commonName,
         taxonomicRank: editTree.taxonomicRank,
-        iNaturalistId: editTree.iNaturalistId
+        iNaturalistId: editTree.iNaturalistId,
+        seed_source: editTree.seed_source || '',
+        nursery_stock_id: editTree.nursery_stock_id || '',
+        condition_notes: editTree.condition_notes || '',
+        management_actions: editTree.management_actions || []
       });
     }
   }, [isEditMode, editTree]);
@@ -141,7 +149,11 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           scientificName: undefined,
           commonName: undefined,
           taxonomicRank: undefined,
-          iNaturalistId: undefined
+          iNaturalistId: undefined,
+          seed_source: '',
+          nursery_stock_id: '',
+          condition_notes: '',
+          management_actions: []
         });
       }
       
@@ -192,7 +204,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
 
     setIsSearching(true);
     try {
-      const results = await iNaturalistService.searchSpecies(formData.species);
+      const results = await iNaturalistService.searchTreeSpecies(formData.species);
       setSearchResults(results);
       setShowSearchResults(true);
       
@@ -241,7 +253,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-green-800 flex items-center gap-2">
             🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
@@ -365,6 +377,65 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               rows={3}
               className="border-green-200 focus:border-green-400"
             />
+          </div>
+
+          {/* Forestry Management Section */}
+          <div className="border-t border-green-100 pt-4">
+            <h3 className="text-green-800 font-medium mb-3 flex items-center gap-2">
+              🌲 Forestry Management
+            </h3>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="seed_source" className="text-green-700">Seed Source</Label>
+                <Input
+                  id="seed_source"
+                  value={formData.seed_source}
+                  onChange={(e) => setFormData(prev => ({ ...prev, seed_source: e.target.value }))}
+                  placeholder="e.g., Local nursery, wild collection..."
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="nursery_stock_id" className="text-green-700">Nursery Stock ID</Label>
+                <Input
+                  id="nursery_stock_id"
+                  value={formData.nursery_stock_id}
+                  onChange={(e) => setFormData(prev => ({ ...prev, nursery_stock_id: e.target.value }))}
+                  placeholder="e.g., NST-2024-001"
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+            </div>
+            
+            <div className="mt-3">
+              <Label htmlFor="condition_notes" className="text-green-700">Condition Notes</Label>
+              <Textarea
+                id="condition_notes"
+                value={formData.condition_notes}
+                onChange={(e) => setFormData(prev => ({ ...prev, condition_notes: e.target.value }))}
+                placeholder="Current health, visible damage, growth patterns..."
+                rows={2}
+                className="border-green-200 focus:border-green-400"
+              />
+            </div>
+            
+            <div className="mt-3">
+              <Label htmlFor="management_actions" className="text-green-700">Management Actions</Label>
+              <Textarea
+                id="management_actions"
+                value={Array.isArray(formData.management_actions) ? formData.management_actions.join(', ') : formData.management_actions}
+                onChange={(e) => {
+                  const actions = e.target.value.split(',').map(action => action.trim()).filter(action => action);
+                  setFormData(prev => ({ ...prev, management_actions: actions }));
+                }}
+                placeholder="Watering, pruning, fertilizing, pest control... (separate with commas)"
+                rows={2}
+                className="border-green-200 focus:border-green-400"
+              />
+              <p className="text-xs text-green-600 mt-1">Separate multiple actions with commas</p>
+            </div>
           </div>
 
           <div className="flex gap-2 pt-4">

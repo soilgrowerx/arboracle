@@ -17,7 +17,7 @@ export class TreeService {
       const migratedTrees = trees.map((tree: Tree) => {
         // Check if plus_code_local contains coordinates (has comma)
         if (tree.plus_code_local && tree.plus_code_local.includes(',')) {
-          const plusCodes = PlusCodeService.encode(tree.location.lat, tree.location.lng);
+          const plusCodes = PlusCodeService.encode(tree.lat, tree.lng);
           return {
             ...tree,
             plus_code_global: plusCodes.global,
@@ -26,7 +26,7 @@ export class TreeService {
         }
         // Check if plus_code_local is missing or empty
         if (!tree.plus_code_local || !tree.plus_code_global) {
-          const plusCodes = PlusCodeService.encode(tree.location.lat, tree.location.lng);
+          const plusCodes = PlusCodeService.encode(tree.lat, tree.lng);
           return {
             ...tree,
             plus_code_global: plusCodes.global,
