@@ -1,3 +1,23 @@
+export interface TaxonomicHierarchy {
+  kingdom?: string;
+  phylum?: string;
+  class?: string;
+  order?: string;
+  family?: string;
+  genus?: string;
+  species?: string;
+  // Additional taxonomic levels for completeness
+  subkingdom?: string;
+  subphylum?: string;
+  subclass?: string;
+  suborder?: string;
+  subfamily?: string;
+  subgenus?: string;
+  subspecies?: string;
+  variety?: string;
+  form?: string;
+}
+
 export interface Tree {
   id: string;
   species: string;
@@ -14,6 +34,8 @@ export interface Tree {
   commonName?: string;
   taxonomicRank?: string;
   iNaturalistId?: number;
+  // Full taxonomic hierarchy for scientific rigor
+  taxonomy?: TaxonomicHierarchy;
   // Enhanced forestry management fields
   seed_source?: string;
   nursery_stock_id?: string;
@@ -125,6 +147,8 @@ export interface TreeFormData {
   commonName?: string;
   taxonomicRank?: string;
   iNaturalistId?: number;
+  // Full taxonomic hierarchy for scientific rigor
+  taxonomy?: TaxonomicHierarchy;
   // Enhanced forestry management fields
   seed_source?: string;
   nursery_stock_id?: string;

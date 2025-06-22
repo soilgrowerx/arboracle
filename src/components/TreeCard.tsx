@@ -11,6 +11,7 @@ import { EcosystemService } from '@/services/ecosystemService';
 import { calculateTreeAge } from '@/lib/utils';
 import { useState } from 'react';
 import Link from 'next/link';
+import { TaxonomicDisplay, BinomialNomenclature, TaxonomyBreadcrumb } from '@/components/TaxonomicDisplay';
 
 interface TreeCardProps {
   tree: Tree;
@@ -164,7 +165,15 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
               )}
             </div>
           </div>
-          {tree.scientificName && (
+          {/* Enhanced Taxonomic Display */}
+          {tree.taxonomy && (
+            <div className="space-y-2">
+              <BinomialNomenclature taxonomy={tree.taxonomy} />
+              <TaxonomyBreadcrumb taxonomy={tree.taxonomy} />
+            </div>
+          )}
+          {/* Fallback for trees without full taxonomy */}
+          {!tree.taxonomy && tree.scientificName && (
             <div className="tree-scientific-name rounded-md">
               <div className="text-xs sm:text-sm font-medium text-green-700 italic">
                 {tree.scientificName}

@@ -19,6 +19,7 @@ import { MapPin, Calendar, StickyNote, CheckCircle, Clock, Shield, Sprout, Exter
 import { PlusCodeService } from '@/services/plusCodeService';
 import { calculateTreeAge } from '@/lib/utils';
 import Image from 'next/image';
+import { TaxonomicDisplay, BinomialNomenclature } from '@/components/TaxonomicDisplay';
 
 interface TreeDetailModalProps {
   tree: Tree | null;
@@ -180,9 +181,14 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                 <DialogTitle className="text-xl sm:text-2xl font-bold text-green-800 leading-tight">
                   {tree.commonName || tree.species}
                 </DialogTitle>
-                {tree.scientificName && (
+                {/* Enhanced Taxonomic Display in Header */}
+                {tree.taxonomy ? (
+                  <div className="mt-2">
+                    <BinomialNomenclature taxonomy={tree.taxonomy} />
+                  </div>
+                ) : tree.scientificName ? (
                   <p className="text-base sm:text-lg italic text-green-600 mt-1">{tree.scientificName}</p>
-                )}
+                ) : null}
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
                   <div className="flex items-center gap-2">
                     {getVerificationStatusIcon()}
@@ -512,31 +518,72 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
               </TabsContent>
 
               <TabsContent value="scientific" className="space-y-6 mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>🔬 Scientific Classification</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 mb-1">Scientific Name</p>
-                      <p className="text-sm text-gray-600 italic">{tree.scientificName || 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 mb-1">Common Name</p>
-                      <p className="text-sm text-gray-600">{tree.commonName || tree.species}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 mb-1">Taxonomic Rank</p>
-                      <p className="text-sm text-gray-600">{tree.taxonomicRank || 'Not specified'}</p>
-                    </div>
-                    {tree.iNaturalistId && (
+                {/* Enhanced Taxonomic Display */}
+                {tree.taxonomy ? (
+                  <TaxonomicDisplay taxonomy={tree.taxonomy} variant="full" />
+                ) : (
+                  /* Fallback for trees without full taxonomy */
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>🔬 Scientific Classification</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-1">Scientific Name</p>
+                        <p className="text-sm text-gray-600 italic">{tree.scientificName || 'Not specified'}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-1">Common Name</p>
+                        <p className="text-sm text-gray-600">{tree.commonName || tree.species}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-1">Taxonomic Rank</p>
+                        <p className="text-sm text-gray-600">{tree.taxonomicRank || 'Not specified'}</p>
+                      </div>
+                      {tree.iNaturalistId && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-1">iNaturalist ID</p>
+                          <p className="text-sm text-gray-600 font-mono">{tree.iNaturalistId}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+                
+                {/* Additional Scientific Information */}
+                {tree.iNaturalistId && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>🏷️ iNaturalist Integration</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
                       <div>
                         <p className="text-sm font-medium text-gray-700 mb-1">iNaturalist ID</p>
                         <p className="text-sm text-gray-600 font-mono">{tree.iNaturalistId}</p>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 mb-1">Species Verification</p>
+                        <div className="flex items-center gap-2">
+                          {tree.verification_status === 'verified' && (
+                            <Badge className="bg-green-100 text-green-800">
+                              ✅ iNaturalist Verified
+                            </Badge>
+                          )}
+                          {tree.verification_status === 'manual' && (
+                            <Badge className="bg-blue-100 text-blue-800">
+                              🔵 Manually Verified
+                            </Badge>
+                          )}
+                          {tree.verification_status === 'pending' && (
+                            <Badge className="bg-yellow-100 text-yellow-800">
+                              🟡 Pending Verification
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {tree.description && (
                   <Card>
