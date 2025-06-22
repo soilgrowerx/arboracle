@@ -24,7 +24,6 @@ import { Plus, Search, MapPin, Map } from 'lucide-react';
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const useMapEvents = dynamic(() => import('react-leaflet').then(mod => mod.useMapEvents), { ssr: false });
 
 interface AddTreeModalProps {
   onTreeAdded?: () => void;
@@ -101,13 +100,17 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
       // Delay to allow modal animation to complete
       const timer = setTimeout(() => {
         // Force all leaflet maps to invalidate their size
-        if (typeof window !== 'undefined' && window.L) {
-          const maps = Object.values(window.L._mapById || {});
-          maps.forEach((map: any) => {
-            if (map && map.invalidateSize) {
-              map.invalidateSize();
-            }
-          });
+        if (typeof window !== 'undefined' && (window as any).L) {
+          const L = (window as any).L;
+          // Check if _mapById exists on the L object
+          if (L._mapById) {
+            const maps = Object.values(L._mapById);
+            maps.forEach((map: any) => {
+              if (map && map.invalidateSize) {
+                map.invalidateSize();
+              }
+            });
+          }
         }
       }, 300);
       
@@ -534,12 +537,6 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                     style={{ height: '100%', width: '100%', minHeight: '256px' }}
                     className="leaflet-container"
                     key={`map-${showLocationMap}`} // Force re-render when map shows/hides
-                    whenReady={(map) => {
-                      // Force map to invalidate size after it's ready
-                      setTimeout(() => {
-                        map.target.invalidateSize();
-                      }, 100);
-                    }}
                   >
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
