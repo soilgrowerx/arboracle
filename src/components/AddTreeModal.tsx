@@ -580,12 +580,19 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               <Label htmlFor="management_actions" className="text-green-700 font-medium">Management Actions</Label>
               <Textarea
                 id="management_actions"
-                value={Array.isArray(formData.management_actions) ? formData.management_actions.join(', ') : formData.management_actions}
+                value={Array.isArray(formData.management_actions) ? formData.management_actions.join(', ') : ''}
                 onChange={(e) => {
-                  const actions = e.target.value.split(',').map(action => action.trim()).filter(action => action);
-                  setFormData(prev => ({ ...prev, management_actions: actions }));
+                  // Process the input and store as array while preserving typing experience
+                  const inputValue = e.target.value;
+                  if (inputValue === '') {
+                    setFormData(prev => ({ ...prev, management_actions: [] }));
+                  } else {
+                    // Split by comma and trim only leading/trailing spaces, preserving internal spaces
+                    const actions = inputValue.split(',').map(action => action.trim()).filter(action => action);
+                    setFormData(prev => ({ ...prev, management_actions: actions }));
+                  }
                 }}
-                placeholder="Watering, pruning, fertilizing, pest control... (separate with commas)"
+                placeholder="watering, pruning, fertilizing, pest control... (separate with commas)"
                 rows={2}
                 className="border-green-200 focus:border-green-400"
               />
