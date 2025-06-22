@@ -41,7 +41,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
   };
 
   const treeAge = calculateTreeAge(tree.date_planted);
-  const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng, 11);
+  const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng, 12);
   const ecosystemStats = EcosystemService.getEcosystemStatistics(tree.id);
 
 
