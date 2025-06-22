@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Calendar, StickyNote, CheckCircle, Clock, Shield, Sprout, ExternalLink, Edit, Leaf, TreePine, Database, Microscope, X } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle, Clock, Shield, Sprout, ExternalLink, Edit, Leaf, TreePine, Database, Microscope, X, Copy } from 'lucide-react';
 import { PlusCodeService } from '@/services/plusCodeService';
 import { calculateTreeAge } from '@/lib/utils';
 import Image from 'next/image';
@@ -185,24 +185,75 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                         Location Information
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-3">
+                    <CardContent className="space-y-4">
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Coordinates</p>
-                        <p className="text-sm text-gray-600">
-                          {tree.lat.toFixed(6)}, {tree.lng.toFixed(6)}
-                        </p>
+                        <p className="text-sm font-medium text-gray-700 mb-2">Coordinates</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono text-sm bg-green-50 border border-green-200 p-3 rounded-lg flex-1 text-green-800">
+                            {tree.lat.toFixed(6)}, {tree.lng.toFixed(6)}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              const coords = `${tree.lat.toFixed(6)}, ${tree.lng.toFixed(6)}`;
+                              await PlusCodeService.copyToClipboard(coords);
+                            }}
+                            className="h-10 w-10 p-0 hover:bg-green-100"
+                            title="Copy coordinates"
+                          >
+                            <Copy size={14} className="text-green-600" />
+                          </Button>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Plus Code (Global)</p>
-                        <p className="font-mono text-sm bg-gray-100 p-2 rounded">{tree.plus_code_global}</p>
+                        <p className="text-sm font-medium text-gray-700 mb-2">Plus Code (Global)</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono text-sm bg-green-50 border border-green-200 p-3 rounded-lg flex-1 text-green-800">
+                            {tree.plus_code_global}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              await PlusCodeService.copyToClipboard(tree.plus_code_global);
+                            }}
+                            className="h-10 w-10 p-0 hover:bg-green-100"
+                            title="Copy global Plus Code"
+                          >
+                            <Copy size={14} className="text-green-600" />
+                          </Button>
+                        </div>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-700 mb-1">Plus Code (Local)</p>
-                        <p className="font-mono text-sm bg-gray-100 p-2 rounded">{tree.plus_code_local}</p>
+                        <p className="text-sm font-medium text-gray-700 mb-2">Plus Code (Local)</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono text-sm bg-green-50 border border-green-200 p-3 rounded-lg flex-1 text-green-800">
+                            {tree.plus_code_local}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              await PlusCodeService.copyToClipboard(tree.plus_code_local);
+                            }}
+                            className="h-10 w-10 p-0 hover:bg-green-100"
+                            title="Copy local Plus Code"
+                          >
+                            <Copy size={14} className="text-green-600" />
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-700 mb-1">Precision</p>
-                        <p className="text-sm text-gray-600">{plusCodeInfo.areaSize} area</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border">
+                            {plusCodeInfo.areaSize} area
+                          </span>
+                          <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded border">
+                            {plusCodeInfo.precision} characters
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

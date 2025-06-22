@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { TreeFormData, Tree } from '@/types';
 import { TreeService } from '@/services/treeService';
 import { iNaturalistService } from '@/services/inaturalistService';
+import { PlusCodeService } from '@/services/plusCodeService';
 import {
   Dialog,
   DialogContent,
@@ -16,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, MapPin } from 'lucide-react';
 
 interface AddTreeModalProps {
   onTreeAdded?: () => void;
@@ -403,6 +404,33 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
               Use Current Location
             </Button>
+            
+            {/* Plus Code Preview */}
+            {formData.location.lat !== 0 && formData.location.lng !== 0 && (
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin size={16} className="text-green-600" />
+                  <span className="text-sm font-medium text-green-700">Generated Plus Code Preview</span>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs text-green-600 mb-1">Global Code:</p>
+                    <p className="font-mono text-sm bg-white border border-green-200 p-2 rounded text-green-800">
+                      {PlusCodeService.encode(formData.location.lat, formData.location.lng).global}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-green-600 mb-1">Local Code:</p>
+                    <p className="font-mono text-sm bg-white border border-green-200 p-2 rounded text-green-800">
+                      {PlusCodeService.encode(formData.location.lat, formData.location.lng).local}
+                    </p>
+                  </div>
+                  <div className="text-xs text-green-600">
+                    Precision: {PlusCodeService.encode(formData.location.lat, formData.location.lng).areaSize} area
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Management Data Section */}

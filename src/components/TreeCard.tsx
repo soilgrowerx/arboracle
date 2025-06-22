@@ -174,44 +174,68 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
-        <div className="tree-info-item flex items-center gap-3 px-2">
-          <MapPin size={18} className="text-green-600 flex-shrink-0" />
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-green-700 font-medium">Plus Code:</span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={toggleCodeFormat}
-                className="tree-plus-code font-mono text-xs px-3 py-1.5 rounded-md hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200"
-              >
-                {displayCode}
-              </button>
+        <div className="tree-info-item flex items-start gap-3 px-2">
+          <MapPin size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 space-y-2">
+            {/* Coordinates Display */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-green-700 font-medium">Coordinates:</span>
+              <span className="text-xs font-mono bg-green-50 px-2 py-1 rounded border text-green-800">
+                {tree.lat.toFixed(6)}°, {tree.lng.toFixed(6)}°
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => handleCopyCode(displayCode, e)}
-                className="h-7 w-7 p-0 hover:bg-green-100"
+                onClick={(e) => handleCopyCode(`${tree.lat.toFixed(6)}, ${tree.lng.toFixed(6)}`, e)}
+                className="h-6 w-6 p-0 hover:bg-green-100"
+                title="Copy coordinates"
               >
                 {copied ? (
-                  <Check size={12} className="text-green-600" />
+                  <Check size={10} className="text-green-600" />
                 ) : (
-                  <Copy size={12} className="text-green-600" />
+                  <Copy size={10} className="text-green-600" />
                 )}
               </Button>
             </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info size={14} className="text-green-500 hover:text-green-700 cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <div className="text-sm">
-                    <p><strong>Area:</strong> {plusCodeInfo.areaSize}</p>
-                    <p><strong>Precision:</strong> {plusCodeInfo.precision} characters</p>
-                    <p className="text-xs text-gray-600 mt-1">Click code to toggle full/local format</p>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            
+            {/* Plus Code Display */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-green-700 font-medium">Plus Code:</span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={toggleCodeFormat}
+                  className="tree-plus-code font-mono text-xs px-3 py-1.5 rounded-md hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200"
+                >
+                  {displayCode}
+                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => handleCopyCode(displayCode, e)}
+                  className="h-7 w-7 p-0 hover:bg-green-100"
+                >
+                  {copied ? (
+                    <Check size={12} className="text-green-600" />
+                  ) : (
+                    <Copy size={12} className="text-green-600" />
+                  )}
+                </Button>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info size={14} className="text-green-500 hover:text-green-700 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="text-sm">
+                      <p><strong>Area:</strong> {plusCodeInfo.areaSize}</p>
+                      <p><strong>Precision:</strong> {plusCodeInfo.precision} characters</p>
+                      <p className="text-xs text-gray-600 mt-1">Click code to toggle full/local format</p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
         </div>
         
