@@ -10,9 +10,64 @@ import { Badge } from '@/components/ui/badge';
 import { EcosystemService } from '@/services/ecosystemService';
 import { calculateTreeAge } from '@/lib/utils';
 
+// Extensible tile layer configuration for future Earth Engine integration
+interface TileLayerConfig {
+  name: string;
+  url: string;
+  attribution: string;
+  maxZoom?: number;
+  opacity?: number;
+  className?: string;
+  type: 'base' | 'overlay';
+  checked?: boolean;
+}
+
+const TILE_LAYERS: TileLayerConfig[] = [
+  {
+    name: "🗺️ Street Map",
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    type: 'base',
+    checked: true
+  },
+  {
+    name: "🛰️ Satellite",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    maxZoom: 18,
+    type: 'base'
+  },
+  {
+    name: "🏷️ Street Labels",
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: 'Labels from OpenStreetMap',
+    opacity: 0.6,
+    className: 'labels-overlay',
+    type: 'overlay'
+  },
+  {
+    name: "🛣️ Transportation",
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
+    attribution: 'Transportation overlay from Esri',
+    opacity: 0.8,
+    className: 'transportation-overlay',
+    type: 'overlay'
+  }
+  // Future Earth Engine layers can be added here:
+  // {
+  //   name: "🌍 NDVI Analysis",
+  //   url: "https://earthengine.googleapis.com/v1alpha/projects/{projectId}/maps/{mapId}/tiles/{z}/{x}/{y}",
+  //   attribution: 'Earth Engine NDVI Analysis',
+  //   type: 'overlay'
+  // }
+];
+
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const LayersControl = dynamic(() => import('react-leaflet').then(mod => mod.LayersControl), { ssr: false });
+const BaseLayer = dynamic(() => import('react-leaflet').then(mod => mod.LayersControl.BaseLayer), { ssr: false });
+const Overlay = dynamic(() => import('react-leaflet').then(mod => mod.LayersControl.Overlay), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
 
@@ -246,29 +301,35 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
       </div>
       )}
 
-      {/* Map Legend */}
+      {/* Map Legend & Controls */}
       <div className="bg-white rounded-lg border border-green-200 p-3 shadow-sm">
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="text-sm font-semibold text-green-800">Legend:</span>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-green-600 border-2 border-white shadow-sm"></div>
-            <span className="text-sm text-gray-700">Verified</span>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="text-sm font-semibold text-green-800">Legend:</span>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-green-600 border-2 border-white shadow-sm"></div>
+              <span className="text-sm text-gray-700">Verified</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-sm"></div>
+              <span className="text-sm text-gray-700">Manual</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 rounded-full bg-orange-600 border-2 border-white shadow-sm"></div>
+              <span className="text-sm text-gray-700">Pending</span>
+            </div>
+            <div className="flex items-center gap-2 ml-4">
+              <span className="text-lg">🌱</span>
+              <span className="text-sm text-gray-600">Young (&lt;2y)</span>
+              <span className="text-lg">🌲</span>
+              <span className="text-sm text-gray-600">Medium (2-5y)</span>
+              <span className="text-lg">🌳</span>
+              <span className="text-sm text-gray-600">Mature (5y+)</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-sm"></div>
-            <span className="text-sm text-gray-700">Manual</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-orange-600 border-2 border-white shadow-sm"></div>
-            <span className="text-sm text-gray-700">Pending</span>
-          </div>
-          <div className="flex items-center gap-2 ml-4">
-            <span className="text-lg">🌱</span>
-            <span className="text-sm text-gray-600">Young (&lt;2y)</span>
-            <span className="text-lg">🌲</span>
-            <span className="text-sm text-gray-600">Medium (2-5y)</span>
-            <span className="text-lg">🌳</span>
-            <span className="text-sm text-gray-600">Mature (5y+)</span>
+          <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
+            <span className="text-lg">🛰️</span>
+            <span className="font-medium">Satellite view available - use layer control (top-right)</span>
           </div>
         </div>
       </div>
@@ -281,10 +342,40 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
           style={{ height: '100%', width: '100%' }}
           className="leaflet-container"
         >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+          <LayersControl position="topright">
+            {/* Dynamically render base layers */}
+            {TILE_LAYERS.filter(layer => layer.type === 'base').map((layer) => (
+              <BaseLayer 
+                key={layer.name}
+                checked={layer.checked}
+                name={layer.name}
+              >
+                <TileLayer
+                  attribution={layer.attribution}
+                  url={layer.url}
+                  maxZoom={layer.maxZoom}
+                  opacity={layer.opacity}
+                  className={layer.className}
+                />
+              </BaseLayer>
+            ))}
+            
+            {/* Dynamically render overlay layers */}
+            {TILE_LAYERS.filter(layer => layer.type === 'overlay').map((layer) => (
+              <Overlay 
+                key={layer.name}
+                name={layer.name}
+              >
+                <TileLayer
+                  attribution={layer.attribution}
+                  url={layer.url}
+                  maxZoom={layer.maxZoom}
+                  opacity={layer.opacity}
+                  className={layer.className}
+                />
+              </Overlay>
+            ))}
+          </LayersControl>
           
           {!showEmptyState && <MapBounds trees={filteredTrees} />}
           
