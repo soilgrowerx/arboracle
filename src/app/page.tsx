@@ -8,14 +8,17 @@ import { AddTreeModal } from '@/components/AddTreeModal';
 import { TreeStatistics } from '@/components/TreeStatistics';
 import { TreeMapView } from '@/components/TreeMapView';
 import { TreeDetailModal } from '@/components/TreeDetailModal';
+import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 import { Toaster } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, SortAsc, Download, List, Map, Settings } from 'lucide-react';
+import { Search, Filter, SortAsc, Download, List, Map, Settings, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { calculateTreeAge } from '@/lib/utils';
+import { EcosystemService } from '@/services/ecosystemService';
 
 export default function Home() {
   const [trees, setTrees] = useState<Tree[]>([]);
@@ -65,9 +68,18 @@ export default function Home() {
       'Scientific Name',
       'Latitude',
       'Longitude',
-      'Plus Code',
+      'Plus Code Global',
+      'Plus Code Local',
       'Date Planted',
       'Tree Age',
+      'Verification Status',
+      'Health Score',
+      'Ecosystem Species Count',
+      'Ecosystem Categories',
+      'Seed Source',
+      'Nursery Stock ID',
+      'Condition Notes',
+      'Management Actions',
       'Date Added',
       'Notes'
     ];
@@ -76,14 +88,33 @@ export default function Home() {
       headers.join(','),
       ...trees.map(tree => {
         const treeAge = calculateTreeAge(tree.date_planted);
+        const ecosystemStats = EcosystemService.getEcosystemStatistics(tree.id);
+        const ecosystemCategories = Object.keys(ecosystemStats.categoryCounts).join(';');
+        
+        // Calculate simple health score for this tree
+        const verificationScore = tree.verification_status === 'verified' ? 40 : tree.verification_status === 'manual' ? 25 : 10;
+        const ageScore = Math.min((treeAge.totalDays / 365) / 5, 1) * 20;
+        const ecosystemScore = Math.min(ecosystemStats.totalSpecies, 1) * 20;
+        const dataScore = (tree.scientificName && tree.lat && tree.lng) ? 20 : 10;
+        const healthScore = Math.round(verificationScore + ageScore + ecosystemScore + dataScore);
+
         return [
           `"${tree.commonName || tree.species}"`,
           `"${tree.scientificName || ''}"`,
           tree.lat,
           tree.lng,
+          `"${tree.plus_code_global}"`,
           `"${tree.plus_code_local}"`,
           `"${new Date(tree.date_planted).toLocaleDateString()}"`,
           `"${treeAge.displayText}"`,
+          `"${tree.verification_status}"`,
+          `"${healthScore}%"`,
+          ecosystemStats.totalSpecies,
+          `"${ecosystemCategories}"`,
+          `"${tree.seed_source || ''}"`,
+          `"${tree.nursery_stock_id || ''}"`,
+          `"${tree.condition_notes || ''}"`,
+          `"${(tree.management_actions || []).join(';')}"`,
           `"${new Date(tree.created_at).toLocaleDateString()}"`,
           `"${tree.notes || ''}"`
         ].join(',');
@@ -96,7 +127,68 @@ export default function Home() {
     if (link.download !== undefined) {
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `arboracle-trees-${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute('download', `arboracle-comprehensive-export-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  // Export ecosystem data separately
+  const exportEcosystemData = () => {
+    if (trees.length === 0) return;
+
+    const allEcosystemSpecies = trees.flatMap(tree => 
+      EcosystemService.getEcosystemSpeciesForTree(tree.id).map(species => ({
+        ...species,
+        treeName: tree.commonName || tree.species,
+        treeScientificName: tree.scientificName,
+        treePlusCode: tree.plus_code_local
+      }))
+    );
+
+    if (allEcosystemSpecies.length === 0) {
+      alert('No ecosystem species data to export');
+      return;
+    }
+
+    const headers = [
+      'Ecosystem Species',
+      'Scientific Name',
+      'Category',
+      'Relationship',
+      'Observation Date',
+      'Verified',
+      'Tree Name',
+      'Tree Scientific Name',
+      'Tree Location',
+      'Notes'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...allEcosystemSpecies.map(species => [
+        `"${species.speciesName}"`,
+        `"${species.scientificName || ''}"`,
+        `"${species.category}"`,
+        `"${species.relationship}"`,
+        `"${new Date(species.observationDate).toLocaleDateString()}"`,
+        `"${species.isVerified ? 'Yes' : 'No'}"`,
+        `"${species.treeName}"`,
+        `"${species.treeScientificName || ''}"`,
+        `"${species.treePlusCode}"`,
+        `"${species.notes || ''}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `arboracle-ecosystem-species-${new Date().toISOString().split('T')[0]}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -217,14 +309,25 @@ export default function Home() {
               </Button>
             </Link>
             {trees.length > 0 && (
-              <Button
-                onClick={exportToCSV}
-                variant="outline"
-                className="border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300"
-              >
-                <Download size={16} className="mr-2" />
-                Export Data
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300"
+                  >
+                    <Download size={16} className="mr-2" />
+                    Export Data
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={exportToCSV}>
+                    📊 Export Tree Data (CSV)
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportEcosystemData}>
+                    🌍 Export Ecosystem Data (CSV)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
             <AddTreeModal 
               onTreeAdded={handleTreeAdded} 
@@ -240,7 +343,7 @@ export default function Home() {
         {/* View Tabs */}
         {trees.length > 0 && (
           <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-6 bg-green-50 border border-green-200">
+            <TabsList className="grid w-full grid-cols-3 max-w-lg mx-auto mb-6 bg-green-50 border border-green-200">
               <TabsTrigger 
                 value="list" 
                 className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
@@ -254,6 +357,13 @@ export default function Home() {
               >
                 <Map size={16} />
                 Map View
+              </TabsTrigger>
+              <TabsTrigger 
+                value="analytics" 
+                className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+              >
+                <BarChart3 size={16} />
+                Analytics
               </TabsTrigger>
             </TabsList>
 
@@ -368,6 +478,10 @@ export default function Home() {
 
             <TabsContent value="map" className="space-y-6">
               <TreeMapView onTreeSelect={handleTreeSelect} />
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              <AnalyticsDashboard trees={trees} />
             </TabsContent>
           </Tabs>
         )}
