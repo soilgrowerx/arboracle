@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { TreeFormData, Tree } from '@/types';
 import { TreeService } from '@/services/treeService';
 import { iNaturalistService } from '@/services/inaturalistService';
@@ -17,12 +18,36 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Plus, Search, MapPin } from 'lucide-react';
+import { Plus, Search, MapPin, Map } from 'lucide-react';
+
+// Dynamically import map components to avoid SSR issues
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 
 interface AddTreeModalProps {
   onTreeAdded?: () => void;
   editTree?: Tree;
   isEditMode?: boolean;
+}
+
+// Map click handler component
+function LocationPicker({ position, onLocationSelect }: { position: [number, number] | null, onLocationSelect: (lat: number, lng: number) => void }) {
+  const { useMapEvents } = require('react-leaflet');
+  
+  const map = useMapEvents({
+    click: (e: any) => {
+      onLocationSelect(e.latlng.lat, e.latlng.lng);
+    },
+  });
+
+  useEffect(() => {
+    if (position) {
+      map.setView(position, map.getZoom());
+    }
+  }, [position, map]);
+
+  return position ? <Marker position={position} /> : null;
 }
 
 export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddTreeModalProps) {
@@ -37,7 +62,13 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showLocationMap, setShowLocationMap] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
   const [formData, setFormData] = useState<TreeFormData>({
     species: '',
     location: { lat: 0, lng: 0 },
@@ -194,12 +225,32 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               lng: position.coords.longitude
             }
           }));
+          toast({
+            title: "Location Set",
+            description: "Current location has been set successfully",
+          });
         },
         (error) => {
           console.error('Error getting location:', error);
+          toast({
+            title: "Location Error",
+            description: "Unable to get current location. Please set manually.",
+            variant: "destructive"
+          });
         }
       );
     }
+  };
+
+  const handleMapLocationSelect = (lat: number, lng: number) => {
+    setFormData(prev => ({
+      ...prev,
+      location: { lat, lng }
+    }));
+    toast({
+      title: "Location Selected",
+      description: `Coordinates set to ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+    });
   };
 
   const searchSpecies = async () => {
@@ -398,15 +449,61 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={getCurrentLocation}
-              className="w-full btn-outline-enhanced"
-            >
-              <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
-              Use Current Location
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={getCurrentLocation}
+                className="btn-outline-enhanced"
+              >
+                <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
+                Use Current Location
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowLocationMap(!showLocationMap)}
+                className="btn-outline-enhanced"
+              >
+                <Map size={16} className="mr-2" />
+                {showLocationMap ? 'Hide Map' : 'Pick on Map'}
+              </Button>
+            </div>
+
+            {/* Interactive Map for Location Selection */}
+            {showLocationMap && isClient && (
+              <div className="mt-4 border border-green-200 rounded-lg overflow-hidden">
+                <div className="bg-green-50 px-4 py-2 border-b border-green-200">
+                  <p className="text-sm text-green-700 font-medium">📍 Click on the map to set tree location</p>
+                </div>
+                <div className="h-64 w-full">
+                  <MapContainer
+                    center={formData.location.lat !== 0 && formData.location.lng !== 0 
+                      ? [formData.location.lat, formData.location.lng] 
+                      : [40.7128, -74.0060]} // Default to NYC
+                    zoom={13}
+                    style={{ height: '100%', width: '100%' }}
+                    className="leaflet-container"
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <LocationPicker
+                      position={formData.location.lat !== 0 && formData.location.lng !== 0 
+                        ? [formData.location.lat, formData.location.lng] 
+                        : null}
+                      onLocationSelect={handleMapLocationSelect}
+                    />
+                  </MapContainer>
+                </div>
+                <div className="bg-green-50 px-4 py-2 border-t border-green-200">
+                  <p className="text-xs text-green-600">
+                    💡 Tip: You can also enter coordinates manually in the fields above
+                  </p>
+                </div>
+              </div>
+            )}
             
             {/* Plus Code Preview */}
             {formData.location.lat !== 0 && formData.location.lng !== 0 && (

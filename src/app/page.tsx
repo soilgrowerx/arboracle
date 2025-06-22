@@ -308,17 +308,15 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {trees.length > 0 && (
-              <Link href="/map">
-                <Button
-                  variant="outline"
-                  className="border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300"
-                >
-                  <Map size={16} className="mr-2" />
-                  Full Map View
-                </Button>
-              </Link>
-            )}
+            {/* Map View Button - Always visible as a key feature */}
+            <Link href="/map">
+              <Button
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 font-semibold"
+              >
+                <Map size={18} className="mr-2" />
+                🗺️ View Map
+              </Button>
+            </Link>
             <Link href="/settings">
               <Button
                 variant="outline"
@@ -382,10 +380,10 @@ export default function Home() {
               </TabsTrigger>
               <TabsTrigger 
                 value="map" 
-                className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white font-semibold hover:bg-blue-50 border-2 border-transparent data-[state=active]:border-blue-400"
               >
                 <Map size={16} />
-                Map View
+                🗺️ Map View
               </TabsTrigger>
               <TabsTrigger 
                 value="analytics" 
@@ -524,11 +522,23 @@ export default function Home() {
               <p className="text-green-700 mb-6">
                 Start your digital forest by adding your first tree!
               </p>
-              <AddTreeModal 
-                onTreeAdded={handleTreeAdded} 
-                editTree={editingTree}
-                isEditMode={!!editingTree}
-              />
+              <div className="space-y-3">
+                <AddTreeModal 
+                  onTreeAdded={handleTreeAdded} 
+                  editTree={editingTree}
+                  isEditMode={!!editingTree}
+                />
+                <div className="text-sm text-green-600 mb-2">or</div>
+                <Link href="/map">
+                  <Button
+                    variant="outline"
+                    className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+                  >
+                    <Map size={16} className="mr-2" />
+                    🗺️ View Map & Add Trees by Location
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         )}
