@@ -247,8 +247,35 @@ export function TreeMapView({ onTreeSelect }: TreeMapViewProps) {
         </div>
       </div>
 
+      {/* Map Legend */}
+      <div className="bg-white rounded-lg border border-green-200 p-3 shadow-sm">
+        <div className="flex flex-wrap items-center gap-4">
+          <span className="text-sm font-semibold text-green-800">Legend:</span>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-green-600 border-2 border-white shadow-sm"></div>
+            <span className="text-sm text-gray-700">Verified</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-sm"></div>
+            <span className="text-sm text-gray-700">Manual</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-orange-600 border-2 border-white shadow-sm"></div>
+            <span className="text-sm text-gray-700">Pending</span>
+          </div>
+          <div className="flex items-center gap-2 ml-4">
+            <span className="text-lg">🌱</span>
+            <span className="text-sm text-gray-600">Young (&lt;2y)</span>
+            <span className="text-lg">🌲</span>
+            <span className="text-sm text-gray-600">Medium (2-5y)</span>
+            <span className="text-lg">🌳</span>
+            <span className="text-sm text-gray-600">Mature (5y+)</span>
+          </div>
+        </div>
+      </div>
+
       {/* Map Container */}
-      <div className="h-96 w-full rounded-lg overflow-hidden border border-green-200 shadow-sm">
+      <div className="h-[500px] w-full rounded-lg overflow-hidden border border-green-200 shadow-sm">
       <MapContainer
         center={defaultCenter}
         zoom={10}
