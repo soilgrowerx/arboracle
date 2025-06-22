@@ -212,3 +212,6 @@ export interface iNaturalistSearchParams {
   page?: number;
   quality_grade?: 'casual' | 'needs_id' | 'research';
 }
+
+// Export Knowledge Base types
+export * from './knowledge';

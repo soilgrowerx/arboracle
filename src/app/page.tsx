@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, SortAsc, Download, List, Map, Settings, BarChart3 } from 'lucide-react';
+import { Search, Filter, SortAsc, Download, List, Map, Settings, BarChart3, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { calculateTreeAge } from '@/lib/utils';
 import { EcosystemService } from '@/services/ecosystemService';
@@ -337,6 +337,16 @@ export default function Home() {
                     <Settings size={16} className="mr-2" />
                     <span className="hidden sm:inline">Settings</span>
                     <span className="sm:hidden">Settings</span>
+                  </Button>
+                </Link>
+                <Link href="/knowledge" className="flex-1 sm:flex-none">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-4 py-3"
+                  >
+                    <BookOpen size={16} className="mr-2" />
+                    <span className="hidden sm:inline">🧠 Knowledge</span>
+                    <span className="sm:hidden">Knowledge</span>
                   </Button>
                 </Link>
                 <Link href="/admin" className="flex-1 sm:flex-none">
