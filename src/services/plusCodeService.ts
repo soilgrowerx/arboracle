@@ -11,7 +11,7 @@ export interface PlusCodeResult {
 const olc = new OpenLocationCode();
 
 export class PlusCodeService {
-  static encode(latitude: number, longitude: number, precision: number = 11): PlusCodeResult {
+  static encode(latitude: number, longitude: number, precision: number = 12): PlusCodeResult {
     const global = olc.encode(latitude, longitude, precision);
     const local = olc.encode(latitude, longitude, 10); // 10-character code for local use
     const short = olc.shorten(global, latitude, longitude);
@@ -63,7 +63,7 @@ export class PlusCodeService {
       14: '~2.5 m × 2 m',
       15: '~1.25 m × 1 m'
     };
-    return areaSizes[precision] || '~125 m × 100 m';
+    return areaSizes[precision] || '~25 m × 20 m';
   }
 
   static formatForDisplay(code: string, showFull: boolean = false): string {

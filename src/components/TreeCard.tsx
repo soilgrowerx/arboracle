@@ -92,7 +92,7 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
   };
 
   // Get enhanced Plus Code info
-  const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng, 11);
+  const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng);
   const displayCode = showFullCode ? tree.plus_code_global : tree.plus_code_local;
   
   // Calculate tree age

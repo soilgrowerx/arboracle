@@ -23,8 +23,9 @@ export class TreeService {
           migratedTree.plus_code_global = plusCodes.global;
           migratedTree.plus_code_local = plusCodes.local;
         }
-        // Check if plus_code_local is missing or empty
-        if (!tree.plus_code_local || !tree.plus_code_global) {
+        // Check if plus_code_local is missing or empty, or needs precision upgrade
+        if (!tree.plus_code_local || !tree.plus_code_global || 
+            (tree.plus_code_global && tree.plus_code_global.length < 12)) {
           const plusCodes = PlusCodeService.encode(tree.lat, tree.lng);
           migratedTree.plus_code_global = plusCodes.global;
           migratedTree.plus_code_local = plusCodes.local;
