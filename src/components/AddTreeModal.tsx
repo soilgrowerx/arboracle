@@ -46,7 +46,12 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     scientificName: undefined,
     commonName: undefined,
     taxonomicRank: undefined,
-    iNaturalistId: undefined
+    iNaturalistId: undefined,
+    seed_source: '',
+    nursery_stock_id: '',
+    condition_notes: '',
+    inaturalist_observation_url: '',
+    management_actions: []
   });
 
   useEffect(() => {
@@ -54,13 +59,18 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
       setFormData({
         species: editTree.species,
         location: editTree.location,
-        date_planted: editTree.date_planted,
-        notes: editTree.notes,
+        date_planted: editTree.date_planted || '',
+        notes: editTree.notes || '',
         images: editTree.images,
         scientificName: editTree.scientificName,
         commonName: editTree.commonName,
         taxonomicRank: editTree.taxonomicRank,
-        iNaturalistId: editTree.iNaturalistId
+        iNaturalistId: editTree.iNaturalistId,
+        seed_source: editTree.seed_source || '',
+        nursery_stock_id: editTree.nursery_stock_id || '',
+        condition_notes: editTree.condition_notes || '',
+        inaturalist_observation_url: editTree.inaturalist_observation_url || '',
+        management_actions: editTree.management_actions || []
       });
     }
   }, [isEditMode, editTree]);
@@ -87,6 +97,14 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
       
       if (formData.location.lng < -180 || formData.location.lng > 180) {
         errors.push('Longitude must be between -180 and 180');
+      }
+    }
+    
+    // Validate iNaturalist observation URL if provided
+    if (formData.inaturalist_observation_url && formData.inaturalist_observation_url.trim()) {
+      const urlPattern = /^https?:\/\/.+/;
+      if (!urlPattern.test(formData.inaturalist_observation_url.trim())) {
+        errors.push('iNaturalist observation URL must be a valid URL starting with http:// or https://');
       }
     }
     
@@ -141,7 +159,12 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           scientificName: undefined,
           commonName: undefined,
           taxonomicRank: undefined,
-          iNaturalistId: undefined
+          iNaturalistId: undefined,
+          seed_source: '',
+          nursery_stock_id: '',
+          condition_notes: '',
+          inaturalist_observation_url: '',
+          management_actions: []
         });
       }
       
@@ -365,6 +388,69 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               rows={3}
               className="border-green-200 focus:border-green-400"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="seed_source" className="text-green-700">Seed Source</Label>
+            <Input
+              id="seed_source"
+              value={formData.seed_source}
+              onChange={(e) => setFormData(prev => ({ ...prev, seed_source: e.target.value }))}
+              placeholder="e.g., Local collection, nursery, friend..."
+              className="border-green-200 focus:border-green-400"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="nursery_stock_id" className="text-green-700">Nursery Stock ID</Label>
+            <Input
+              id="nursery_stock_id"
+              value={formData.nursery_stock_id}
+              onChange={(e) => setFormData(prev => ({ ...prev, nursery_stock_id: e.target.value }))}
+              placeholder="e.g., NS-2024-001, SKU-12345..."
+              className="border-green-200 focus:border-green-400"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="condition_notes" className="text-green-700">Condition Notes</Label>
+            <Textarea
+              id="condition_notes"
+              value={formData.condition_notes}
+              onChange={(e) => setFormData(prev => ({ ...prev, condition_notes: e.target.value }))}
+              placeholder="Current health, growth status, any issues..."
+              rows={2}
+              className="border-green-200 focus:border-green-400"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="inaturalist_observation_url" className="text-green-700">iNaturalist Observation URL</Label>
+            <Input
+              id="inaturalist_observation_url"
+              type="url"
+              value={formData.inaturalist_observation_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, inaturalist_observation_url: e.target.value }))}
+              placeholder="https://www.inaturalist.org/observations/123456789"
+              className={`border-green-200 focus:border-green-400 ${
+                errors.some(e => e.includes('iNaturalist observation URL')) ? 'border-red-500' : ''
+              }`}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="management_actions" className="text-green-700">Management Actions</Label>
+            <Input
+              id="management_actions"
+              value={formData.management_actions?.join(', ') || ''}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                management_actions: e.target.value.split(',').map(action => action.trim()).filter(action => action) 
+              }))}
+              placeholder="e.g., Watering, Pruning, Fertilizing..."
+              className="border-green-200 focus:border-green-400"
+            />
+            <p className="text-xs text-green-600 mt-1">Separate multiple actions with commas</p>
           </div>
 
           <div className="flex gap-2 pt-4">

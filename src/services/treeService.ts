@@ -80,7 +80,12 @@ export class TreeService {
       scientificName: formData.scientificName,
       commonName: formData.commonName,
       taxonomicRank: formData.taxonomicRank,
-      iNaturalistId: formData.iNaturalistId
+      iNaturalistId: formData.iNaturalistId,
+      seed_source: formData.seed_source,
+      nursery_stock_id: formData.nursery_stock_id,
+      condition_notes: formData.condition_notes,
+      inaturalist_observation_url: formData.inaturalist_observation_url,
+      management_actions: formData.management_actions || []
     };
 
     trees.push(newTree);
