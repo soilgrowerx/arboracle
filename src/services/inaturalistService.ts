@@ -38,7 +38,10 @@ export class iNaturalistService {
         q: query,
         rank: 'species,genus',
         iconic_taxa: 'Plantae',
-        per_page: 20
+        per_page: 20,
+        include_ancestry: true,
+        include_conservation_status: true,
+        include_description: true
       };
 
       // Add tree-specific filtering

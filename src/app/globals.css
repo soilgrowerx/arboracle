@@ -1077,6 +1077,43 @@
     z-index: 1 !important;
   }
 
+  /* Taxonomic Hierarchy Enhancements */
+  .taxonomic-level {
+    transition: all 0.3s ease-in-out;
+    position: relative;
+  }
+  
+  .taxonomic-level:hover {
+    transform: translateX(4px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .taxonomic-level::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, currentColor, transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 2px;
+  }
+  
+  .taxonomic-level:hover::before {
+    opacity: 0.6;
+  }
+  
+  .taxonomic-connection {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .taxonomic-level:hover + .taxonomic-connection {
+    background: linear-gradient(to bottom, currentColor, rgba(0,0,0,0.3));
+    width: 2px;
+  }
+
   /* Enhanced Search Input Styles */
   .search-input-enhanced {
     @apply transition-all duration-300 ease-in-out;

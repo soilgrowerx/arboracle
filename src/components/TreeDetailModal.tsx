@@ -534,77 +534,216 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                   </CardContent>
                 </Card>
 
-                {/* Full Taxonomic Hierarchy */}
-                {(tree.kingdom || tree.phylum || tree.class || tree.order || tree.family || tree.genus) && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>🧬 Complete Taxonomic Hierarchy</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 gap-4">
-                        {tree.kingdom && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                            <span className="text-2xl">👑</span>
-                            <div>
-                              <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Kingdom</p>
-                              <p className="font-semibold text-blue-800">{tree.kingdom}</p>
+                {/* Complete Taxonomic Hierarchy */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <span className="text-2xl">🧬</span>
+                      Complete Taxonomic Classification
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 mt-2">
+                      Scientific classification from Kingdom down to Species level
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    {/* Hierarchical Flow Display */}
+                    <div className="space-y-3">
+                      {/* Kingdom */}
+                      <div className="taxonomic-level flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-blue-600/10"></div>
+                        <div className="relative z-10 flex items-center gap-4 w-full">
+                          <span className="text-3xl filter drop-shadow-sm">👑</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-blue-700 uppercase tracking-widest">Kingdom</p>
+                              <div className="h-px bg-blue-300 flex-1"></div>
                             </div>
+                            <p className="font-bold text-lg text-blue-900 mt-1">
+                              {tree.kingdom || (
+                                <span className="text-blue-500 italic font-medium">Unknown</span>
+                              )}
+                            </p>
                           </div>
-                        )}
-                        
-                        {tree.phylum && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                            <span className="text-2xl">🧬</span>
-                            <div>
-                              <p className="text-xs font-medium text-purple-600 uppercase tracking-wide">Phylum</p>
-                              <p className="font-semibold text-purple-800">{tree.phylum}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {tree.class && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
-                            <span className="text-2xl">🏛️</span>
-                            <div>
-                              <p className="text-xs font-medium text-indigo-600 uppercase tracking-wide">Class</p>
-                              <p className="font-semibold text-indigo-800">{tree.class}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {tree.order && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg border border-teal-200">
-                            <span className="text-2xl">📋</span>
-                            <div>
-                              <p className="text-xs font-medium text-teal-600 uppercase tracking-wide">Order</p>
-                              <p className="font-semibold text-teal-800">{tree.order}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {tree.family && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-                            <span className="text-2xl">👨‍👩‍👧‍👦</span>
-                            <div>
-                              <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Family</p>
-                              <p className="font-semibold text-emerald-800">{tree.family}</p>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {tree.genus && (
-                          <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
-                            <span className="text-2xl">🌿</span>
-                            <div>
-                              <p className="text-xs font-medium text-green-600 uppercase tracking-wide">Genus</p>
-                              <p className="font-semibold text-green-800">{tree.genus}</p>
-                            </div>
-                          </div>
-                        )}
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                )}
+
+                      {/* Connection Line */}
+                      <div className="taxonomic-connection flex justify-center">
+                        <div className="w-px h-6 bg-gradient-to-b from-blue-300 to-purple-300"></div>
+                      </div>
+
+                      {/* Phylum */}
+                      <div className="taxonomic-level flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-purple-600/10"></div>
+                        <div className="relative z-10 flex items-center gap-4 w-full">
+                          <span className="text-3xl filter drop-shadow-sm">🧬</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-purple-700 uppercase tracking-widest">Phylum</p>
+                              <div className="h-px bg-purple-300 flex-1"></div>
+                            </div>
+                            <p className="font-bold text-lg text-purple-900 mt-1">
+                              {tree.phylum || (
+                                <span className="text-purple-500 italic font-medium">Unknown</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Connection Line */}
+                      <div className="taxonomic-connection flex justify-center">
+                        <div className="w-px h-6 bg-gradient-to-b from-purple-300 to-indigo-300"></div>
+                      </div>
+
+                      {/* Class */}
+                      <div className="taxonomic-level flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-indigo-600/10"></div>
+                        <div className="relative z-10 flex items-center gap-4 w-full">
+                          <span className="text-3xl filter drop-shadow-sm">🏛️</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-indigo-700 uppercase tracking-widest">Class</p>
+                              <div className="h-px bg-indigo-300 flex-1"></div>
+                            </div>
+                            <p className="font-bold text-lg text-indigo-900 mt-1">
+                              {tree.class || (
+                                <span className="text-indigo-500 italic font-medium">Unknown</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Connection Line */}
+                      <div className="taxonomic-connection flex justify-center">
+                        <div className="w-px h-6 bg-gradient-to-b from-indigo-300 to-teal-300"></div>
+                      </div>
+
+                      {/* Order */}
+                      <div className="taxonomic-level flex items-center gap-4 p-4 bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg border border-teal-200 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-teal-600/10"></div>
+                        <div className="relative z-10 flex items-center gap-4 w-full">
+                          <span className="text-3xl filter drop-shadow-sm">📋</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-teal-700 uppercase tracking-widest">Order</p>
+                              <div className="h-px bg-teal-300 flex-1"></div>
+                            </div>
+                            <p className="font-bold text-lg text-teal-900 mt-1">
+                              {tree.order || (
+                                <span className="text-teal-500 italic font-medium">Unknown</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Connection Line */}
+                      <div className="taxonomic-connection flex justify-center">
+                        <div className="w-px h-6 bg-gradient-to-b from-teal-300 to-emerald-300"></div>
+                      </div>
+
+                      {/* Family */}
+                      <div className="taxonomic-level flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-emerald-600/10"></div>
+                        <div className="relative z-10 flex items-center gap-4 w-full">
+                          <span className="text-3xl filter drop-shadow-sm">👨‍👩‍👧‍👦</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest">Family</p>
+                              <div className="h-px bg-emerald-300 flex-1"></div>
+                            </div>
+                            <p className="font-bold text-lg text-emerald-900 mt-1">
+                              {tree.family || (
+                                <span className="text-emerald-500 italic font-medium">Unknown</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Connection Line */}
+                      <div className="taxonomic-connection flex justify-center">
+                        <div className="w-px h-6 bg-gradient-to-b from-emerald-300 to-green-300"></div>
+                      </div>
+
+                      {/* Genus */}
+                      <div className="taxonomic-level flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-green-600/10"></div>
+                        <div className="relative z-10 flex items-center gap-4 w-full">
+                          <span className="text-3xl filter drop-shadow-sm">🌿</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-green-700 uppercase tracking-widest">Genus</p>
+                              <div className="h-px bg-green-300 flex-1"></div>
+                            </div>
+                            <p className="font-bold text-lg text-green-900 mt-1">
+                              {tree.genus || (
+                                <span className="text-green-500 italic font-medium">Unknown</span>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Connection Line */}
+                      <div className="taxonomic-connection flex justify-center">
+                        <div className="w-px h-6 bg-gradient-to-b from-green-300 to-lime-300"></div>
+                      </div>
+
+                      {/* Species */}
+                      <div className="taxonomic-level flex items-center gap-4 p-4 bg-gradient-to-r from-lime-50 to-lime-100 rounded-lg border border-lime-200 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-lime-500/5 to-lime-600/10"></div>
+                        <div className="relative z-10 flex items-center gap-4 w-full">
+                          <span className="text-3xl filter drop-shadow-sm">🌳</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-lime-700 uppercase tracking-widest">Species</p>
+                              <div className="h-px bg-lime-300 flex-1"></div>
+                            </div>
+                            <p className="font-bold text-lg text-lime-900 mt-1">
+                              {tree.species_binomial || tree.scientificName || (
+                                <span className="text-lime-500 italic font-medium">Unknown</span>
+                              )}
+                            </p>
+                            {tree.commonName && (
+                              <p className="text-sm text-lime-700 mt-1 font-medium">
+                                Common name: {tree.commonName}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Summary Box */}
+                    <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                      <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <span>📖</span>
+                        Complete Classification
+                      </h4>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        <span className="font-semibold">
+                          {tree.kingdom || 'Unknown Kingdom'} → {' '}
+                          {tree.phylum || 'Unknown Phylum'} → {' '}
+                          {tree.class || 'Unknown Class'} → {' '}
+                          {tree.order || 'Unknown Order'} → {' '}
+                          {tree.family || 'Unknown Family'} → {' '}
+                          {tree.genus || 'Unknown Genus'} → {' '}
+                          {tree.species_binomial || tree.scientificName || 'Unknown Species'}
+                        </span>
+                      </p>
+                      {tree.iNaturalistId && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs text-gray-600">
+                            Taxonomic data verified through iNaturalist (ID: {tree.iNaturalistId})
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Enhanced Tree Data */}
                 {(tree.land_owner || tree.site_name || tree.nursery_name || tree.height_cm || tree.dbh_cm || tree.health_status) && (
