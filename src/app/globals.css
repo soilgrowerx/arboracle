@@ -751,3 +751,24 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Map specific styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+}
+
+.tree-popup .leaflet-popup-content {
+  margin: 0 !important;
+  border-radius: 8px;
+}
+
+.tree-popup .leaflet-popup-close-button {
+  color: #059669 !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+}

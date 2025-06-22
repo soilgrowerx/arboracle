@@ -6,11 +6,13 @@ import { TreeService } from '@/services/treeService';
 import { TreeCard } from '@/components/TreeCard';
 import { AddTreeModal } from '@/components/AddTreeModal';
 import { TreeStatistics } from '@/components/TreeStatistics';
+import { MapView } from '@/components/MapView';
 import { Toaster } from '@/components/ui/toaster';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, SortAsc, Download } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Filter, SortAsc, Download, List, MapPin } from 'lucide-react';
 import { calculateTreeAge } from '@/lib/utils';
 
 export default function Home() {
@@ -19,6 +21,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState('date-newest');
   const [filterBy, setFilterBy] = useState('all');
   const [editingTree, setEditingTree] = useState<Tree | undefined>(undefined);
+  const [selectedTree, setSelectedTree] = useState<Tree | undefined>(undefined);
 
   const loadTrees = () => {
     try {
@@ -40,6 +43,12 @@ export default function Home() {
   };
 
   const handleEditTree = (tree: Tree) => {
+    setEditingTree(tree);
+  };
+
+  const handleTreeSelect = (tree: Tree) => {
+    setSelectedTree(tree);
+    // For now, just edit the tree when selected from map
     setEditingTree(tree);
   };
 
@@ -214,8 +223,22 @@ export default function Home() {
         {/* Statistics Dashboard */}
         <TreeStatistics trees={trees} />
 
-        {/* Search and Filter Section */}
-        {trees.length > 0 && (
+        {/* Tabs for List and Map View */}
+        <Tabs defaultValue="list" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="list" className="flex items-center gap-2">
+              <List size={16} />
+              List View
+            </TabsTrigger>
+            <TabsTrigger value="map" className="flex items-center gap-2">
+              <MapPin size={16} />
+              Map View
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="list" className="space-y-6">
+            {/* Search and Filter Section */}
+            {trees.length > 0 && (
           <div className="mb-6 space-y-4">
             {/* Search Bar */}
             <div className="search-container-enhanced max-w-md">
@@ -339,6 +362,12 @@ export default function Home() {
             ))}
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="map" className="space-y-6">
+            <MapView trees={filteredTrees} onTreeSelect={handleTreeSelect} />
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Footer */}
