@@ -400,37 +400,37 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     <Dialog open={open} onOpenChange={setOpen}>
       {!isEditMode && (
         <DialogTrigger asChild>
-          <Button className="btn-primary-enhanced group">
-            <Plus size={16} className="mr-2 transition-transform duration-200 group-hover:rotate-90" />
+          <Button className="w-full btn-primary-enhanced group py-2 sm:py-3 text-sm sm:text-base font-semibold">
+            <Plus size={14} className="mr-2 transition-transform duration-200 group-hover:rotate-90" />
             Add Tree
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] w-[95vw] sm:w-full overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-green-800 flex items-center gap-2 text-lg sm:text-xl">
+      <DialogContent className="sm:max-w-[700px] max-h-[95vh] w-[95vw] sm:w-full overflow-y-auto p-3 sm:p-6">
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="text-green-800 flex items-center gap-2 text-base sm:text-lg lg:text-xl">
             🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-6">
           {/* Tree Details Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg">🌳</span>
-              <h3 className="text-lg font-semibold text-green-800">Tree Details</h3>
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-4">
+              <span className="text-base sm:text-lg">🌳</span>
+              <h3 className="text-base sm:text-lg font-semibold text-green-800">Tree Details</h3>
             </div>
             
             <div>
               <Label htmlFor="species" className="text-green-700 font-medium text-sm sm:text-base">Species *</Label>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col gap-2 mt-1">
                 <Input
                   id="species"
                   value={formData.species}
                   onChange={(e) => setFormData(prev => ({ ...prev, species: e.target.value }))}
                   placeholder="e.g., Oak, Maple, Pine..."
                   required
-                  className={`border-green-200 focus:border-green-400 ${
+                  className={`border-green-200 focus:border-green-400 text-sm sm:text-base ${
                     errors.some(e => e.includes('Species')) ? 'border-red-500' : ''
                   }`}
                 />
@@ -439,15 +439,15 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   variant="outline"
                   onClick={searchSpecies}
                   disabled={isSearching}
-                  className="btn-search-enhanced shrink-0 w-full sm:w-auto"
+                  className="btn-search-enhanced w-full py-2 sm:py-3"
                 >
-                  <Search size={16} className={`transition-transform duration-300 ${isSearching ? 'animate-spin' : ''}`} />
-                  <span className="ml-2">{isSearching ? 'Searching...' : 'Search'}</span>
+                  <Search size={14} className={`transition-transform duration-300 ${isSearching ? 'animate-spin' : ''}`} />
+                  <span className="ml-2 text-sm sm:text-base">{isSearching ? 'Searching...' : 'Search'}</span>
                 </Button>
               </div>
               
               {showSearchResults && searchResults.length > 0 && (
-                <div className="mt-2 max-h-60 overflow-y-auto border border-green-200 rounded-md bg-white shadow-sm">
+                <div className="mt-2 max-h-48 sm:max-h-60 overflow-y-auto border border-green-200 rounded-md bg-white shadow-sm">
                   {searchResults.map((taxon) => {
                     const taxonomy = iNaturalistService.parseTaxonomicHierarchy(taxon);
                     return (
@@ -455,16 +455,16 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                         key={taxon.id}
                         type="button"
                         onClick={() => selectSpecies(taxon)}
-                        className="w-full text-left px-4 py-3 hover:bg-green-50 border-b border-green-100 last:border-b-0 transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
+                        className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-green-50 border-b border-green-100 last:border-b-0 transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
                       >
-                        <div className="font-medium text-green-800 mb-1">
+                        <div className="font-medium text-green-800 mb-1 text-sm sm:text-base">
                           {taxon.preferred_common_name || taxon.name}
                         </div>
-                        <div className="text-sm text-green-600 mb-2">
-                          <span className="italic font-serif">{taxon.name}</span> • <span className="text-xs bg-green-100 px-2 py-0.5 rounded-full">{taxon.rank}</span>
+                        <div className="text-xs sm:text-sm text-green-600 mb-1 sm:mb-2">
+                          <span className="italic font-serif">{taxon.name}</span> • <span className="text-xs bg-green-100 px-1 sm:px-2 py-0.5 rounded-full">{taxon.rank}</span>
                         </div>
                         {taxonomy && (
-                          <div className="mt-1">
+                          <div className="mt-1 hidden sm:block">
                             <TaxonomyBreadcrumb taxonomy={taxonomy} />
                           </div>
                         )}
@@ -476,34 +476,34 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             </div>
 
             <div>
-              <Label htmlFor="date_planted" className="text-green-700 font-medium">Date Planted</Label>
+              <Label htmlFor="date_planted" className="text-green-700 font-medium text-sm sm:text-base">Date Planted</Label>
               <Input
                 id="date_planted"
                 type="date"
                 value={formData.date_planted}
                 onChange={(e) => setFormData(prev => ({ ...prev, date_planted: e.target.value }))}
-                className="border-green-200 focus:border-green-400"
+                className="border-green-200 focus:border-green-400 text-sm sm:text-base mt-1"
               />
             </div>
 
             <div>
-              <Label htmlFor="notes" className="text-green-700 font-medium">General Notes</Label>
+              <Label htmlFor="notes" className="text-green-700 font-medium text-sm sm:text-base">General Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                 placeholder="Any general notes about this tree..."
-                rows={3}
-                className="border-green-200 focus:border-green-400"
+                rows={2}
+                className="border-green-200 focus:border-green-400 text-sm sm:text-base mt-1 resize-none"
               />
             </div>
           </div>
 
           {/* Location Info Section */}
-          <div className="border-t border-green-100 pt-6 space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg">📍</span>
-              <h3 className="text-lg font-semibold text-green-800">Location Info</h3>
+          <div className="border-t border-green-100 pt-3 sm:pt-4 lg:pt-6 space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-4">
+              <span className="text-base sm:text-lg">📍</span>
+              <h3 className="text-base sm:text-lg font-semibold text-green-800">Location Info</h3>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -520,7 +520,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   }))}
                   placeholder="0.000000"
                   required
-                  className={`border-green-200 focus:border-green-400 ${
+                  className={`border-green-200 focus:border-green-400 text-sm sm:text-base mt-1 ${
                     errors.some(e => e.includes('Latitude') || e.includes('Location')) ? 'border-red-500' : ''
                   }`}
                 />
@@ -538,48 +538,48 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   }))}
                   placeholder="0.000000"
                   required
-                  className={`border-green-200 focus:border-green-400 ${
+                  className={`border-green-200 focus:border-green-400 text-sm sm:text-base mt-1 ${
                     errors.some(e => e.includes('Longitude') || e.includes('Location')) ? 'border-red-500' : ''
                   }`}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={getCurrentLocation}
-                className="btn-outline-enhanced w-full"
+                className="btn-outline-enhanced w-full py-2 sm:py-3 text-sm sm:text-base"
               >
                 <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
                 <span className="hidden xs:inline">Use Current Location</span>
-                <span className="xs:hidden">Current Location</span>
+                <span className="xs:hidden">Current GPS</span>
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowLocationMap(!showLocationMap)}
-                className="btn-outline-enhanced w-full"
+                className="btn-outline-enhanced w-full py-2 sm:py-3 text-sm sm:text-base"
               >
-                <Map size={16} className="mr-2" />
+                <Map size={14} className="mr-2" />
                 {showLocationMap ? 'Hide Map' : 'Pick on Map'}
               </Button>
             </div>
 
             {/* Interactive Map for Location Selection */}
             {showLocationMap && isClient && (
-              <div className="mt-4 border border-green-200 rounded-lg overflow-hidden">
-                <div className="bg-green-50 px-4 py-2 border-b border-green-200">
-                  <p className="text-sm text-green-700 font-medium">📍 Click on the map to set tree location</p>
+              <div className="mt-3 sm:mt-4 border border-green-200 rounded-lg overflow-hidden">
+                <div className="bg-green-50 px-3 sm:px-4 py-2 border-b border-green-200">
+                  <p className="text-xs sm:text-sm text-green-700 font-medium">📍 Click on the map to set tree location</p>
                 </div>
-                <div className="h-64 w-full relative">
+                <div className="h-48 sm:h-64 w-full relative">
                   <MapContainer
                     center={formData.location.lat !== 0 && formData.location.lng !== 0 
                       ? [formData.location.lat, formData.location.lng] 
                       : [40.7128, -74.0060]} // Default to NYC
                     zoom={13}
-                    style={{ height: '100%', width: '100%', minHeight: '256px' }}
+                    style={{ height: '100%', width: '100%' }}
                     className="leaflet-container"
                     key={`map-${showLocationMap}`} // Force re-render when map shows/hides
                   >
@@ -597,7 +597,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                     />
                   </MapContainer>
                 </div>
-                <div className="bg-green-50 px-4 py-2 border-t border-green-200">
+                <div className="bg-green-50 px-3 sm:px-4 py-2 border-t border-green-200">
                   <p className="text-xs text-green-600">
                     💡 Tip: You can also enter coordinates manually in the fields above
                   </p>
@@ -607,21 +607,21 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             
             {/* Plus Code Preview */}
             {formData.location.lat !== 0 && formData.location.lng !== 0 && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <MapPin size={16} className="text-green-600" />
-                  <span className="text-sm font-medium text-green-700">Generated Plus Code Preview</span>
+                  <MapPin size={14} className="text-green-600" />
+                  <span className="text-xs sm:text-sm font-medium text-green-700">Generated Plus Code Preview</span>
                 </div>
                 <div className="space-y-2">
                   <div>
                     <p className="text-xs text-green-600 mb-1">Global Code:</p>
-                    <p className="font-mono text-sm bg-white border border-green-200 p-2 rounded text-green-800">
+                    <p className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all">
                       {PlusCodeService.encode(formData.location.lat, formData.location.lng).global}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-green-600 mb-1">Local Code:</p>
-                    <p className="font-mono text-sm bg-white border border-green-200 p-2 rounded text-green-800">
+                    <p className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all">
                       {PlusCodeService.encode(formData.location.lat, formData.location.lng).local}
                     </p>
                   </div>
@@ -732,28 +732,28 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="flex-1 btn-outline-enhanced order-2 sm:order-1"
-            >
-              Cancel
-            </Button>
+          <div className="flex flex-col gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-green-100">
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 btn-primary-enhanced order-1 sm:order-2"
+              className="w-full btn-primary-enhanced py-3 sm:py-4 text-sm sm:text-base font-semibold"
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center">
                   <span className="animate-spin mr-2">🌱</span>
-                  {isEditMode ? 'Updating...' : 'Adding...'}
+                  <span className="text-sm sm:text-base">{isEditMode ? 'Updating...' : 'Adding...'}</span>
                 </span>
               ) : (
-                isEditMode ? 'Update Tree' : 'Add Tree'
+                <span className="text-sm sm:text-base">{isEditMode ? 'Update Tree' : 'Add Tree'}</span>
               )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              className="w-full btn-outline-enhanced py-2 sm:py-3 text-sm sm:text-base"
+            >
+              Cancel
             </Button>
           </div>
         </form>

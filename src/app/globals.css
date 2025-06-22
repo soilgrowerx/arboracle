@@ -550,6 +550,68 @@
     @apply w-4 h-4 sm:w-5 sm:h-5;
   }
 
+  /* Mobile-first responsive card grid */
+  .responsive-card-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6;
+  }
+
+  /* Mobile button sizing */
+  .mobile-button {
+    @apply py-2 sm:py-3 px-3 sm:px-4 text-sm sm:text-base;
+  }
+
+  /* Mobile form elements */
+  .mobile-input {
+    @apply text-sm sm:text-base py-2 sm:py-3 px-3 sm:px-4;
+  }
+
+  .mobile-label {
+    @apply text-sm sm:text-base font-medium;
+  }
+
+  /* Mobile-responsive headers */
+  .mobile-header {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  .mobile-subheader {
+    @apply text-base sm:text-lg lg:text-xl;
+  }
+
+  /* Mobile modal sizing */
+  .mobile-modal {
+    @apply w-[95vw] sm:w-full max-h-[95vh] p-3 sm:p-6;
+  }
+
+  /* Touch-friendly minimum sizes */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Mobile-specific layouts */
+  .mobile-stack {
+    @apply flex flex-col space-y-3 sm:space-y-4;
+  }
+
+  .mobile-inline {
+    @apply flex flex-col xs:flex-row gap-2 xs:gap-3;
+  }
+
+  /* Responsive text truncation */
+  .mobile-truncate {
+    @apply truncate sm:whitespace-normal;
+  }
+
+  /* Mobile card content spacing */
+  .mobile-card-content {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+
+  /* Mobile-friendly tab sizing */
+  .mobile-tabs {
+    @apply text-xs sm:text-sm px-2 sm:px-3 py-2;
+  }
+
   .arboracle-gradient {
     @apply bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50;
   }

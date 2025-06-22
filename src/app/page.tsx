@@ -297,64 +297,66 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-10 dashboard-section">
         {/* Header Section with Add Button and View Toggle */}
-        <div className="dashboard-card-enhanced p-8 mb-10">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-2">
-            <div className="float-animation">
-              <h2 className="text-3xl sm:text-4xl font-bold text-green-800 mb-2">My Trees</h2>
-              <p className="text-green-600 text-base sm:text-lg font-medium">
+        <div className="dashboard-card-enhanced p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 lg:mb-10">
+          <div className="flex flex-col gap-4 sm:gap-6 mb-2">
+            <div className="float-animation text-center sm:text-left">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-800 mb-2">My Trees</h2>
+              <p className="text-green-600 text-sm sm:text-base lg:text-lg font-medium">
                 {trees.length === 0 
                   ? "Start building your digital forest" 
                   : `Managing ${trees.length} tree${trees.length !== 1 ? 's' : ''} in your collection`
                 }
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              {/* Primary Actions - Always visible */}
-              <div className="flex gap-3">
-                <Link href="/map" className="flex-1 sm:flex-none">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              {/* Primary Actions Row */}
+              <div className="flex flex-col xs:flex-row gap-2 xs:gap-3">
+                <Link href="/map" className="flex-1">
                   <Button
-                    className="w-full sm:w-auto btn-enhanced bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-3"
+                    className="w-full btn-enhanced bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-3 sm:px-4 lg:px-6 py-2 sm:py-3 text-sm sm:text-base"
                   >
-                    <Map size={18} className="mr-2" />
+                    <Map size={16} className="mr-2" />
                     <span className="hidden xs:inline">🗺️ View Map</span>
                     <span className="xs:hidden">Map</span>
                   </Button>
                 </Link>
-                <AddTreeModal 
-                  onTreeAdded={handleTreeAdded} 
-                  editTree={editingTree}
-                  isEditMode={!!editingTree}
-                />
+                <div className="flex-1">
+                  <AddTreeModal 
+                    onTreeAdded={handleTreeAdded} 
+                    editTree={editingTree}
+                    isEditMode={!!editingTree}
+                  />
+                </div>
               </div>
               
-              {/* Secondary Actions - Enhanced styling */}
-              <div className="flex gap-3">
-                <Link href="/settings" className="flex-1 sm:flex-none">
+              {/* Secondary Actions - Responsive grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                <Link href="/settings" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full sm:w-auto btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-4 py-3"
+                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm"
                   >
-                    <Settings size={16} className="mr-2" />
+                    <Settings size={14} className="mr-1 sm:mr-2" />
                     <span className="hidden sm:inline">Settings</span>
-                    <span className="sm:hidden">Settings</span>
+                    <span className="sm:hidden">Config</span>
                   </Button>
                 </Link>
-                <Link href="/knowledge" className="flex-1 sm:flex-none">
+                <Link href="/knowledge" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full sm:w-auto btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-4 py-3"
+                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm"
                   >
-                    <BookOpen size={16} className="mr-2" />
+                    <BookOpen size={14} className="mr-1 sm:mr-2" />
                     <span className="hidden sm:inline">🧠 Knowledge</span>
-                    <span className="sm:hidden">Knowledge</span>
+                    <span className="sm:hidden">Learn</span>
                   </Button>
                 </Link>
-                <Link href="/admin" className="flex-1 sm:flex-none">
+                <Link href="/admin" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full sm:w-auto btn-outline-enhanced border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 px-4 py-3"
+                    className="w-full btn-outline-enhanced border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm"
                   >
-                    <Settings size={16} className="mr-2" />
+                    <Settings size={14} className="mr-1 sm:mr-2" />
                     <span className="hidden sm:inline">Admin</span>
                     <span className="sm:hidden">Admin</span>
                   </Button>
@@ -364,18 +366,18 @@ export default function Home() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
-                        className="btn-outline-enhanced px-4 py-3"
+                        className="w-full btn-outline-enhanced px-2 sm:px-3 lg:px-4 py-2 sm:py-3 text-xs sm:text-sm col-span-1"
                       >
-                        <Download size={16} className="mr-2" />
+                        <Download size={14} className="mr-1 sm:mr-2" />
                         <span className="hidden sm:inline">Export</span>
                         <span className="sm:hidden">Export</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="dashboard-card-enhanced">
-                      <DropdownMenuItem onClick={exportToCSV} className="py-3 px-4">
+                      <DropdownMenuItem onClick={exportToCSV} className="py-2 sm:py-3 px-3 sm:px-4 text-sm">
                         📊 Export Tree Data (CSV)
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={exportEcosystemData} className="py-3 px-4">
+                      <DropdownMenuItem onClick={exportEcosystemData} className="py-2 sm:py-3 px-3 sm:px-4 text-sm">
                         🌍 Export Ecosystem Data (CSV)
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -488,11 +490,11 @@ export default function Home() {
 
               {/* Trees Grid */}
               {filteredTrees.length === 0 ? (
-                <div className="text-center py-20">
-                  <div className="dashboard-card-enhanced p-16 max-w-lg mx-auto float-animation">
-                    <div className="text-8xl mb-8 float-animation">🔍</div>
-                    <h3 className="text-3xl font-bold text-green-800 mb-6">No Trees Match Your Criteria</h3>
-                    <p className="text-green-700 mb-8 text-lg leading-relaxed">
+                <div className="text-center py-12 sm:py-16 lg:py-20">
+                  <div className="dashboard-card-enhanced p-6 sm:p-10 lg:p-16 max-w-xs sm:max-w-lg mx-auto float-animation">
+                    <div className="text-6xl sm:text-7xl lg:text-8xl mb-6 sm:mb-8 float-animation">🔍</div>
+                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-800 mb-4 sm:mb-6">No Trees Match Your Criteria</h3>
+                    <p className="text-green-700 mb-6 sm:mb-8 text-sm sm:text-base lg:text-lg leading-relaxed">
                       Try adjusting your search, sort, or filter settings to discover more trees in your collection.
                     </p>
                     <div className="space-y-4">
@@ -502,7 +504,7 @@ export default function Home() {
                           setFilterBy('all');
                           setSortBy('date-newest');
                         }}
-                        className="block w-full btn-primary-enhanced py-4 px-8 text-lg"
+                        className="block w-full btn-primary-enhanced py-3 sm:py-4 px-4 sm:px-8 text-sm sm:text-base lg:text-lg"
                       >
                         Clear All Filters
                       </button>
@@ -510,7 +512,7 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
                   {filteredTrees.map((tree, index) => (
                     <div key={tree.id} className={`grid-fade-in`} style={{animationDelay: `${index * 0.1}s`}}>
                       <TreeCard
@@ -536,31 +538,32 @@ export default function Home() {
 
         {/* Empty State - Show when no trees */}
         {trees.length === 0 && (
-          <div className="text-center py-24">
-            <div className="dashboard-card-enhanced p-20 max-w-2xl mx-auto float-animation">
-              <div className="text-9xl mb-10 float-animation">🌱</div>
-              <h3 className="text-4xl font-bold text-green-800 mb-6">Welcome to Your Digital Forest</h3>
-              <p className="text-green-700 mb-10 text-xl leading-relaxed">
+          <div className="text-center py-12 sm:py-16 lg:py-24">
+            <div className="dashboard-card-enhanced p-6 sm:p-12 lg:p-20 max-w-md sm:max-w-lg lg:max-w-2xl mx-auto float-animation">
+              <div className="text-6xl sm:text-7xl lg:text-9xl mb-6 sm:mb-8 lg:mb-10 float-animation">🌱</div>
+              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-800 mb-4 sm:mb-6">Welcome to Your Digital Forest</h3>
+              <p className="text-green-700 mb-6 sm:mb-8 lg:mb-10 text-sm sm:text-base lg:text-xl leading-relaxed">
                 Begin your journey of cultivating knowledge and preserving nature by adding your first tree to the collection!
               </p>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <AddTreeModal 
                   onTreeAdded={handleTreeAdded} 
                   editTree={editingTree}
                   isEditMode={!!editingTree}
                 />
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-2 sm:gap-4">
                   <div className="h-px bg-green-200 flex-1"></div>
-                  <span className="text-green-600 font-medium px-4">or</span>
+                  <span className="text-green-600 font-medium px-2 sm:px-4 text-sm sm:text-base">or</span>
                   <div className="h-px bg-green-200 flex-1"></div>
                 </div>
                 <Link href="/map">
                   <Button
                     variant="outline"
-                    className="w-full btn-outline-enhanced py-4 px-8 text-lg border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
+                    className="w-full btn-outline-enhanced py-3 sm:py-4 px-4 sm:px-8 text-sm sm:text-base lg:text-lg border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
                   >
-                    <Map size={20} className="mr-3" />
-                    🗺️ Explore Map & Add Trees by Location
+                    <Map size={16} className="sm:size-18 lg:size-20 mr-2 sm:mr-3" />
+                    <span className="hidden xs:inline">🗺️ Explore Map & Add Trees by Location</span>
+                    <span className="xs:hidden">🗺️ Map View</span>
                   </Button>
                 </Link>
               </div>

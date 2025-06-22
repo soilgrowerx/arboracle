@@ -108,15 +108,15 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
       className="cursor-pointer tree-card-enhanced"
       onClick={onClick}
     >
-      <CardHeader className="pb-3 sm:pb-4 tree-card-header">
-        <CardTitle className="text-base sm:text-lg font-semibold text-green-800">
+      <CardHeader className="pb-2 sm:pb-3 lg:pb-4 tree-card-header">
+        <CardTitle className="text-sm sm:text-base lg:text-lg font-semibold text-green-800">
           <div className="flex items-start gap-2 sm:gap-3 mb-2">
-            <span className="text-xl sm:text-2xl tree-icon-enhanced flex-shrink-0">🌳</span>
+            <span className="text-lg sm:text-xl lg:text-2xl tree-icon-enhanced flex-shrink-0">🌳</span>
             <div className="flex-1 min-w-0">
-              <div className="text-base sm:text-lg font-bold text-green-800 mb-1 leading-tight">
+              <div className="text-sm sm:text-base lg:text-lg font-bold text-green-800 mb-1 leading-tight break-words">
                 {tree.commonName || tree.species}
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <div className="flex flex-col gap-1 sm:gap-2">
                 <div className="flex items-center gap-1">
                   {getVerificationStatusIcon()}
                   <span className={`text-xs font-medium ${getVerificationStatusColor()}`}>
@@ -132,9 +132,9 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
                     variant="ghost"
                     size="sm"
                     onClick={handleOpenINaturalist}
-                    className="h-6 px-2 text-xs hover:bg-blue-50 hidden sm:inline-flex"
+                    className="h-5 px-2 text-xs hover:bg-blue-50 hidden sm:inline-flex self-start"
                   >
-                    <ExternalLink size={12} className="mr-1 text-blue-600" />
+                    <ExternalLink size={10} className="mr-1 text-blue-600" />
                     <span className="text-blue-600">View on iNaturalist</span>
                   </Button>
                 )}
@@ -146,10 +146,10 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
                   variant="ghost"
                   size="sm"
                   onClick={handleOpenINaturalist}
-                  className="h-6 w-6 sm:h-8 sm:w-8 p-0 hover:bg-blue-100"
+                  className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 p-0 hover:bg-blue-100 touch-target"
                   title="Open on iNaturalist"
                 >
-                  <ExternalLink size={12} className="sm:size-14 text-blue-600" />
+                  <ExternalLink size={12} className="text-blue-600" />
                 </Button>
               )}
               {onEdit && (
@@ -157,10 +157,10 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
                   variant="ghost"
                   size="sm"
                   onClick={handleEdit}
-                  className="h-6 w-6 sm:h-8 sm:w-8 p-0 hover:bg-green-100"
+                  className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 p-0 hover:bg-green-100 touch-target"
                   title="Edit tree"
                 >
-                  <Pencil size={12} className="sm:size-14 text-green-600" />
+                  <Pencil size={12} className="text-green-600" />
                 </Button>
               )}
             </div>
@@ -187,40 +187,40 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 sm:space-y-4 pt-3 sm:pt-4">
-        <div className="tree-info-item flex items-start gap-2 sm:gap-3 px-1 sm:px-2">
-          <MapPin size={16} className="sm:size-18 text-green-600 flex-shrink-0 mt-0.5" />
-          <div className="flex-1 space-y-2 min-w-0">
+      <CardContent className="space-y-2 sm:space-y-3 lg:space-y-4 pt-2 sm:pt-3 lg:pt-4">
+        <div className="tree-info-item flex items-start gap-2 px-1 sm:px-2">
+          <MapPin size={14} className="sm:size-16 text-green-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 space-y-1 sm:space-y-2 min-w-0">
             {/* Coordinates Display */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <div className="flex flex-col gap-1">
               <span className="text-xs sm:text-sm text-green-700 font-medium">Coordinates:</span>
-              <div className="flex items-center gap-1 sm:gap-2">
-                <span className="text-xs font-mono bg-green-50 px-1.5 sm:px-2 py-1 rounded border text-green-800 truncate">
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-mono bg-green-50 px-1.5 sm:px-2 py-1 rounded border text-green-800 truncate flex-1">
                   {tree.lat.toFixed(4)}°, {tree.lng.toFixed(4)}°
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={(e) => handleCopyCode(`${tree.lat.toFixed(6)}, ${tree.lng.toFixed(6)}`, e)}
-                  className="h-5 w-5 sm:h-6 sm:w-6 p-0 hover:bg-green-100 flex-shrink-0"
+                  className="h-6 w-6 p-0 hover:bg-green-100 flex-shrink-0 touch-target"
                   title="Copy coordinates"
                 >
                   {copied ? (
-                    <Check size={8} className="sm:size-10 text-green-600" />
+                    <Check size={10} className="text-green-600" />
                   ) : (
-                    <Copy size={8} className="sm:size-10 text-green-600" />
+                    <Copy size={10} className="text-green-600" />
                   )}
                 </Button>
               </div>
             </div>
             
             {/* Plus Code Display */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+            <div className="flex flex-col gap-1">
               <span className="text-xs sm:text-sm text-green-700 font-medium">Plus Code:</span>
               <div className="flex items-center gap-1">
                 <button
                   onClick={toggleCodeFormat}
-                  className="tree-plus-code font-mono text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-md hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200 truncate"
+                  className="tree-plus-code font-mono text-xs px-2 py-1 rounded-md hover:bg-green-50 transition-colors cursor-pointer border border-transparent hover:border-green-200 truncate flex-1 text-left"
                 >
                   {displayCode}
                 </button>
@@ -228,18 +228,18 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
                   variant="ghost"
                   size="sm"
                   onClick={(e) => handleCopyCode(displayCode, e)}
-                  className="h-5 w-5 sm:h-7 sm:w-7 p-0 hover:bg-green-100 flex-shrink-0"
+                  className="h-6 w-6 p-0 hover:bg-green-100 flex-shrink-0 touch-target"
                 >
                   {copied ? (
-                    <Check size={8} className="sm:size-12 text-green-600" />
+                    <Check size={10} className="text-green-600" />
                   ) : (
-                    <Copy size={8} className="sm:size-12 text-green-600" />
+                    <Copy size={10} className="text-green-600" />
                   )}
                 </Button>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Info size={12} className="sm:size-14 text-green-500 hover:text-green-700 cursor-help flex-shrink-0" />
+                      <Info size={12} className="text-green-500 hover:text-green-700 cursor-help flex-shrink-0" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <div className="text-sm">
@@ -255,13 +255,13 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
           </div>
         </div>
         
-        <div className="tree-info-item flex items-center gap-2 sm:gap-3 px-1 sm:px-2">
-          <Calendar size={16} className="sm:size-18 text-green-600 flex-shrink-0" />
+        <div className="tree-info-item flex items-center gap-2 px-1 sm:px-2">
+          <Calendar size={14} className="text-green-600 flex-shrink-0" />
           <span className="text-xs sm:text-sm text-green-700 font-medium">Planted: {formatDate(tree.date_planted)}</span>
         </div>
         
-        <div className="tree-info-item flex items-center gap-2 sm:gap-3 px-1 sm:px-2">
-          <Sprout size={16} className="sm:size-18 text-emerald-600 flex-shrink-0" />
+        <div className="tree-info-item flex items-center gap-2 px-1 sm:px-2">
+          <Sprout size={14} className="text-emerald-600 flex-shrink-0" />
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm text-emerald-700 font-medium">Age:</span>
             <span className="text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 px-1.5 sm:px-2 py-1 rounded-full">
@@ -380,16 +380,17 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 mt-4 pt-3 border-t border-green-100">
+        <div className="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-4 pt-3 border-t border-green-100">
           <Link href={`/tree/${tree.id}`} className="flex-1">
-            <Button variant="outline" size="sm" className="w-full border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300">
-              <Eye size={14} className="mr-2" />
-              View Details & Ecosystem
+            <Button variant="outline" size="sm" className="w-full border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 py-2 text-xs sm:text-sm touch-target">
+              <Eye size={12} className="mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">View Details & Ecosystem</span>
+              <span className="sm:hidden">View Details</span>
             </Button>
           </Link>
           {onEdit && (
-            <Button variant="ghost" size="sm" onClick={() => onEdit(tree)} className="text-green-600 hover:bg-green-50">
-              <Pencil size={14} className="mr-1" />
+            <Button variant="ghost" size="sm" onClick={() => onEdit(tree)} className="text-green-600 hover:bg-green-50 py-2 text-xs sm:text-sm touch-target sm:flex-shrink-0">
+              <Pencil size={12} className="mr-1" />
               Edit
             </Button>
           )}

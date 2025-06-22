@@ -191,92 +191,109 @@ export default function TreeDetailPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Header */}
       <header className="enhanced-header-gradient backdrop-blur-md border-b border-green-200/60 sticky top-0 z-40">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4 lg:py-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            {/* Top Row - Back button */}
+            <div className="flex items-center justify-between">
               <Link href="/">
-                <Button variant="ghost" size="sm" className="text-green-700 hover:bg-green-100">
-                  <ArrowLeft size={16} className="mr-2" />
-                  Back to Dashboard
+                <Button variant="ghost" size="sm" className="text-green-700 hover:bg-green-100 text-xs sm:text-sm px-2 sm:px-3">
+                  <ArrowLeft size={14} className="mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Back to Dashboard</span>
+                  <span className="xs:hidden">Back</span>
                 </Button>
               </Link>
-              <div className="flex items-center gap-3">
-                <div className="text-4xl">🌳</div>
-                <div>
-                  <h1 className="text-3xl font-bold text-green-800">
-                    {tree.commonName || tree.species}
-                  </h1>
-                  {tree.scientificName && (
-                    <p className="text-lg italic text-green-600 mt-1">{tree.scientificName}</p>
-                  )}
-                  <div className="flex items-center gap-3 mt-2">
-                    <div className="flex items-center gap-2">
-                      {getVerificationStatusIcon()}
-                      <span className="text-sm font-medium text-gray-700">
-                        {getVerificationStatusText()}
-                      </span>
-                    </div>
-                    {tree.taxonomicRank && (
-                      <Badge variant="outline" className="text-xs">
-                        {tree.taxonomicRank}
-                      </Badge>
-                    )}
-                    {ecosystemStats.totalSpecies > 0 && (
-                      <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-300">
-                        🌍 {ecosystemStats.totalSpecies} ecosystem species
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {tree.iNaturalist_link && (
+              <div className="flex items-center gap-1 sm:gap-2">
+                {tree.iNaturalist_link && (
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(tree.iNaturalist_link, '_blank')}
+                    className="border-blue-200 text-blue-700 hover:bg-blue-50 px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm"
+                  >
+                    <ExternalLink size={14} className="mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">iNaturalist</span>
+                    <span className="sm:hidden">iNat</span>
+                  </Button>
+                )}
                 <Button
                   variant="outline"
-                  onClick={() => window.open(tree.iNaturalist_link, '_blank')}
-                  className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                  onClick={() => router.push('/')}
+                  className="border-green-200 text-green-700 hover:bg-green-50 px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm"
                 >
-                  <ExternalLink size={16} className="mr-2" />
-                  iNaturalist
+                  <Edit size={14} className="mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Edit Tree</span>
+                  <span className="sm:hidden">Edit</span>
                 </Button>
-              )}
-              <Button
-                variant="outline"
-                onClick={() => router.push('/')}
-                className="border-green-200 text-green-700 hover:bg-green-50"
-              >
-                <Edit size={16} className="mr-2" />
-                Edit Tree
-              </Button>
+              </div>
+            </div>
+            
+            {/* Tree Info Row */}
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="text-2xl sm:text-3xl lg:text-4xl flex-shrink-0">🌳</div>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-green-800 leading-tight">
+                  {tree.commonName || tree.species}
+                </h1>
+                {tree.scientificName && (
+                  <p className="text-sm sm:text-base lg:text-lg italic text-green-600 mt-1">{tree.scientificName}</p>
+                )}
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    {getVerificationStatusIcon()}
+                    <span className="text-xs sm:text-sm font-medium text-gray-700">
+                      <span className="hidden sm:inline">{getVerificationStatusText()}</span>
+                      <span className="sm:hidden">
+                        {tree.verification_status === 'verified' ? 'Verified' : 
+                         tree.verification_status === 'manual' ? 'Manual' : 'Pending'}
+                      </span>
+                    </span>
+                  </div>
+                  {tree.taxonomicRank && (
+                    <Badge variant="outline" className="text-xs">
+                      {tree.taxonomicRank}
+                    </Badge>
+                  )}
+                  {ecosystemStats.totalSpecies > 0 && (
+                    <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-300">
+                      🌍 {ecosystemStats.totalSpecies}
+                      <span className="hidden sm:inline"> ecosystem species</span>
+                    </Badge>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
         {/* Quick Stats Banner */}
-        <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 border border-green-200 rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
-            <div className="space-y-2">
-              <div className="text-2xl">📍</div>
-              <div className="text-sm font-medium text-green-700">Location Verified</div>
-              <div className="text-xs text-green-600">Plus Code System</div>
+        <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 border border-green-200 rounded-lg p-3 sm:p-4 lg:p-6 mb-4 sm:mb-6 lg:mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 text-center">
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-lg sm:text-xl lg:text-2xl">📍</div>
+              <div className="text-xs sm:text-sm font-medium text-green-700">Location Verified</div>
+              <div className="text-xs text-green-600 hidden sm:block">Plus Code System</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl">🕐</div>
-              <div className="text-sm font-medium text-green-700">Age: {treeAge.displayText}</div>
-              <div className="text-xs text-green-600">Since {formatDate(tree.date_planted)}</div>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-lg sm:text-xl lg:text-2xl">🕐</div>
+              <div className="text-xs sm:text-sm font-medium text-green-700">Age: {treeAge.displayText}</div>
+              <div className="text-xs text-green-600 hidden sm:block">Since {formatDate(tree.date_planted)}</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl">{getVerificationStatusIcon()}</div>
-              <div className="text-sm font-medium text-green-700">{getVerificationStatusText()}</div>
-              <div className="text-xs text-green-600">Data Quality</div>
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-lg sm:text-xl lg:text-2xl">{getVerificationStatusIcon()}</div>
+              <div className="text-xs sm:text-sm font-medium text-green-700">
+                <span className="hidden sm:inline">{getVerificationStatusText()}</span>
+                <span className="sm:hidden">
+                  {tree.verification_status === 'verified' ? 'Verified' : 
+                   tree.verification_status === 'manual' ? 'Manual' : 'Pending'}
+                </span>
+              </div>
+              <div className="text-xs text-green-600 hidden sm:block">Data Quality</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-2xl">🌍</div>
-              <div className="text-sm font-medium text-green-700">Ecosystem</div>
-              <div className="text-xs text-green-600">
+            <div className="space-y-1 sm:space-y-2">
+              <div className="text-lg sm:text-xl lg:text-2xl">🌍</div>
+              <div className="text-xs sm:text-sm font-medium text-green-700">Ecosystem</div>
+              <div className="text-xs text-green-600 hidden sm:block">
                 {ecosystemStats.totalSpecies > 0 ? `${ecosystemStats.totalSpecies} species documented` : 'No species yet'}
               </div>
             </div>
@@ -285,43 +302,48 @@ export default function TreeDetailPage() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6 bg-green-50 border border-green-200">
-            <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
-              <TreePine size={16} />
-              Overview
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 mb-4 sm:mb-6 bg-green-50 border border-green-200 h-auto p-1">
+            <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white py-2 px-2 sm:px-3 text-xs sm:text-sm">
+              <TreePine size={14} />
+              <span className="hidden xs:inline">Overview</span>
+              <span className="xs:hidden">Info</span>
             </TabsTrigger>
-            <TabsTrigger value="ecosystem" className="flex items-center gap-2 data-[state=active]:bg-emerald-600 data-[state=active]:text-white font-semibold">
-              <Leaf size={16} />
-              🌍 Tree Ecosystem
+            <TabsTrigger value="ecosystem" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-emerald-600 data-[state=active]:text-white font-semibold py-2 px-2 sm:px-3 text-xs sm:text-sm">
+              <Leaf size={14} />
+              <span className="hidden sm:inline">🌍 Tree Ecosystem</span>
+              <span className="sm:hidden">🌍 Eco</span>
             </TabsTrigger>
-            <TabsTrigger value="management" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
-              <Database size={16} />
-              Management
+            <TabsTrigger value="management" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white py-2 px-2 sm:px-3 text-xs sm:text-sm col-span-1 lg:col-span-1">
+              <Database size={14} />
+              <span className="hidden sm:inline">Management</span>
+              <span className="sm:hidden">Manage</span>
             </TabsTrigger>
-            <TabsTrigger value="scientific" className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white">
-              <Microscope size={16} />
-              Scientific
+            <TabsTrigger value="scientific" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white py-2 px-2 sm:px-3 text-xs sm:text-sm col-span-1 lg:col-span-1">
+              <Microscope size={14} />
+              <span className="hidden sm:inline">Scientific</span>
+              <span className="sm:hidden">Science</span>
             </TabsTrigger>
-            <TabsTrigger value="community" className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <MessageCircle size={16} />
-              💬 Community ({comments.length})
+            <TabsTrigger value="community" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white py-2 px-2 sm:px-3 text-xs sm:text-sm col-span-2 sm:col-span-1">
+              <MessageCircle size={14} />
+              <span className="hidden sm:inline">💬 Community ({comments.length})</span>
+              <span className="sm:hidden">💬 ({comments.length})</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin size={20} className="text-green-600" />
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <MapPin size={18} className="text-green-600" />
                     Location Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Coordinates</p>
-                    <div className="flex items-center gap-2">
-                      <p className="font-mono text-sm bg-green-50 border border-green-200 p-3 rounded-lg flex-1 text-green-800">
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Coordinates</p>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <p className="font-mono text-xs sm:text-sm bg-green-50 border border-green-200 p-2 sm:p-3 rounded-lg flex-1 text-green-800 break-all">
                         {tree.lat.toFixed(6)}, {tree.lng.toFixed(6)}
                       </p>
                       <Button
@@ -331,17 +353,17 @@ export default function TreeDetailPage() {
                           const coords = `${tree.lat.toFixed(6)}, ${tree.lng.toFixed(6)}`;
                           await PlusCodeService.copyToClipboard(coords);
                         }}
-                        className="h-10 w-10 p-0 hover:bg-green-100"
+                        className="h-8 w-8 sm:h-10 sm:w-10 p-0 hover:bg-green-100 flex-shrink-0"
                         title="Copy coordinates"
                       >
-                        <Copy size={14} className="text-green-600" />
+                        <Copy size={12} className="sm:size-14 text-green-600" />
                       </Button>
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Plus Code (Global)</p>
-                    <div className="flex items-center gap-2">
-                      <p className="font-mono text-sm bg-green-50 border border-green-200 p-3 rounded-lg flex-1 text-green-800">
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Plus Code (Global)</p>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <p className="font-mono text-xs sm:text-sm bg-green-50 border border-green-200 p-2 sm:p-3 rounded-lg flex-1 text-green-800 break-all">
                         {tree.plus_code_global}
                       </p>
                       <Button
@@ -350,17 +372,17 @@ export default function TreeDetailPage() {
                         onClick={async () => {
                           await PlusCodeService.copyToClipboard(tree.plus_code_global);
                         }}
-                        className="h-10 w-10 p-0 hover:bg-green-100"
+                        className="h-8 w-8 sm:h-10 sm:w-10 p-0 hover:bg-green-100 flex-shrink-0"
                         title="Copy global Plus Code"
                       >
-                        <Copy size={14} className="text-green-600" />
+                        <Copy size={12} className="sm:size-14 text-green-600" />
                       </Button>
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-2">Plus Code (Local)</p>
-                    <div className="flex items-center gap-2">
-                      <p className="font-mono text-sm bg-green-50 border border-green-200 p-3 rounded-lg flex-1 text-green-800">
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Plus Code (Local)</p>
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <p className="font-mono text-xs sm:text-sm bg-green-50 border border-green-200 p-2 sm:p-3 rounded-lg flex-1 text-green-800 break-all">
                         {tree.plus_code_local}
                       </p>
                       <Button
@@ -369,10 +391,10 @@ export default function TreeDetailPage() {
                         onClick={async () => {
                           await PlusCodeService.copyToClipboard(tree.plus_code_local);
                         }}
-                        className="h-10 w-10 p-0 hover:bg-green-100"
+                        className="h-8 w-8 sm:h-10 sm:w-10 p-0 hover:bg-green-100 flex-shrink-0"
                         title="Copy local Plus Code"
                       >
-                        <Copy size={14} className="text-green-600" />
+                        <Copy size={12} className="sm:size-14 text-green-600" />
                       </Button>
                     </div>
                   </div>
@@ -380,33 +402,33 @@ export default function TreeDetailPage() {
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar size={20} className="text-green-600" />
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Calendar size={18} className="text-green-600" />
                     Timeline Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2 sm:space-y-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">Date Planted</p>
-                    <p className="text-sm text-gray-600">{formatDate(tree.date_planted)}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Date Planted</p>
+                    <p className="text-xs sm:text-sm text-gray-600">{formatDate(tree.date_planted)}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">Tree Age</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Tree Age</p>
                     <div className="flex items-center gap-2">
-                      <Sprout size={16} className="text-emerald-600" />
-                      <span className="text-sm font-semibold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full">
+                      <Sprout size={14} className="text-emerald-600" />
+                      <span className="text-xs sm:text-sm font-semibold text-emerald-800 bg-emerald-50 px-2 sm:px-3 py-1 rounded-full">
                         {treeAge.displayText}
                       </span>
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">Added to System</p>
-                    <p className="text-sm text-gray-600">{formatDate(tree.created_at)}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Added to System</p>
+                    <p className="text-xs sm:text-sm text-gray-600">{formatDate(tree.created_at)}</p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">Last Updated</p>
-                    <p className="text-sm text-gray-600">{formatDate(tree.updated_at)}</p>
+                    <p className="text-xs sm:text-sm font-medium text-gray-700 mb-1">Last Updated</p>
+                    <p className="text-xs sm:text-sm text-gray-600">{formatDate(tree.updated_at)}</p>
                   </div>
                 </CardContent>
               </Card>
