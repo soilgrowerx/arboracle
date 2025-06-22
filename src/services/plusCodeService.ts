@@ -57,20 +57,20 @@ export class PlusCodeService {
       6: '~25 km × 20 km',
       8: '~2.5 km × 2 km',
       10: '~250 m × 200 m',
-      11: '~125 m × 100 m',
-      12: '~25 m × 20 m',
-      13: '~12.5 m × 10 m',
-      14: '~2.5 m × 2 m',
-      15: '~1.25 m × 1 m'
+      11: '~13 m × 13 m',
+      12: '~3 m × 2.5 m',
+      13: '~1.2 m × 1 m',
+      14: '~0.6 m × 0.5 m',
+      15: '~0.3 m × 0.25 m'
     };
-    return areaSizes[precision] || '~125 m × 100 m';
+    return areaSizes[precision] || '~3 m × 2.5 m';
   }
 
   static formatForDisplay(code: string, showFull: boolean = false): string {
     if (showFull) {
       return code;
     }
-    // Show shortened version for display
+    // Show shortened version for display - handle 12-character codes properly
     return code.length > 11 ? code.substring(0, 8) + '+' + code.substring(8) : code;
   }
 
