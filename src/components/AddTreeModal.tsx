@@ -53,7 +53,8 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     condition_notes: '',
     management_actions: [],
     iNaturalist_link: '',
-    verification_status: 'pending'
+    verification_status: 'pending',
+    associated_species: []
   });
 
   useEffect(() => {
@@ -73,7 +74,8 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         condition_notes: editTree.condition_notes || '',
         management_actions: editTree.management_actions || [],
         iNaturalist_link: editTree.iNaturalist_link || '',
-        verification_status: editTree.verification_status || 'pending'
+        verification_status: editTree.verification_status || 'pending',
+        associated_species: editTree.associated_species || []
       });
     }
   }, [isEditMode, editTree]);
@@ -160,7 +162,8 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           condition_notes: '',
           management_actions: [],
           iNaturalist_link: '',
-          verification_status: 'pending'
+          verification_status: 'pending',
+          associated_species: []
         });
       }
       
@@ -504,6 +507,22 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 />
               </div>
             )}
+            
+            <div>
+              <Label htmlFor="photo_urls" className="text-green-700 font-medium">Photo URLs</Label>
+              <Textarea
+                id="photo_urls"
+                value={formData.images?.join('\n') || ''}
+                onChange={(e) => {
+                  const urls = e.target.value.split('\n').filter(url => url.trim());
+                  setFormData(prev => ({ ...prev, images: urls }));
+                }}
+                placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg&#10;(one URL per line)"
+                rows={3}
+                className="border-green-200 focus:border-green-400"
+              />
+              <p className="text-xs text-green-600 mt-1">Enter photo URLs, one per line</p>
+            </div>
           </div>
 
           <div className="flex gap-2 pt-4">

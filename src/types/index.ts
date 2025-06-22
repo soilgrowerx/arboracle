@@ -28,6 +28,8 @@ export interface Tree {
   photos?: EnhancedPhoto[];
   // Tree Ecosystem Management
   ecosystemSpecies?: EcosystemSpecies[];
+  // Associated ecosystem species
+  associated_species?: AssociatedSpecies[];
 }
 
 export interface User {
@@ -98,6 +100,18 @@ export interface EnhancedPhoto {
   };
 }
 
+export interface AssociatedSpecies {
+  id: string;
+  name: string;
+  scientificName?: string;
+  commonName?: string;
+  taxonomicRank?: string;
+  iNaturalistId?: number;
+  relationship: 'symbiotic' | 'pollinator' | 'disperser' | 'parasitic' | 'competitive' | 'neutral';
+  notes?: string;
+  dateAdded: string;
+}
+
 export interface TreeFormData {
   species: string;
   location: {
@@ -118,6 +132,8 @@ export interface TreeFormData {
   management_actions?: string[];
   iNaturalist_link?: string;
   verification_status?: 'verified' | 'manual' | 'pending';
+  // Associated ecosystem species
+  associated_species?: AssociatedSpecies[];
 }
 
 // Export iNaturalist types
