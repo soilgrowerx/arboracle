@@ -4,12 +4,13 @@ import { Tree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout, Pencil, ExternalLink, AlertTriangle, Clock, Shield, Leaf } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout, Pencil, ExternalLink, AlertTriangle, Clock, Shield, Leaf, Eye } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlusCodeService } from '@/services/plusCodeService';
 import { EcosystemService } from '@/services/ecosystemService';
 import { calculateTreeAge } from '@/lib/utils';
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface TreeCardProps {
   tree: Tree;
@@ -361,6 +362,22 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
           <Badge variant="outline" className="tree-badge-enhanced text-xs border-green-300 text-green-600 px-3 py-1.5">
             Added {formatDate(tree.created_at)}
           </Badge>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 mt-4 pt-3 border-t border-green-100">
+          <Link href={`/tree/${tree.id}`} className="flex-1">
+            <Button variant="outline" size="sm" className="w-full border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300">
+              <Eye size={14} className="mr-2" />
+              View Details & Ecosystem
+            </Button>
+          </Link>
+          {onEdit && (
+            <Button variant="ghost" size="sm" onClick={() => onEdit(tree)} className="text-green-600 hover:bg-green-50">
+              <Pencil size={14} className="mr-1" />
+              Edit
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
