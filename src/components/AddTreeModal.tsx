@@ -50,7 +50,9 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     seed_source: '',
     nursery_stock_id: '',
     condition_notes: '',
-    management_actions: []
+    management_actions: [],
+    iNaturalist_link: '',
+    verification_status: 'pending'
   });
 
   useEffect(() => {
@@ -68,7 +70,9 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         seed_source: editTree.seed_source || '',
         nursery_stock_id: editTree.nursery_stock_id || '',
         condition_notes: editTree.condition_notes || '',
-        management_actions: editTree.management_actions || []
+        management_actions: editTree.management_actions || [],
+        iNaturalist_link: editTree.iNaturalist_link || '',
+        verification_status: editTree.verification_status || 'pending'
       });
     }
   }, [isEditMode, editTree]);
@@ -153,7 +157,9 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           seed_source: '',
           nursery_stock_id: '',
           condition_notes: '',
-          management_actions: []
+          management_actions: [],
+          iNaturalist_link: '',
+          verification_status: 'pending'
         });
       }
       
@@ -228,13 +234,17 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
 
   const selectSpecies = (taxon: any) => {
     const speciesName = taxon.preferred_common_name || taxon.name;
+    const iNaturalistLink = `https://www.inaturalist.org/taxa/${taxon.id}`;
+    
     setFormData(prev => ({ 
       ...prev, 
       species: speciesName,
       scientificName: taxon.name,
       commonName: taxon.preferred_common_name,
       taxonomicRank: taxon.rank,
-      iNaturalistId: taxon.id
+      iNaturalistId: taxon.id,
+      iNaturalist_link: iNaturalistLink,
+      verification_status: 'verified'
     }));
     setShowSearchResults(false);
     toast({
@@ -253,141 +263,158 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-green-800 flex items-center gap-2">
+          <DialogTitle className="text-green-800 flex items-center gap-2 text-xl">
             🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="species" className="text-green-700">Species *</Label>
-            <div className="flex gap-2">
-              <Input
-                id="species"
-                value={formData.species}
-                onChange={(e) => setFormData(prev => ({ ...prev, species: e.target.value }))}
-                placeholder="e.g., Oak, Maple, Pine..."
-                required
-                className={`border-green-200 focus:border-green-400 ${
-                  errors.some(e => e.includes('Species')) ? 'border-red-500' : ''
-                }`}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={searchSpecies}
-                disabled={isSearching}
-                className="btn-search-enhanced"
-              >
-                <Search size={16} className={`transition-transform duration-300 ${isSearching ? 'animate-spin' : ''}`} />
-                {isSearching ? 'Searching...' : 'Search'}
-              </Button>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Tree Details Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-lg">🌳</span>
+              <h3 className="text-lg font-semibold text-green-800">Tree Details</h3>
             </div>
             
-            {showSearchResults && searchResults.length > 0 && (
-              <div className="mt-2 max-h-40 overflow-y-auto border border-green-200 rounded-md bg-white">
-                {searchResults.map((taxon) => (
-                  <button
-                    key={taxon.id}
-                    type="button"
-                    onClick={() => selectSpecies(taxon)}
-                    className="w-full text-left px-3 py-2 hover:bg-green-50 border-b border-green-100 last:border-b-0 transition-all duration-200 hover:scale-[1.02] hover:shadow-sm"
-                  >
-                    <div className="font-medium text-green-800">
-                      {taxon.preferred_common_name || taxon.name}
-                    </div>
-                    <div className="text-sm text-green-600">
-                      {taxon.name} • {taxon.rank}
-                    </div>
-                  </button>
-                ))}
+            <div>
+              <Label htmlFor="species" className="text-green-700 font-medium">Species *</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="species"
+                  value={formData.species}
+                  onChange={(e) => setFormData(prev => ({ ...prev, species: e.target.value }))}
+                  placeholder="e.g., Oak, Maple, Pine..."
+                  required
+                  className={`border-green-200 focus:border-green-400 ${
+                    errors.some(e => e.includes('Species')) ? 'border-red-500' : ''
+                  }`}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={searchSpecies}
+                  disabled={isSearching}
+                  className="btn-search-enhanced shrink-0"
+                >
+                  <Search size={16} className={`transition-transform duration-300 ${isSearching ? 'animate-spin' : ''}`} />
+                  {isSearching ? 'Searching...' : 'Search'}
+                </Button>
               </div>
-            )}
-          </div>
+              
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="mt-2 max-h-40 overflow-y-auto border border-green-200 rounded-md bg-white shadow-sm">
+                  {searchResults.map((taxon) => (
+                    <button
+                      key={taxon.id}
+                      type="button"
+                      onClick={() => selectSpecies(taxon)}
+                      className="w-full text-left px-4 py-3 hover:bg-green-50 border-b border-green-100 last:border-b-0 transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
+                    >
+                      <div className="font-medium text-green-800">
+                        {taxon.preferred_common_name || taxon.name}
+                      </div>
+                      <div className="text-sm text-green-600">
+                        {taxon.name} • {taxon.rank}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label htmlFor="latitude" className="text-green-700">Latitude *</Label>
+              <Label htmlFor="date_planted" className="text-green-700 font-medium">Date Planted</Label>
               <Input
-                id="latitude"
-                type="number"
-                step="any"
-                value={formData.location.lat === 0 ? '' : formData.location.lat}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, lat: e.target.value ? parseFloat(e.target.value) : 0 }
-                }))}
-                placeholder="0.000000"
-                required
-                className={`border-green-200 focus:border-green-400 ${
-                  errors.some(e => e.includes('Latitude') || e.includes('Location')) ? 'border-red-500' : ''
-                }`}
+                id="date_planted"
+                type="date"
+                value={formData.date_planted}
+                onChange={(e) => setFormData(prev => ({ ...prev, date_planted: e.target.value }))}
+                className="border-green-200 focus:border-green-400"
               />
             </div>
+
             <div>
-              <Label htmlFor="longitude" className="text-green-700">Longitude *</Label>
-              <Input
-                id="longitude"
-                type="number"
-                step="any"
-                value={formData.location.lng === 0 ? '' : formData.location.lng}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  location: { ...prev.location, lng: e.target.value ? parseFloat(e.target.value) : 0 }
-                }))}
-                placeholder="0.000000"
-                required
-                className={`border-green-200 focus:border-green-400 ${
-                  errors.some(e => e.includes('Longitude') || e.includes('Location')) ? 'border-red-500' : ''
-                }`}
+              <Label htmlFor="notes" className="text-green-700 font-medium">General Notes</Label>
+              <Textarea
+                id="notes"
+                value={formData.notes}
+                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Any general notes about this tree..."
+                rows={3}
+                className="border-green-200 focus:border-green-400"
               />
             </div>
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={getCurrentLocation}
-            className="w-full btn-outline-enhanced"
-          >
-            <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
-            Use Current Location
-          </Button>
-
-          <div>
-            <Label htmlFor="date_planted" className="text-green-700">Date Planted</Label>
-            <Input
-              id="date_planted"
-              type="date"
-              value={formData.date_planted}
-              onChange={(e) => setFormData(prev => ({ ...prev, date_planted: e.target.value }))}
-              className="border-green-200 focus:border-green-400"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="notes" className="text-green-700">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Any additional notes about this tree..."
-              rows={3}
-              className="border-green-200 focus:border-green-400"
-            />
-          </div>
-
-          {/* Forestry Management Section */}
-          <div className="border-t border-green-100 pt-4">
-            <h3 className="text-green-800 font-medium mb-3 flex items-center gap-2">
-              🌲 Forestry Management
-            </h3>
+          {/* Location Info Section */}
+          <div className="border-t border-green-100 pt-6 space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-lg">📍</span>
+              <h3 className="text-lg font-semibold text-green-800">Location Info</h3>
+            </div>
             
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="seed_source" className="text-green-700">Seed Source</Label>
+                <Label htmlFor="latitude" className="text-green-700 font-medium">Latitude *</Label>
+                <Input
+                  id="latitude"
+                  type="number"
+                  step="any"
+                  value={formData.location.lat === 0 ? '' : formData.location.lat}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lat: e.target.value ? parseFloat(e.target.value) : 0 }
+                  }))}
+                  placeholder="0.000000"
+                  required
+                  className={`border-green-200 focus:border-green-400 ${
+                    errors.some(e => e.includes('Latitude') || e.includes('Location')) ? 'border-red-500' : ''
+                  }`}
+                />
+              </div>
+              <div>
+                <Label htmlFor="longitude" className="text-green-700 font-medium">Longitude *</Label>
+                <Input
+                  id="longitude"
+                  type="number"
+                  step="any"
+                  value={formData.location.lng === 0 ? '' : formData.location.lng}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    location: { ...prev.location, lng: e.target.value ? parseFloat(e.target.value) : 0 }
+                  }))}
+                  placeholder="0.000000"
+                  required
+                  className={`border-green-200 focus:border-green-400 ${
+                    errors.some(e => e.includes('Longitude') || e.includes('Location')) ? 'border-red-500' : ''
+                  }`}
+                />
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={getCurrentLocation}
+              className="w-full btn-outline-enhanced"
+            >
+              <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
+              Use Current Location
+            </Button>
+          </div>
+
+          {/* Management Data Section */}
+          <div className="border-t border-green-100 pt-6 space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-lg">🌲</span>
+              <h3 className="text-lg font-semibold text-green-800">Management Data</h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="seed_source" className="text-green-700 font-medium">Seed Source</Label>
                 <Input
                   id="seed_source"
                   value={formData.seed_source}
@@ -398,7 +425,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               </div>
               
               <div>
-                <Label htmlFor="nursery_stock_id" className="text-green-700">Nursery Stock ID</Label>
+                <Label htmlFor="nursery_stock_id" className="text-green-700 font-medium">Nursery Stock ID</Label>
                 <Input
                   id="nursery_stock_id"
                   value={formData.nursery_stock_id}
@@ -409,20 +436,20 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               </div>
             </div>
             
-            <div className="mt-3">
-              <Label htmlFor="condition_notes" className="text-green-700">Condition Notes</Label>
+            <div>
+              <Label htmlFor="condition_notes" className="text-green-700 font-medium">Condition Notes</Label>
               <Textarea
                 id="condition_notes"
                 value={formData.condition_notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, condition_notes: e.target.value }))}
                 placeholder="Current health, visible damage, growth patterns..."
-                rows={2}
+                rows={3}
                 className="border-green-200 focus:border-green-400"
               />
             </div>
             
-            <div className="mt-3">
-              <Label htmlFor="management_actions" className="text-green-700">Management Actions</Label>
+            <div>
+              <Label htmlFor="management_actions" className="text-green-700 font-medium">Management Actions</Label>
               <Textarea
                 id="management_actions"
                 value={Array.isArray(formData.management_actions) ? formData.management_actions.join(', ') : formData.management_actions}
@@ -436,6 +463,19 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               />
               <p className="text-xs text-green-600 mt-1">Separate multiple actions with commas</p>
             </div>
+
+            {formData.iNaturalist_link && (
+              <div>
+                <Label htmlFor="iNaturalist_link" className="text-green-700 font-medium">iNaturalist Link</Label>
+                <Input
+                  id="iNaturalist_link"
+                  value={formData.iNaturalist_link}
+                  onChange={(e) => setFormData(prev => ({ ...prev, iNaturalist_link: e.target.value }))}
+                  placeholder="https://www.inaturalist.org/taxa/..."
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2 pt-4">

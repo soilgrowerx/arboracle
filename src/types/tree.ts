@@ -1,10 +1,8 @@
 export interface Tree {
   id: string;
   species: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
+  lat: number;
+  lng: number;
   plus_code_global: string;
   plus_code_local: string;
   date_planted: string;
@@ -18,9 +16,11 @@ export interface Tree {
   iNaturalistId?: number;
   // Enhanced forestry management fields
   seed_source?: string;
+  nursery_stock_id?: string;
   condition_notes?: string;
   management_actions?: string[];
-  nursery_stock_id?: string;
+  iNaturalist_link?: string;
+  verification_status: 'verified' | 'manual' | 'pending';
   // Enhanced species data from iNaturalist
   description?: string;
   distribution_info?: string;
@@ -56,7 +56,9 @@ export interface TreeFormData {
   iNaturalistId?: number;
   // Enhanced forestry management fields
   seed_source?: string;
+  nursery_stock_id?: string;
   condition_notes?: string;
   management_actions?: string[];
-  nursery_stock_id?: string;
+  iNaturalist_link?: string;
+  verification_status?: 'verified' | 'manual' | 'pending';
 }

@@ -16,9 +16,11 @@ export interface Tree {
   iNaturalistId?: number;
   // Enhanced forestry management fields
   seed_source?: string;
+  nursery_stock_id?: string;
   condition_notes?: string;
   management_actions?: string[];
-  nursery_stock_id?: string;
+  iNaturalist_link?: string;
+  verification_status: 'verified' | 'manual' | 'pending';
   // Enhanced species data from iNaturalist
   description?: string;
   distribution_info?: string;
@@ -59,9 +61,11 @@ export interface TreeFormData {
   iNaturalistId?: number;
   // Enhanced forestry management fields
   seed_source?: string;
+  nursery_stock_id?: string;
   condition_notes?: string;
   management_actions?: string[];
-  nursery_stock_id?: string;
+  iNaturalist_link?: string;
+  verification_status?: 'verified' | 'manual' | 'pending';
 }
 
 // Export iNaturalist types

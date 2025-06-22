@@ -4,7 +4,7 @@ import { Tree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout, Pencil } from 'lucide-react';
+import { MapPin, Calendar, StickyNote, CheckCircle, Info, Copy, Check, Sprout, Pencil, ExternalLink, AlertTriangle, Clock, Shield } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlusCodeService } from '@/services/plusCodeService';
 import { calculateTreeAge } from '@/lib/utils';
@@ -43,6 +43,52 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
     onEdit?.(tree);
   };
 
+  const handleOpenINaturalist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (tree.iNaturalist_link) {
+      window.open(tree.iNaturalist_link, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const getVerificationStatusIcon = () => {
+    switch (tree.verification_status) {
+      case 'verified':
+        return <CheckCircle size={14} className="text-green-600" />;
+      case 'manual':
+        return <Shield size={14} className="text-blue-600" />;
+      case 'pending':
+        return <Clock size={14} className="text-amber-600" />;
+      default:
+        return <AlertTriangle size={14} className="text-gray-600" />;
+    }
+  };
+
+  const getVerificationStatusText = () => {
+    switch (tree.verification_status) {
+      case 'verified':
+        return 'iNaturalist Verified';
+      case 'manual':
+        return 'Manually Verified';
+      case 'pending':
+        return 'Pending Verification';
+      default:
+        return 'Unknown Status';
+    }
+  };
+
+  const getVerificationStatusColor = () => {
+    switch (tree.verification_status) {
+      case 'verified':
+        return 'text-green-600';
+      case 'manual':
+        return 'text-blue-600';
+      case 'pending':
+        return 'text-amber-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
   // Get enhanced Plus Code info
   const plusCodeInfo = PlusCodeService.encode(tree.lat, tree.lng, 11);
   const displayCode = showFullCode ? tree.plus_code_global : tree.plus_code_local;
@@ -63,23 +109,50 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
               <div className="text-lg font-bold text-green-800 mb-1">
                 {tree.commonName || tree.species}
               </div>
-              {tree.iNaturalistId && (
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <CheckCircle size={14} className="text-green-600" />
-                  <span className="text-xs text-green-600 font-medium">Verified</span>
+                  {getVerificationStatusIcon()}
+                  <span className={`text-xs font-medium ${getVerificationStatusColor()}`}>
+                    {getVerificationStatusText()}
+                  </span>
                 </div>
+                {tree.iNaturalist_link && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleOpenINaturalist}
+                    className="h-6 px-2 text-xs hover:bg-blue-50"
+                  >
+                    <ExternalLink size={12} className="mr-1 text-blue-600" />
+                    <span className="text-blue-600">View on iNaturalist</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-1">
+              {tree.iNaturalist_link && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleOpenINaturalist}
+                  className="h-8 w-8 p-0 hover:bg-blue-100"
+                  title="Open on iNaturalist"
+                >
+                  <ExternalLink size={14} className="text-blue-600" />
+                </Button>
+              )}
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleEdit}
+                  className="h-8 w-8 p-0 hover:bg-green-100"
+                  title="Edit tree"
+                >
+                  <Pencil size={14} className="text-green-600" />
+                </Button>
               )}
             </div>
-            {onEdit && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleEdit}
-                className="h-8 w-8 p-0 hover:bg-green-100"
-              >
-                <Pencil size={14} className="text-green-600" />
-              </Button>
-            )}
           </div>
           {tree.scientificName && (
             <div className="tree-scientific-name rounded-md">
@@ -159,6 +232,41 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
           </div>
         )}
 
+        {/* Forestry Management Data */}
+        {(tree.seed_source || tree.nursery_stock_id || tree.condition_notes || (tree.management_actions && tree.management_actions.length > 0)) && (
+          <div className="border-t border-green-100 pt-3 mt-3 space-y-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm">🌲</span>
+              <span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Management Data</span>
+            </div>
+            
+            {tree.seed_source && (
+              <div className="text-xs text-green-600">
+                <span className="font-medium">Seed Source:</span> {tree.seed_source}
+              </div>
+            )}
+            
+            {tree.nursery_stock_id && (
+              <div className="text-xs text-green-600">
+                <span className="font-medium">Stock ID:</span> {tree.nursery_stock_id}
+              </div>
+            )}
+            
+            {tree.condition_notes && (
+              <div className="text-xs text-green-600">
+                <span className="font-medium">Condition:</span> <span className="line-clamp-1">{tree.condition_notes}</span>
+              </div>
+            )}
+            
+            {tree.management_actions && tree.management_actions.length > 0 && (
+              <div className="text-xs text-green-600">
+                <span className="font-medium">Actions:</span> {tree.management_actions.slice(0, 3).join(', ')}
+                {tree.management_actions.length > 3 && <span className="text-green-500"> +{tree.management_actions.length - 3} more</span>}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-2 pt-2">
           {tree.images.length > 0 && (
             <Badge variant="secondary" className="tree-badge-enhanced bg-emerald-100 text-emerald-700 px-3 py-1.5">
@@ -166,10 +274,22 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
               {tree.images.length} photo{tree.images.length !== 1 ? 's' : ''}
             </Badge>
           )}
-          {tree.iNaturalistId && (
+          {tree.verification_status === 'verified' && (
+            <Badge variant="secondary" className="tree-badge-enhanced bg-green-100 text-green-700 text-xs px-3 py-1.5">
+              <CheckCircle size={12} className="mr-1" />
+              Verified
+            </Badge>
+          )}
+          {tree.verification_status === 'manual' && (
             <Badge variant="secondary" className="tree-badge-enhanced bg-blue-100 text-blue-700 text-xs px-3 py-1.5">
-              <span className="mr-1">🔬</span>
-              iNaturalist verified
+              <Shield size={12} className="mr-1" />
+              Manual
+            </Badge>
+          )}
+          {tree.verification_status === 'pending' && (
+            <Badge variant="secondary" className="tree-badge-enhanced bg-amber-100 text-amber-700 text-xs px-3 py-1.5">
+              <Clock size={12} className="mr-1" />
+              Pending
             </Badge>
           )}
           <Badge variant="outline" className="tree-badge-enhanced text-xs border-green-300 text-green-600 px-3 py-1.5">

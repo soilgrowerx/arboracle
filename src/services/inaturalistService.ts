@@ -62,12 +62,24 @@ export class iNaturalistService {
           const name = (taxon.name || '').toLowerCase();
           const commonName = (taxon.preferred_common_name || '').toLowerCase();
           
-          // Common tree family indicators
+          // Common tree family indicators and characteristics
           const treeIndicators = [
             'tree', 'oak', 'maple', 'pine', 'elm', 'birch', 'cedar', 'fir',
             'spruce', 'poplar', 'willow', 'ash', 'cherry', 'apple', 'walnut',
             'beech', 'hickory', 'basswood', 'linden', 'sycamore', 'magnolia',
-            'tulip', 'dogwood', 'redbud', 'catalpa', 'locust', 'cottonwood'
+            'tulip', 'dogwood', 'redbud', 'catalpa', 'locust', 'cottonwood',
+            'juniper', 'hemlock', 'chestnut', 'ginkgo', 'cypress', 'redwood',
+            'sequoia', 'eucalyptus', 'palm', 'bamboo', 'acacia', 'alder',
+            'aspen', 'balsam', 'basswood', 'buttonwood', 'cork', 'hazel',
+            'hawthorn', 'ironwood', 'laurel', 'mahogany', 'mulberry', 'persimmon',
+            'plane', 'sweetgum', 'tamarack', 'tupelo', 'yellowwood'
+          ];
+
+          // Tree family names (scientific families known to contain trees)
+          const treeFamilies = [
+            'fagaceae', 'pinaceae', 'cupressaceae', 'rosaceae', 'salicaceae',
+            'betulaceae', 'juglandaceae', 'oleaceae', 'aceraceae', 'sapindaceae',
+            'magnoliaceae', 'lauraceae', 'moraceae', 'ulmaceae', 'tiliaceae'
           ];
 
           // Check if it's likely a tree based on name or ancestry
@@ -75,10 +87,22 @@ export class iNaturalistService {
             name.includes(indicator) || commonName.includes(indicator)
           );
 
+          // Check if it belongs to a tree family
+          const ancestryString = (taxon.ancestry || '').toLowerCase();
+          const hasTreeFamily = treeFamilies.some(family => 
+            ancestryString.includes(family) || name.includes(family)
+          );
+
           // Check rank - prefer species and genus level
           const appropriateRank = ['species', 'genus'].includes(taxon.rank?.toLowerCase());
 
-          return hasTreeIndicator && appropriateRank;
+          // Additional filtering - exclude obvious non-trees
+          const excludeTerms = ['herb', 'shrub', 'vine', 'fern', 'moss', 'lichen', 'fungus'];
+          const isExcluded = excludeTerms.some(term => 
+            name.includes(term) || commonName.includes(term)
+          );
+
+          return (hasTreeIndicator || hasTreeFamily) && appropriateRank && !isExcluded;
         });
       }
 
