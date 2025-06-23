@@ -154,6 +154,33 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     health_status: undefined
   });
 
+  // Handle image upload from camera or gallery
+  const handleImageUpload = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const files = Array.from(input.files);
+    
+    files.forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          if (result) {
+            setFormData(prev => ({
+              ...prev,
+              images: [...(prev.images || []), result]
+            }));
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    // Reset the input
+    input.value = '';
+  };
+
   useEffect(() => {
     if (isEditMode && editTree) {
       const managementActions = editTree.management_actions || [];
@@ -832,19 +859,86 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             </div>
             
             <div>
-              <Label htmlFor="photo_urls" className="text-green-700 font-medium">Photo URLs</Label>
-              <Textarea
-                id="photo_urls"
-                value={formData.images?.join('\n') || ''}
-                onChange={(e) => {
-                  const urls = e.target.value.split('\n').filter(url => url.trim());
-                  setFormData(prev => ({ ...prev, images: urls }));
-                }}
-                placeholder="https://example.com/photo1.jpg&#10;https://example.com/photo2.jpg&#10;(one URL per line)"
-                rows={3}
-                className="border-green-200 focus:border-green-400"
-              />
-              <p className="text-xs text-green-600 mt-1">Enter photo URLs, one per line</p>
+              <Label className="text-green-700 font-medium">Photos</Label>
+              <div className="space-y-3">
+                {/* Photo Upload Buttons */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*';
+                      input.capture = 'environment';
+                      input.multiple = true;
+                      input.onchange = handleImageUpload;
+                      input.click();
+                    }}
+                    className="border-green-200 text-green-700 hover:bg-green-50 flex items-center justify-center gap-2 py-3"
+                  >
+                    <span className="text-lg">📷</span>
+                    Camera
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*';
+                      input.multiple = true;
+                      input.onchange = handleImageUpload;
+                      input.click();
+                    }}
+                    className="border-green-200 text-green-700 hover:bg-green-50 flex items-center justify-center gap-2 py-3"
+                  >
+                    <span className="text-lg">🖼️</span>
+                    Gallery
+                  </Button>
+                </div>
+                
+                {/* Selected Images Preview */}
+                {(formData.images && formData.images.length > 0) && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-green-600 font-medium">Selected Photos ({formData.images.length})</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {formData.images.map((image, index) => (
+                        <div key={index} className="relative">
+                          {image.startsWith('data:') ? (
+                            // Base64 image preview
+                            <img 
+                              src={image} 
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-20 object-cover rounded border"
+                            />
+                          ) : (
+                            // URL-based image or placeholder
+                            <div className="w-full h-20 bg-green-100 rounded border flex items-center justify-center">
+                              <span className="text-green-600 text-xs">📷 {index + 1}</span>
+                            </div>
+                          )}
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              const newImages = [...(formData.images || [])];
+                              newImages.splice(index, 1);
+                              setFormData(prev => ({ ...prev, images: newImages }));
+                            }}
+                            className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs p-0"
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <p className="text-xs text-green-600">Tap Camera to take photos or Gallery to select from your device</p>
+              </div>
             </div>
           </div>
 
