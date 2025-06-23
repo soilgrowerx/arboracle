@@ -486,10 +486,11 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-6">
           {/* Tree Details Section */}
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2 mb-2 sm:mb-4">
-              <span className="text-base sm:text-lg">🌳</span>
-              <h3 className="text-base sm:text-lg font-semibold text-green-800">Tree Details</h3>
+          <div className="bg-gradient-to-r from-green-50 to-green-25 p-4 sm:p-5 rounded-lg border border-green-100 space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-4 pb-2 border-b border-green-200">
+              <span className="text-lg sm:text-xl">🌳</span>
+              <h3 className="text-lg sm:text-xl font-bold text-green-800">Tree Details</h3>
+              <div className="ml-auto text-xs sm:text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">Required</div>
             </div>
             
             <div>
@@ -571,10 +572,11 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           </div>
 
           {/* Location Info Section */}
-          <div className="border-t border-green-100 pt-3 sm:pt-4 lg:pt-6 space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2 mb-2 sm:mb-4">
-              <span className="text-base sm:text-lg">📍</span>
-              <h3 className="text-base sm:text-lg font-semibold text-green-800">Location Info</h3>
+          <div className="bg-gradient-to-r from-blue-50 to-blue-25 p-4 sm:p-5 rounded-lg border border-blue-100 space-y-3 sm:space-y-4 mt-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-4 pb-2 border-b border-blue-200">
+              <span className="text-lg sm:text-xl">📍</span>
+              <h3 className="text-lg sm:text-xl font-bold text-blue-800">Location Info</h3>
+              <div className="ml-auto text-xs sm:text-sm text-red-600 bg-red-100 px-2 py-1 rounded-full">Required</div>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -705,10 +707,11 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           </div>
 
           {/* Tree Measurements Section */}
-          <div className="border-t border-green-100 pt-3 sm:pt-4 lg:pt-6 space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2 mb-2 sm:mb-4">
-              <span className="text-base sm:text-lg">📏</span>
-              <h3 className="text-base sm:text-lg font-semibold text-green-800">Tree Measurements</h3>
+          <div className="bg-gradient-to-r from-purple-50 to-purple-25 p-4 sm:p-5 rounded-lg border border-purple-100 space-y-3 sm:space-y-4 mt-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-4 pb-2 border-b border-purple-200">
+              <span className="text-lg sm:text-xl">📏</span>
+              <h3 className="text-lg sm:text-xl font-bold text-purple-800">Tree Measurements</h3>
+              <div className="ml-auto text-xs sm:text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded-full">Optional</div>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -744,10 +747,11 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           </div>
 
           {/* Management Data Section */}
-          <div className="border-t border-green-100 pt-6 space-y-4">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg">🌲</span>
-              <h3 className="text-lg font-semibold text-green-800">Management Data</h3>
+          <div className="bg-gradient-to-r from-amber-50 to-amber-25 p-4 sm:p-5 rounded-lg border border-amber-100 space-y-4 mt-4">
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-amber-200">
+              <span className="text-lg sm:text-xl">🌲</span>
+              <h3 className="text-lg sm:text-xl font-bold text-amber-800">Management Data</h3>
+              <div className="ml-auto text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 py-1 rounded-full">Professional</div>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
