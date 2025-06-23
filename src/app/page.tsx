@@ -113,7 +113,7 @@ export default function Home() {
           `"${ecosystemCategories}"`,
           `"${tree.seed_source || ''}"`,
           `"${tree.nursery_stock_id || ''}"`,
-          `"${tree.condition_notes || ''}"`,
+          `"${tree.condition_assessment?.arborist_summary || ''}"`,
           `"${(tree.management_actions || []).join(';')}"`,
           `"${new Date(tree.created_at).toLocaleDateString()}"`,
           `"${tree.notes || ''}"`

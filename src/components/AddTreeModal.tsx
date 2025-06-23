@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import { Plus, Search, MapPin, Map } from 'lucide-react';
 import { TaxonomyBreadcrumb } from '@/components/TaxonomicDisplay';
+import ConditionAssessment, { ConditionChecklistData } from '@/components/ConditionAssessment';
 
 // Dynamically import map components to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
@@ -132,7 +133,16 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     taxonomy: undefined,
     seed_source: '',
     nursery_stock_id: '',
-    condition_notes: '',
+    condition_assessment: {
+      checklist: {
+        structure: [],
+        canopy_health: [],
+        pests_diseases: [],
+        site_conditions: []
+      },
+      arborist_summary: '',
+      health_status: undefined
+    },
     management_actions: [],
     iNaturalist_link: '',
     verification_status: 'pending',
@@ -160,7 +170,16 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         taxonomy: editTree.taxonomy,
         seed_source: editTree.seed_source || '',
         nursery_stock_id: editTree.nursery_stock_id || '',
-        condition_notes: editTree.condition_notes || '',
+        condition_assessment: editTree.condition_assessment || {
+          checklist: {
+            structure: [],
+            canopy_health: [],
+            pests_diseases: [],
+            site_conditions: []
+          },
+          arborist_summary: '',
+          health_status: undefined
+        },
         management_actions: managementActions,
         iNaturalist_link: editTree.iNaturalist_link || '',
         verification_status: editTree.verification_status || 'pending',
@@ -255,7 +274,16 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           taxonomy: undefined,
           seed_source: '',
           nursery_stock_id: '',
-          condition_notes: '',
+          condition_assessment: {
+            checklist: {
+              structure: [],
+              canopy_health: [],
+              pests_diseases: [],
+              site_conditions: []
+            },
+            arborist_summary: '',
+            health_status: undefined
+          },
           management_actions: [],
           iNaturalist_link: '',
           verification_status: 'pending',
@@ -743,17 +771,10 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               </div>
             </div>
             
-            <div>
-              <Label htmlFor="condition_notes" className="text-green-700 font-medium">Condition Notes</Label>
-              <Textarea
-                id="condition_notes"
-                value={formData.condition_notes}
-                onChange={(e) => setFormData(prev => ({ ...prev, condition_notes: e.target.value }))}
-                placeholder="Current health, visible damage, growth patterns..."
-                rows={3}
-                className="border-green-200 focus:border-green-400"
-              />
-            </div>
+            <ConditionAssessment
+              value={formData.condition_assessment!}
+              onChange={(conditionAssessment) => setFormData(prev => ({ ...prev, condition_assessment: conditionAssessment }))}
+            />
             
             <div>
               <Label htmlFor="management_actions" className="text-green-700 font-medium">Management Actions</Label>

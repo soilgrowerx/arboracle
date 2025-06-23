@@ -39,6 +39,9 @@ export interface Tree {
   // Enhanced forestry management fields
   seed_source?: string;
   nursery_stock_id?: string;
+  // Genesis Sprint IV: Structured condition assessment (replaces condition_notes)
+  condition_assessment?: ConditionAssessment;
+  // Legacy field for backward compatibility (will be migrated)
   condition_notes?: string;
   management_actions?: string[];
   iNaturalist_link?: string;
@@ -124,6 +127,19 @@ export type EcosystemRelationship =
   | 'beneficial' 
   | 'detrimental';
 
+export interface ConditionChecklistData {
+  structure: string[];
+  canopy_health: string[];
+  pests_diseases: string[];
+  site_conditions: string[];
+}
+
+export interface ConditionAssessment {
+  checklist: ConditionChecklistData;
+  arborist_summary: string;
+  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
+}
+
 export interface TreeFormData {
   species: string;
   location: {
@@ -142,7 +158,8 @@ export interface TreeFormData {
   // Enhanced forestry management fields
   seed_source?: string;
   nursery_stock_id?: string;
-  condition_notes?: string;
+  // Genesis Sprint IV: Structured condition assessment (replaces condition_notes)
+  condition_assessment?: ConditionAssessment;
   management_actions?: string[];
   iNaturalist_link?: string;
   verification_status?: 'verified' | 'manual' | 'pending';

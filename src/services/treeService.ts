@@ -99,7 +99,9 @@ export class TreeService {
       // Enhanced forestry management fields
       seed_source: formData.seed_source,
       nursery_stock_id: formData.nursery_stock_id,
-      condition_notes: formData.condition_notes,
+      condition_assessment: formData.condition_assessment,
+      // Legacy backward compatibility
+      condition_notes: formData.condition_assessment?.arborist_summary || '',
       management_actions: formData.management_actions || [],
       iNaturalist_link: formData.iNaturalist_link,
       verification_status: formData.verification_status || (formData.iNaturalistId ? 'verified' : 'pending'),
@@ -175,6 +177,7 @@ export class TreeService {
       (tree.commonName && tree.commonName.toLowerCase().includes(lowercaseQuery)) ||
       (tree.seed_source && tree.seed_source.toLowerCase().includes(lowercaseQuery)) ||
       (tree.condition_notes && tree.condition_notes.toLowerCase().includes(lowercaseQuery)) ||
+      (tree.condition_assessment?.arborist_summary && tree.condition_assessment.arborist_summary.toLowerCase().includes(lowercaseQuery)) ||
       (tree.nursery_stock_id && tree.nursery_stock_id.toLowerCase().includes(lowercaseQuery)) ||
       (tree.management_actions && tree.management_actions.some(action => 
         action.toLowerCase().includes(lowercaseQuery)
