@@ -1,4 +1,4 @@
-import { Tree, TreeFormData } from '@/types';
+import { Tree, TreeFormData } from '@/types/tree';
 import { PlusCodeService } from './plusCodeService';
 import { iNaturalistService } from './inaturalistService';
 import { v4 as uuidv4 } from 'uuid';
@@ -102,7 +102,13 @@ export class TreeService {
       condition_notes: formData.condition_notes,
       management_actions: formData.management_actions || [],
       iNaturalist_link: formData.iNaturalist_link,
-      verification_status: formData.verification_status || (formData.iNaturalistId ? 'verified' : 'pending')
+      verification_status: formData.verification_status || (formData.iNaturalistId ? 'verified' : 'pending'),
+      // Professional arborist fields for Genesis Sprint III
+      land_owner: formData.land_owner,
+      site_name: formData.site_name,
+      height_cm: formData.height_cm,
+      dbh_cm: formData.dbh_cm,
+      health_status: formData.health_status
     };
 
     trees.push(newTree);
@@ -173,6 +179,9 @@ export class TreeService {
       (tree.management_actions && tree.management_actions.some(action => 
         action.toLowerCase().includes(lowercaseQuery)
       )) ||
+      (tree.land_owner && tree.land_owner.toLowerCase().includes(lowercaseQuery)) ||
+      (tree.site_name && tree.site_name.toLowerCase().includes(lowercaseQuery)) ||
+      (tree.health_status && tree.health_status.toLowerCase().includes(lowercaseQuery)) ||
       tree.verification_status.toLowerCase().includes(lowercaseQuery) ||
       tree.plus_code_global.includes(query.toUpperCase()) ||
       tree.plus_code_local.includes(query.toUpperCase())

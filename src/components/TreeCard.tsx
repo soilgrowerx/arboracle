@@ -1,6 +1,6 @@
 'use client';
 
-import { Tree } from '@/types';
+import { Tree } from '@/types/tree';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -270,6 +270,52 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
           </div>
         </div>
 
+        {/* Tree Measurements */}
+        {(tree.height_cm || tree.dbh_cm) && (
+          <div className="tree-info-item flex items-start gap-2 px-1 sm:px-2">
+            <span className="text-sm text-blue-600 flex-shrink-0 mt-0.5">📏</span>
+            <div className="flex-1 space-y-1">
+              <span className="text-xs sm:text-sm text-blue-700 font-medium block">Measurements:</span>
+              <div className="flex flex-wrap gap-2">
+                {tree.height_cm && (
+                  <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                    H: {tree.height_cm}cm
+                  </span>
+                )}
+                {tree.dbh_cm && (
+                  <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                    DBH: {tree.dbh_cm}cm
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Health Status */}
+        {tree.health_status && (
+          <div className="tree-info-item flex items-center gap-2 px-1 sm:px-2">
+            <span className="text-sm flex-shrink-0">
+              {tree.health_status === 'Excellent' ? '💚' : 
+               tree.health_status === 'Good' ? '🟢' : 
+               tree.health_status === 'Fair' ? '🟡' : 
+               tree.health_status === 'Poor' ? '🟠' : '⚫'}
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-green-700 font-medium">Health:</span>
+              <span className={`text-xs sm:text-sm font-semibold px-2 py-1 rounded-full ${
+                tree.health_status === 'Excellent' ? 'bg-green-100 text-green-800' :
+                tree.health_status === 'Good' ? 'bg-green-100 text-green-700' :
+                tree.health_status === 'Fair' ? 'bg-yellow-100 text-yellow-700' :
+                tree.health_status === 'Poor' ? 'bg-orange-100 text-orange-700' :
+                'bg-red-100 text-red-700'
+              }`}>
+                {tree.health_status}
+              </span>
+            </div>
+          </div>
+        )}
+
         {tree.notes && (
           <div className="tree-info-item flex items-start gap-2 sm:gap-3 px-1 sm:px-2">
             <StickyNote size={16} className="sm:size-18 mt-0.5 flex-shrink-0 text-green-600" />
@@ -278,12 +324,24 @@ export function TreeCard({ tree, onClick, onEdit }: TreeCardProps) {
         )}
 
         {/* Forestry Management Data */}
-        {(tree.seed_source || tree.nursery_stock_id || tree.condition_notes || (tree.management_actions && tree.management_actions.length > 0)) && (
+        {(tree.seed_source || tree.nursery_stock_id || tree.condition_notes || (tree.management_actions && tree.management_actions.length > 0) || tree.land_owner || tree.site_name) && (
           <div className="border-t border-green-100 pt-3 mt-3 space-y-2">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm">🌲</span>
               <span className="text-xs font-semibold text-green-700 uppercase tracking-wide">Management Data</span>
             </div>
+            
+            {tree.land_owner && (
+              <div className="text-xs text-green-600">
+                <span className="font-medium">Land Owner:</span> {tree.land_owner}
+              </div>
+            )}
+            
+            {tree.site_name && (
+              <div className="text-xs text-green-600">
+                <span className="font-medium">Site:</span> {tree.site_name}
+              </div>
+            )}
             
             {tree.seed_source && (
               <div className="text-xs text-green-600">

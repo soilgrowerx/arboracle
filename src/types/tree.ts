@@ -48,8 +48,16 @@ export interface Tree {
   distribution_info?: string;
   conservation_status?: string;
   photos?: EnhancedPhoto[];
+  // Tree Ecosystem Management
+  ecosystemSpecies?: EcosystemSpecies[];
   // Associated ecosystem species
   associated_species?: AssociatedSpecies[];
+  // Professional arborist fields for Genesis Sprint III
+  land_owner?: string;
+  site_name?: string;
+  height_cm?: number;
+  dbh_cm?: number; // Diameter at Breast Height
+  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
 }
 
 export interface EnhancedPhoto {
@@ -77,6 +85,45 @@ export interface AssociatedSpecies {
   dateAdded: string;
 }
 
+// Tree Ecosystem Management Types
+export interface EcosystemSpecies {
+  id: string;
+  treeId: string;
+  speciesName: string;
+  scientificName?: string;
+  category: EcosystemCategory;
+  relationship: EcosystemRelationship;
+  observationDate: string;
+  notes?: string;
+  iNaturalistId?: number;
+  isVerified: boolean;
+  photos?: EnhancedPhoto[];
+  created_at: string;
+  updated_at: string;
+}
+
+export type EcosystemCategory = 
+  | 'plant' 
+  | 'fungus' 
+  | 'animal' 
+  | 'insect' 
+  | 'bird' 
+  | 'microorganism' 
+  | 'other';
+
+export type EcosystemRelationship = 
+  | 'symbiotic' 
+  | 'parasitic' 
+  | 'commensal' 
+  | 'predatory' 
+  | 'pollinator' 
+  | 'seed_disperser' 
+  | 'epiphytic' 
+  | 'competitive' 
+  | 'neutral' 
+  | 'beneficial' 
+  | 'detrimental';
+
 export interface TreeFormData {
   species: string;
   location: {
@@ -101,4 +148,10 @@ export interface TreeFormData {
   verification_status?: 'verified' | 'manual' | 'pending';
   // Associated ecosystem species
   associated_species?: AssociatedSpecies[];
+  // Professional arborist fields for Genesis Sprint III
+  land_owner?: string;
+  site_name?: string;
+  height_cm?: number;
+  dbh_cm?: number; // Diameter at Breast Height
+  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
 }

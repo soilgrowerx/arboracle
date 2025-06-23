@@ -52,6 +52,12 @@ export interface Tree {
   ecosystemSpecies?: EcosystemSpecies[];
   // Associated ecosystem species
   associated_species?: AssociatedSpecies[];
+  // Professional arborist fields for Genesis Sprint III
+  land_owner?: string;
+  site_name?: string;
+  height_cm?: number;
+  dbh_cm?: number; // Diameter at Breast Height
+  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
 }
 
 export interface User {
@@ -158,6 +164,12 @@ export interface TreeFormData {
   verification_status?: 'verified' | 'manual' | 'pending';
   // Associated ecosystem species
   associated_species?: AssociatedSpecies[];
+  // Professional arborist fields for Genesis Sprint III
+  land_owner?: string;
+  site_name?: string;
+  height_cm?: number;
+  dbh_cm?: number; // Diameter at Breast Height
+  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
 }
 
 // Export iNaturalist types

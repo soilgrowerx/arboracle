@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Tree } from '@/types';
+import { Tree } from '@/types/tree';
 import { TreeService } from '@/services/treeService';
 import { TreeCard } from '@/components/TreeCard';
 import { AddTreeModal } from '@/components/AddTreeModal';

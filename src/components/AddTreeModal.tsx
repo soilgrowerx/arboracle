@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { TreeFormData, Tree } from '@/types';
+import { TreeFormData, Tree } from '@/types/tree';
 import { TreeService } from '@/services/treeService';
 import { iNaturalistService } from '@/services/inaturalistService';
 import { PlusCodeService } from '@/services/plusCodeService';
@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Plus, Search, MapPin, Map } from 'lucide-react';
 import { TaxonomyBreadcrumb } from '@/components/TaxonomicDisplay';
@@ -135,7 +136,12 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     management_actions: [],
     iNaturalist_link: '',
     verification_status: 'pending',
-    associated_species: []
+    associated_species: [],
+    land_owner: '',
+    site_name: '',
+    height_cm: undefined,
+    dbh_cm: undefined,
+    health_status: undefined
   });
 
   useEffect(() => {
@@ -158,7 +164,12 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         management_actions: managementActions,
         iNaturalist_link: editTree.iNaturalist_link || '',
         verification_status: editTree.verification_status || 'pending',
-        associated_species: editTree.associated_species || []
+        associated_species: editTree.associated_species || [],
+        land_owner: editTree.land_owner || '',
+        site_name: editTree.site_name || '',
+        height_cm: editTree.height_cm,
+        dbh_cm: editTree.dbh_cm,
+        health_status: editTree.health_status
       });
       setManagementActionsInput(managementActions.join(', '));
     }
@@ -248,7 +259,12 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           management_actions: [],
           iNaturalist_link: '',
           verification_status: 'pending',
-          associated_species: []
+          associated_species: [],
+          land_owner: '',
+          site_name: '',
+          height_cm: undefined,
+          dbh_cm: undefined,
+          health_status: undefined
         });
         setManagementActionsInput('');
       }
@@ -633,6 +649,45 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             )}
           </div>
 
+          {/* Tree Measurements Section */}
+          <div className="border-t border-green-100 pt-3 sm:pt-4 lg:pt-6 space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-2 mb-2 sm:mb-4">
+              <span className="text-base sm:text-lg">📏</span>
+              <h3 className="text-base sm:text-lg font-semibold text-green-800">Tree Measurements</h3>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="height_cm" className="text-green-700 font-medium text-sm sm:text-base">Height (cm)</Label>
+                <Input
+                  id="height_cm"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={formData.height_cm || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, height_cm: e.target.value ? parseInt(e.target.value) : undefined }))}
+                  placeholder="e.g., 350"
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="dbh_cm" className="text-green-700 font-medium text-sm sm:text-base">DBH (cm)</Label>
+                <Input
+                  id="dbh_cm"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={formData.dbh_cm || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, dbh_cm: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                  placeholder="e.g., 45.5"
+                  className="border-green-200 focus:border-green-400"
+                />
+                <p className="text-xs text-green-600 mt-1">Diameter at Breast Height</p>
+              </div>
+            </div>
+          </div>
+
           {/* Management Data Section */}
           <div className="border-t border-green-100 pt-6 space-y-4">
             <div className="flex items-center gap-2 mb-4">
@@ -659,6 +714,30 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   value={formData.nursery_stock_id}
                   onChange={(e) => setFormData(prev => ({ ...prev, nursery_stock_id: e.target.value }))}
                   placeholder="e.g., NST-2024-001"
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="land_owner" className="text-green-700 font-medium text-sm sm:text-base">Land Owner</Label>
+                <Input
+                  id="land_owner"
+                  value={formData.land_owner}
+                  onChange={(e) => setFormData(prev => ({ ...prev, land_owner: e.target.value }))}
+                  placeholder="e.g., City Parks, Private owner..."
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="site_name" className="text-green-700 font-medium text-sm sm:text-base">Site Name</Label>
+                <Input
+                  id="site_name"
+                  value={formData.site_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, site_name: e.target.value }))}
+                  placeholder="e.g., Central Park, Smith Property..."
                   className="border-green-200 focus:border-green-400"
                 />
               </div>
@@ -714,6 +793,22 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 />
               </div>
             )}
+            
+            <div>
+              <Label htmlFor="health_status" className="text-green-700 font-medium">Health Status</Label>
+              <Select value={formData.health_status || ''} onValueChange={(value: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead') => setFormData(prev => ({ ...prev, health_status: value }))}>
+                <SelectTrigger className="border-green-200 focus:border-green-400">
+                  <SelectValue placeholder="Select health status..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Excellent">Excellent</SelectItem>
+                  <SelectItem value="Good">Good</SelectItem>
+                  <SelectItem value="Fair">Fair</SelectItem>
+                  <SelectItem value="Poor">Poor</SelectItem>
+                  <SelectItem value="Dead">Dead</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             <div>
               <Label htmlFor="photo_urls" className="text-green-700 font-medium">Photo URLs</Label>

@@ -1,4 +1,5 @@
-import { EcosystemSpecies, EcosystemSpeciesFormData, Tree } from '@/types';
+import { EcosystemSpecies, EcosystemSpeciesFormData } from '@/types';
+import { Tree } from '@/types/tree';
 import { TreeService } from './treeService';
 import { iNaturalistService } from './inaturalistService';
 import { v4 as uuidv4 } from 'uuid';

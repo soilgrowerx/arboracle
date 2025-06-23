@@ -1,6 +1,6 @@
 'use client';
 
-import { Tree } from '@/types';
+import { Tree } from '@/types/tree';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TreePine, FlaskConical, Shield, Calendar, TrendingUp, TrendingDown, Minus, Leaf, Database } from 'lucide-react';

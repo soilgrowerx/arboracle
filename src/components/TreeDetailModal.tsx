@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Tree } from '@/types';
+import { Tree } from '@/types/tree';
 import { EcosystemManagement } from '@/components/EcosystemManagement';
 import { EcosystemService } from '@/services/ecosystemService';
 import {
