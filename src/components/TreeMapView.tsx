@@ -104,6 +104,7 @@ const BaseLayer = dynamic(() => import('react-leaflet').then(mod => mod.LayersCo
 const Overlay = dynamic(() => import('react-leaflet').then(mod => mod.LayersControl.Overlay), { ssr: false });
 const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const MarkerClusterGroup = dynamic(() => import('react-leaflet-cluster'), { ssr: false });
 
 // Enhanced tree icon with status colors
 const createTreeIcon = (tree: Tree) => {
@@ -454,13 +455,41 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
           
           {!showEmptyState && <MapBounds trees={filteredTrees} />}
           
-          {filteredTrees.map((tree) => (
-            <Marker
-              key={tree.id}
-              position={[tree.lat, tree.lng]}
-              icon={createTreeIcon(tree)}
-            >
-              <Popup className="enhanced-tree-popup" maxWidth={320} minWidth={280}>
+          <MarkerClusterGroup
+            chunkedLoading
+            iconCreateFunction={(cluster: any) => {
+              if (typeof window === 'undefined') return null;
+              const L = require('leaflet');
+              const childCount = cluster.getChildCount();
+              
+              let c = ' marker-cluster-';
+              if (childCount < 10) {
+                c += 'small';
+              } else if (childCount < 100) {
+                c += 'medium';
+              } else {
+                c += 'large';
+              }
+
+              return new L.DivIcon({
+                html: `<div><span>${childCount}</span></div>`,
+                className: 'marker-cluster' + c,
+                iconSize: new L.Point(40, 40)
+              });
+            }}
+            maxClusterRadius={80}
+            spiderfyOnMaxZoom={true}
+            showCoverageOnHover={false}
+            zoomToBoundsOnClick={true}
+            disableClusteringAtZoom={15}
+          >
+            {filteredTrees.map((tree) => (
+              <Marker
+                key={tree.id}
+                position={[tree.lat, tree.lng]}
+                icon={createTreeIcon(tree)}
+              >
+                <Popup className="enhanced-tree-popup" maxWidth={320} minWidth={280}>
               <div className="enhanced-popup-content">
                 {/* Header Section with Gradient */}
                 <div className="popup-header">
@@ -581,9 +610,10 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
                 </div>
               </div>
             </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
+        </MapContainer>
       
       {/* Empty State Overlay */}
       {showEmptyState && (
