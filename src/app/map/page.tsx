@@ -255,31 +255,22 @@ export default function MapPage() {
           </CardContent>
         </Card>
 
-        {/* Map Component */}
-        {filteredTrees.length === 0 ? (
-          <Card className="h-96">
-            <CardContent className="h-full flex items-center justify-center">
+        {/* Map Component - Always render map regardless of tree count */}
+        <div className="relative bg-white rounded-lg border border-green-200 p-1 shadow-sm">
+          <SimpleMap 
+            trees={filteredTrees}
+            center={filteredTrees.length > 0 ? [filteredTrees[0].lat, filteredTrees[0].lng] : [40.7128, -74.0060]}
+          />
+          {filteredTrees.length === 0 && (
+            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur rounded-lg p-4 shadow-lg z-10 max-w-sm">
               <div className="text-center text-green-600">
-                <div className="text-6xl mb-4">🌱</div>
-                <h3 className="text-xl font-semibold mb-2">No Trees with Coordinates</h3>
-                <p className="text-green-500 mb-4">Add trees with GPS coordinates to see them on the map</p>
-                <AddTreeModal 
-                  onTreeAdded={handleTreeAdded} 
-                  editTree={editingTree}
-                  isEditMode={!!editingTree}
-                />
+                <div className="text-3xl mb-2">🌱</div>
+                <h3 className="text-lg font-semibold mb-1">No Trees on Map</h3>
+                <p className="text-green-500 text-sm">Add trees with GPS coordinates to see them here</p>
               </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="bg-white rounded-lg border border-green-200 p-1 shadow-sm">
-            {/* Temporary SimpleMap for testing - Genesis Sprint IV */}
-            <SimpleMap 
-              trees={filteredTrees}
-              center={filteredTrees.length > 0 ? [filteredTrees[0].lat, filteredTrees[0].lng] : [40.7128, -74.0060]}
-            />
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </main>
 
       {/* Tree Detail Modal */}
