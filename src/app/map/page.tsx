@@ -256,7 +256,7 @@ export default function MapPage() {
         </Card>
 
         {/* Map Component */}
-        {trees.length === 0 ? (
+        {false ? (
           <Card className="h-96">
             <CardContent className="h-full flex items-center justify-center">
               <div className="text-center text-green-600">
