@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface SimpleMapProps {
   trees?: any[];
@@ -10,20 +10,32 @@ interface SimpleMapProps {
 
 export function SimpleMap({ trees = [], center = [40.7128, -74.0060], zoom = 10 }: SimpleMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !mapRef.current) return;
 
     // Dynamically import Leaflet to avoid SSR issues
     const initMap = async () => {
-      const L = await import('leaflet');
-      
-      // Create the map
-      const map = L.map(mapRef.current!, {
-        center: center,
-        zoom: zoom,
-        zoomControl: true,
-      });
+      try {
+        const L = await import('leaflet');
+        
+        // Ensure container is completely clean
+        if (mapRef.current) {
+          mapRef.current.innerHTML = '';
+          // Remove any existing leaflet-container class
+          mapRef.current.classList.remove('leaflet-container');
+        }
+        
+        // Create a fresh map instance
+        const map = L.map(mapRef.current!, {
+          center: center,
+          zoom: zoom,
+          zoomControl: true,
+        });
+        
+        mapInstanceRef.current = map;
 
       // Add a basic tile layer
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -63,20 +75,49 @@ export function SimpleMap({ trees = [], center = [40.7128, -74.0060], zoom = 10 
         }
       });
 
-      // Cleanup function
-      return () => {
-        map.remove();
-      };
+      setIsMapReady(true);
+      
+      } catch (error) {
+        console.error('Error initializing map:', error);
+        setIsMapReady(false);
+      }
     };
 
-    initMap();
+    // Add a small delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      initMap();
+    }, 100);
+    
+    // Cleanup on unmount
+    return () => {
+      clearTimeout(timeoutId);
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.remove();
+        } catch (e) {
+          console.warn('Error cleaning up map:', e);
+        }
+        mapInstanceRef.current = null;
+      }
+      setIsMapReady(false);
+    };
   }, [trees, center, zoom]);
 
   return (
-    <div
-      ref={mapRef}
-      className="w-full h-[400px] sm:h-[500px] rounded-lg border border-green-200 shadow-sm"
-      style={{ height: '500px' }}
-    />
+    <div className="w-full h-[400px] sm:h-[500px] rounded-lg border border-green-200 shadow-sm relative">
+      <div
+        ref={mapRef}
+        className="w-full h-full rounded-lg"
+        style={{ height: '500px' }}
+      />
+      {!isMapReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-green-50 rounded-lg">
+          <div className="text-center">
+            <div className="text-4xl mb-2">🗺️</div>
+            <div className="text-green-600">Loading map...</div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
