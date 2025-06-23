@@ -471,9 +471,13 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     <Dialog open={open} onOpenChange={setOpen}>
       {!isEditMode && (
         <DialogTrigger asChild>
-          <Button className="w-full btn-primary-enhanced group touch-target mobile-button font-semibold">
-            <Plus size={14} className="mr-2 transition-transform duration-200 group-hover:rotate-90" />
-            Add Tree
+          <Button className="w-full btn-primary-enhanced group touch-target mobile-button font-bold bg-gradient-to-r from-green-600 via-green-700 to-emerald-700 hover:from-green-700 hover:via-green-800 hover:to-emerald-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0 h-14 sm:h-16">
+            <div className="flex items-center justify-center gap-3">
+              <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all duration-300">
+                <Plus size={18} className="text-white transition-transform duration-300 group-hover:rotate-90" />
+              </div>
+              <span className="text-lg font-bold">+ Add Tree</span>
+            </div>
           </Button>
         </DialogTrigger>
       )}

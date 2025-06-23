@@ -309,15 +309,19 @@ export default function Home() {
               </p>
             </div>
             <div className="mobile-stack">
-              {/* Primary Actions Row */}
-              <div className="mobile-grid-safe sm:grid-cols-2 gap-3">
-                <Link href="/map" className="w-full">
+              {/* Primary Actions Row - Enhanced */}
+              <div className="mobile-grid-safe sm:grid-cols-2 gap-4">
+                <Link href="/map" className="w-full group">
                   <Button
-                    className="w-full btn-enhanced bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold touch-target mobile-button"
+                    className="w-full btn-enhanced bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 text-white font-bold touch-target mobile-button shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0 h-14 sm:h-16"
                   >
-                    <Map size={16} className="mr-2" />
-                    <span className="hidden xs:inline">🗺️ View Map</span>
-                    <span className="xs:hidden">Map</span>
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all duration-300">
+                        <Map size={18} className="text-white" />
+                      </div>
+                      <span className="hidden xs:inline text-lg font-bold">🗺️ View Map</span>
+                      <span className="xs:hidden text-base font-bold">Map</span>
+                    </div>
                   </Button>
                 </Link>
                 <div className="w-full">
