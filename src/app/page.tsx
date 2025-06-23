@@ -333,36 +333,42 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Secondary Actions - Mobile optimized grid */}
-              <div className="grid grid-cols-2 xs:grid-cols-4 gap-2 sm:gap-3">
+              {/* Secondary Actions - Enhanced Professional Grid */}
+              <div className="grid grid-cols-2 xs:grid-cols-4 gap-3 sm:gap-4">
                 <Link href="/settings" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 touch-target mobile-button"
+                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 hover:border-purple-400 touch-target mobile-button h-12 sm:h-14 font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                   >
-                    <Settings size={14} className="mr-1 xs:mr-2" />
-                    <span className="hidden xs:inline">Settings</span>
-                    <span className="xs:hidden text-xs">Config</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <Settings size={16} className="text-purple-600" />
+                      <span className="hidden xs:inline">⚙️ Settings</span>
+                      <span className="xs:hidden text-xs font-bold">Config</span>
+                    </div>
                   </Button>
                 </Link>
                 <Link href="/knowledge" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full btn-outline-enhanced border-purple-300 text-purple-700 hover:bg-purple-50 hover:border-purple-400 touch-target mobile-button"
+                    className="w-full btn-outline-enhanced border-pink-300 text-pink-700 hover:bg-gradient-to-r hover:from-pink-50 hover:to-pink-100 hover:border-pink-400 touch-target mobile-button h-12 sm:h-14 font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                   >
-                    <BookOpen size={14} className="mr-1 xs:mr-2" />
-                    <span className="hidden xs:inline">🧠 Knowledge</span>
-                    <span className="xs:hidden text-xs">Learn</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <BookOpen size={16} className="text-pink-600" />
+                      <span className="hidden xs:inline">🧠 Knowledge</span>
+                      <span className="xs:hidden text-xs font-bold">Learn</span>
+                    </div>
                   </Button>
                 </Link>
                 <Link href="/admin" className="col-span-1">
                   <Button
                     variant="outline"
-                    className="w-full btn-outline-enhanced border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 touch-target mobile-button"
+                    className="w-full btn-outline-enhanced border-orange-300 text-orange-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:border-orange-400 touch-target mobile-button h-12 sm:h-14 font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                   >
-                    <Settings size={14} className="mr-1 xs:mr-2" />
-                    <span className="hidden xs:inline">Admin</span>
-                    <span className="xs:hidden text-xs">Admin</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <Settings size={16} className="text-orange-600" />
+                      <span className="hidden xs:inline">⚙️ Admin</span>
+                      <span className="xs:hidden text-xs font-bold">Admin</span>
+                    </div>
                   </Button>
                 </Link>
                 {trees.length > 0 && (
