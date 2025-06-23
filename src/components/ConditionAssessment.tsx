@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { BodhiSuggestions } from '@/components/BodhiSuggestions';
 
 export interface ConditionChecklistData {
   structure: string[];
@@ -186,6 +187,11 @@ export default function ConditionAssessment({ value, onChange }: ConditionAssess
           </div>
         </div>
       )}
+
+      {/* Bodhi AI Suggestions */}
+      <BodhiSuggestions 
+        selectedConditions={Object.values(value.checklist).flat()}
+      />
     </div>
   );
 }
