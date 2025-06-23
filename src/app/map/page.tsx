@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Tree } from '@/types';
 import { TreeService } from '@/services/treeService';
 import { TreeMapView } from '@/components/TreeMapView';
+import { SimpleMap } from '@/components/SimpleMap';
 import { TreeDetailModal } from '@/components/TreeDetailModal';
 import { AddTreeModal } from '@/components/AddTreeModal';
 import { Button } from '@/components/ui/button';
@@ -272,10 +273,10 @@ export default function MapPage() {
           </Card>
         ) : (
           <div className="bg-white rounded-lg border border-green-200 p-1 shadow-sm">
-            <TreeMapView 
-              onTreeSelect={handleTreeSelect}
-              // Pass filtered trees to the map component
-              filteredTrees={filteredTrees}
+            {/* Temporary SimpleMap for testing - Genesis Sprint IV */}
+            <SimpleMap 
+              trees={filteredTrees}
+              center={filteredTrees.length > 0 ? [filteredTrees[0].lat, filteredTrees[0].lng] : [40.7128, -74.0060]}
             />
           </div>
         )}
