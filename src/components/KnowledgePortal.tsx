@@ -5,10 +5,11 @@ import { KnowledgeArticle } from '@/types/knowledge';
 import { KnowledgeBase } from '@/components/KnowledgeBase';
 import { KnowledgeArticleReader } from '@/components/KnowledgeArticleReader';
 import { AskBodhi } from '@/components/AskBodhi';
+import { StudyGuide } from '@/components/StudyGuide';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, MessageSquare, TrendingUp, Users } from 'lucide-react';
+import { BookOpen, MessageSquare, TrendingUp, Users, GraduationCap } from 'lucide-react';
 
 export function KnowledgePortal() {
   const [activeTab, setActiveTab] = useState('browse');
@@ -55,7 +56,7 @@ export function KnowledgePortal() {
         ) : (
           // Main Portal View
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-8 bg-white border border-green-200 shadow-sm">
+            <TabsList className="grid w-full grid-cols-4 max-w-3xl mx-auto mb-8 bg-white border border-green-200 shadow-sm">
               <TabsTrigger 
                 value="browse" 
                 className="flex items-center gap-2 py-3 px-6 font-semibold data-[state=active]:bg-green-600 data-[state=active]:text-white transition-all duration-200"
@@ -73,6 +74,14 @@ export function KnowledgePortal() {
                 <span className="sm:hidden">Ask AI</span>
               </TabsTrigger>
               <TabsTrigger 
+                value="study" 
+                className="flex items-center gap-2 py-3 px-6 font-semibold data-[state=active]:bg-orange-600 data-[state=active]:text-white transition-all duration-200"
+              >
+                <GraduationCap size={18} />
+                <span className="hidden sm:inline">Study Guide</span>
+                <span className="sm:hidden">Study</span>
+              </TabsTrigger>
+              <TabsTrigger 
                 value="community" 
                 className="flex items-center gap-2 py-3 px-6 font-semibold data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all duration-200"
               >
@@ -88,6 +97,10 @@ export function KnowledgePortal() {
 
             <TabsContent value="ask" className="space-y-6 mt-0">
               <AskBodhi onClose={handleBackToBrowse} />
+            </TabsContent>
+
+            <TabsContent value="study" className="space-y-6 mt-0">
+              <StudyGuide />
             </TabsContent>
 
             <TabsContent value="community" className="space-y-6 mt-0">
