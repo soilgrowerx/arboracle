@@ -4,7 +4,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Leaf, TreePine, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Leaf, TreePine, AlertTriangle, CheckCircle, Download, FileText } from 'lucide-react';
 
 export function ForestHealthScore() {
   // Mock data for forest health metrics
@@ -15,6 +16,59 @@ export function ForestHealthScore() {
     monitoring: 0,
     atRisk: 0,
     total: 0
+  };
+
+  const exportHealthReport = () => {
+    const reportData = {
+      title: 'Arboracle Forest Health Report',
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
+      healthScore: healthScore,
+      status: getScoreStatus(healthScore),
+      metrics: healthMetrics,
+      summary: `Forest health assessment shows ${getScoreStatus(healthScore).toLowerCase()} condition with a score of ${healthScore}/100. ${treeCount === 0 ? 'No trees currently tracked. Begin adding trees to generate detailed health analytics.' : `Analysis based on ${treeCount} tracked trees with comprehensive condition data.`}`,
+      recommendations: [
+        'Regular condition assessments every 6 months',
+        'Monitor for pest and disease indicators',
+        'Maintain proper soil conditions and drainage',
+        'Consider professional arborist consultation for trees at risk'
+      ]
+    };
+
+    const csvContent = [
+      'Arboracle Forest Health Report',
+      `Generated: ${reportData.date} at ${reportData.time}`,
+      '',
+      'HEALTH SCORE SUMMARY',
+      `Overall Score,${reportData.healthScore}/100`,
+      `Status,${reportData.status}`,
+      '',
+      'TREE HEALTH BREAKDOWN',
+      'Category,Count',
+      `Healthy,${healthMetrics.healthy}`,
+      `Monitoring,${healthMetrics.monitoring}`,
+      `At Risk,${healthMetrics.atRisk}`,
+      `Total Trees,${healthMetrics.total}`,
+      '',
+      'SUMMARY',
+      reportData.summary,
+      '',
+      'RECOMMENDATIONS',
+      ...reportData.recommendations.map(rec => `• ${rec}`)
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `arboracle-health-report-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const getScoreColor = (score: number) => {
@@ -87,7 +141,7 @@ export function ForestHealthScore() {
 
           {/* Quick Actions */}
           <div className="pt-2 border-t border-green-100">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mb-3">
               <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
                 AI-Powered Analysis
               </Badge>
@@ -95,7 +149,18 @@ export function ForestHealthScore() {
                 Real-time Updates
               </Badge>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            
+            <Button 
+              onClick={exportHealthReport}
+              variant="outline"
+              size="sm"
+              className="w-full mb-2 border-green-200 text-green-700 hover:bg-green-50"
+            >
+              <FileText className="w-3 h-3 mr-2" />
+              Export Health Report
+            </Button>
+            
+            <p className="text-xs text-gray-500">
               {treeCount === 0 
                 ? "Add trees to begin tracking your forest health metrics"
                 : "Score based on condition assessments, growth data, and ecological factors"
