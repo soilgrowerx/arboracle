@@ -338,6 +338,18 @@ export default function Home() {
               
               {/* Secondary Actions - Enhanced Professional Grid */}
               <div className="grid grid-cols-2 xs:grid-cols-4 gap-3 sm:gap-4">
+                <Link href="/learn" className="col-span-1">
+                  <Button
+                    variant="outline"
+                    className="w-full btn-outline-enhanced border-green-300 text-green-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-green-100 hover:border-green-400 touch-target mobile-button h-12 sm:h-14 font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <BookOpen size={16} className="text-green-600" />
+                      <span className="hidden xs:inline">📚 Learn</span>
+                      <span className="xs:hidden text-xs font-bold">Learn</span>
+                    </div>
+                  </Button>
+                </Link>
                 <Link href="/settings" className="col-span-1">
                   <Button
                     variant="outline"
@@ -358,7 +370,7 @@ export default function Home() {
                     <div className="flex items-center justify-center gap-2">
                       <BookOpen size={16} className="text-pink-600" />
                       <span className="hidden xs:inline">🧠 Knowledge</span>
-                      <span className="xs:hidden text-xs font-bold">Learn</span>
+                      <span className="xs:hidden text-xs font-bold">Know</span>
                     </div>
                   </Button>
                 </Link>
