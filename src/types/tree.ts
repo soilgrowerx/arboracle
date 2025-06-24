@@ -61,6 +61,11 @@ export interface Tree {
   height_cm?: number;
   dbh_cm?: number; // Diameter at Breast Height
   health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
+  // Genesis Sprint IV: Advanced Measurements
+  is_multi_stem?: boolean;
+  stem_diameters?: number[]; // Array of individual stem measurements in cm
+  canopy_spread_ns?: number; // North-South canopy spread in meters
+  canopy_spread_ew?: number; // East-West canopy spread in meters
 }
 
 export interface EnhancedPhoto {
@@ -171,4 +176,9 @@ export interface TreeFormData {
   height_cm?: number;
   dbh_cm?: number; // Diameter at Breast Height
   health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
+  // Genesis Sprint IV: Advanced Measurements
+  is_multi_stem?: boolean;
+  stem_diameters?: number[]; // Array of individual stem measurements in cm
+  canopy_spread_ns?: number; // North-South canopy spread in meters
+  canopy_spread_ew?: number; // East-West canopy spread in meters
 }

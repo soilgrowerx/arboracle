@@ -748,6 +748,75 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 <p className="text-xs text-green-600 mt-1">Diameter at Breast Height</p>
               </div>
             </div>
+
+            {/* Multi-stem checkbox */}
+            <div className="flex items-center space-x-3 mt-4">
+              <input
+                type="checkbox"
+                id="is_multi_stem"
+                checked={formData.is_multi_stem || false}
+                onChange={(e) => setFormData(prev => ({ ...prev, is_multi_stem: e.target.checked }))}
+                className="w-4 h-4 text-green-600 bg-green-100 border-green-300 rounded focus:ring-green-500"
+              />
+              <label htmlFor="is_multi_stem" className="text-green-700 font-medium">
+                Multi-stem tree?
+              </label>
+            </div>
+
+            {/* Show stem diameters if multi-stem is checked */}
+            {formData.is_multi_stem && (
+              <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                <Label className="text-green-700 font-medium text-sm mb-2 block">
+                  Individual Stem Diameters (cm)
+                </Label>
+                <Input
+                  type="text"
+                  value={formData.stem_diameters?.join(', ') || ''}
+                  onChange={(e) => {
+                    const values = e.target.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+                    setFormData(prev => ({ ...prev, stem_diameters: values.length > 0 ? values : undefined }));
+                  }}
+                  placeholder="e.g., 12.5, 15.3, 18.0"
+                  className="border-green-200 focus:border-green-400"
+                />
+                <p className="text-xs text-green-600 mt-1">Separate multiple values with commas</p>
+              </div>
+            )}
+
+            {/* Canopy spread measurements */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+              <div>
+                <Label htmlFor="canopy_spread_ns" className="text-green-700 font-medium text-sm sm:text-base">
+                  Canopy Spread N-S (m)
+                </Label>
+                <Input
+                  id="canopy_spread_ns"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={formData.canopy_spread_ns || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, canopy_spread_ns: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                  placeholder="e.g., 12.5"
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="canopy_spread_ew" className="text-green-700 font-medium text-sm sm:text-base">
+                  Canopy Spread E-W (m)
+                </Label>
+                <Input
+                  id="canopy_spread_ew"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={formData.canopy_spread_ew || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, canopy_spread_ew: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                  placeholder="e.g., 15.0"
+                  className="border-green-200 focus:border-green-400"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Management Data Section */}
