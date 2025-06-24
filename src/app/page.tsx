@@ -18,10 +18,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, SortAsc, Download, List, Map, Settings, BarChart3, BookOpen } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { calculateTreeAge } from '@/lib/utils';
 import { EcosystemService } from '@/services/ecosystemService';
 
 export default function Home() {
+  const router = useRouter();
   const [trees, setTrees] = useState<Tree[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date-newest');
@@ -54,11 +56,11 @@ export default function Home() {
   };
 
   const handleTreeSelect = (tree: Tree) => {
-    setSelectedTree(tree);
+    router.push(`/tree/${tree.id}`);
   };
 
   const handleTreeClick = (tree: Tree) => {
-    setSelectedTree(tree);
+    router.push(`/tree/${tree.id}`);
   };
 
   const exportToCSV = () => {
@@ -606,14 +608,6 @@ export default function Home() {
       </footer>
 
       <Toaster />
-      
-      {/* Tree Detail Modal */}
-      <TreeDetailModal
-        tree={selectedTree}
-        isOpen={!!selectedTree}
-        onClose={() => setSelectedTree(null)}
-        onEdit={handleEditTree}
-      />
     </div>
   );
 }
