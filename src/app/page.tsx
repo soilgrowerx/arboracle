@@ -6,6 +6,7 @@ import { TreeService } from '@/services/treeService';
 import { TreeCard } from '@/components/TreeCard';
 import { AddTreeModal } from '@/components/AddTreeModal';
 import { TreeStatistics } from '@/components/TreeStatistics';
+import { ForestHealthScore } from '@/components/ForestHealthScore';
 import { TreeMapView } from '@/components/TreeMapView';
 import { TreeDetailModal } from '@/components/TreeDetailModal';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
@@ -399,7 +400,14 @@ export default function Home() {
         </div>
 
         {/* Statistics Dashboard */}
-        <TreeStatistics trees={trees} />
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2">
+            <TreeStatistics trees={trees} />
+          </div>
+          <div className="lg:col-span-1">
+            <ForestHealthScore />
+          </div>
+        </div>
 
         {/* View Tabs */}
         {trees.length > 0 && (
