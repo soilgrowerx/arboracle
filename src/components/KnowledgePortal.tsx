@@ -5,7 +5,7 @@ import { KnowledgeArticle } from '@/types/knowledge';
 import { KnowledgeBase } from '@/components/KnowledgeBase';
 import { KnowledgeArticleReader } from '@/components/KnowledgeArticleReader';
 import { AskBodhi } from '@/components/AskBodhi';
-import { StudyGuide } from '@/components/StudyGuide';
+import StudyGuide from '@/components/StudyGuide';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
