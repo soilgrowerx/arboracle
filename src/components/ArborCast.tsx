@@ -93,7 +93,9 @@ export default function ArborCast() {
 
       if (data.success) {
         setUploadStatus('success');
-        setUploadMessage(`Successfully converted "${file.name}" to podcast! Estimated duration: ${Math.floor(data.duration / 60)} minutes.`);
+        const minutes = Math.floor(data.duration / 60);
+        const scriptPreview = data.script ? `\n\nGenerated Script Preview:\n"${data.script.substring(0, 200)}..."` : '';
+        setUploadMessage(`Successfully converted "${file.name}" to podcast! Estimated duration: ${minutes} minutes.${scriptPreview}`);
         fetchMyPodcasts(); // Refresh the list
       } else {
         setUploadStatus('error');

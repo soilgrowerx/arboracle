@@ -45,29 +45,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Simulate TTS processing
-    const wordCount = text.split(' ').length;
-    const estimatedDuration = Math.ceil(wordCount / 150) * 60; // ~150 words per minute
-
-    // In production, this would:
-    // 1. Send text to TTS API (Google Cloud TTS, ElevenLabs, etc.)
-    // 2. Receive audio file
-    // 3. Store in cloud storage (S3, GCS)
-    // 4. Return URL to stored audio
-
-    // For demo purposes, we'll simulate this process
-    const simulatedAudioUrl = `/audio/demo-podcast-${Date.now()}.mp3`;
+    // Generate podcast script using Gemini API
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBijgDawU3tvZpi62Dt_BV9glyh_4A0UfQ';
+    const MODEL_ID = 'gemini-2.0-flash-preview-05-20';
     
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const prompt = `Convert the following document into an engaging, educational podcast script about arboriculture. Make it conversational and informative. Keep it under 500 words:
 
-    const response: TTSResponse = {
-      success: true,
-      audioUrl: simulatedAudioUrl,
-      duration: estimatedDuration,
-    };
+${text}
 
-    return NextResponse.json(response);
+Format the output as a natural-sounding podcast script.`;
+
+    try {
+      const geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_ID}:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              role: 'user',
+              parts: [{
+                text: prompt
+              }]
+            }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 1000,
+            }
+          })
+        }
+      );
+
+      const geminiData = await geminiResponse.json();
+      const podcastScript = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate podcast script';
+      
+      // Calculate duration based on script length
+      const scriptWordCount = podcastScript.split(' ').length;
+      const estimatedDuration = Math.ceil(scriptWordCount / 150) * 60; // ~150 words per minute
+      
+      // For now, return the script as the audio URL placeholder
+      const response: TTSResponse = {
+        success: true,
+        audioUrl: `/api/arborcast/audio/${Date.now()}`, // Placeholder for future audio generation
+        duration: estimatedDuration,
+      };
+      
+      // Store the script in the response for display
+      (response as any).script = podcastScript;
+      (response as any).fileName = file.name;
+
+      return NextResponse.json(response);
+    } catch (geminiError) {
+      console.error('Gemini API Error:', geminiError);
+      return NextResponse.json(
+        { success: false, error: 'Failed to generate podcast content' },
+        { status: 500 }
+      );
+    }
 
   } catch (error) {
     console.error('ArborCast TTS Error:', error);
