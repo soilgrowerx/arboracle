@@ -121,6 +121,41 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     }
   }, [showLocationMap, isClient]);
   const [stemDiametersInput, setStemDiametersInput] = useState('');
+  const [units, setUnits] = useState('metric'); // Track user's unit preference
+
+  // Load unit preference from localStorage
+  useEffect(() => {
+    try {
+      const savedSettings = localStorage.getItem('arboracle_user_settings');
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        setUnits(settings.preferences?.units || 'metric');
+      }
+    } catch (error) {
+      console.error('Error loading unit preference:', error);
+    }
+  }, []);
+
+  // Helper function to get unit labels based on user preference
+  const getUnitLabels = () => {
+    if (units === 'imperial') {
+      return {
+        height: 'Height (ft)',
+        dbh: 'DBH (in)',
+        canopyNS: 'Canopy Spread N-S (ft)',
+        canopyEW: 'Canopy Spread E-W (ft)',
+        stemDiameters: 'Individual Stem Diameters (in)'
+      };
+    }
+    return {
+      height: 'Height (cm)',
+      dbh: 'DBH (cm)',
+      canopyNS: 'Canopy Spread N-S (m)',
+      canopyEW: 'Canopy Spread E-W (m)',
+      stemDiameters: 'Individual Stem Diameters (cm)'
+    };
+  };
+
   const [formData, setFormData] = useState<TreeFormData>({
     species: '',
     location: { lat: 0, lng: 0 },
@@ -748,7 +783,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="height_cm" className="text-green-700 font-medium text-sm sm:text-base">Height (cm)</Label>
+                <Label htmlFor="height_cm" className="text-green-700 font-medium text-sm sm:text-base">{getUnitLabels().height}</Label>
                 <Input
                   id="height_cm"
                   type="number"
@@ -762,7 +797,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               </div>
               
               <div>
-                <Label htmlFor="dbh_cm" className="text-green-700 font-medium text-sm sm:text-base">DBH (cm)</Label>
+                <Label htmlFor="dbh_cm" className="text-green-700 font-medium text-sm sm:text-base">{getUnitLabels().dbh}</Label>
                 <Input
                   id="dbh_cm"
                   type="number"
@@ -813,7 +848,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             {formData.is_multi_stem && (
               <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
                 <Label className="text-green-700 font-medium text-sm mb-2 block">
-                  Individual Stem Diameters (cm)
+                  {getUnitLabels().stemDiameters}
                 </Label>
                 <Input
                   type="text"
@@ -885,7 +920,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
               <div>
                 <Label htmlFor="canopy_spread_ns" className="text-green-700 font-medium text-sm sm:text-base">
-                  Canopy Spread N-S (m)
+                  {getUnitLabels().canopyNS}
                 </Label>
                 <Input
                   id="canopy_spread_ns"
@@ -901,7 +936,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               
               <div>
                 <Label htmlFor="canopy_spread_ew" className="text-green-700 font-medium text-sm sm:text-base">
-                  Canopy Spread E-W (m)
+                  {getUnitLabels().canopyEW}
                 </Label>
                 <Input
                   id="canopy_spread_ew"
