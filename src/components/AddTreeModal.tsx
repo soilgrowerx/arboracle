@@ -747,8 +747,14 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   onChange={(e) => setFormData(prev => ({ ...prev, dbh_cm: e.target.value ? parseFloat(e.target.value) : undefined }))}
                   placeholder="e.g., 45.5"
                   className="border-green-200 focus:border-green-400"
+                  readOnly={formData.is_multi_stem}
+                  disabled={formData.is_multi_stem}
                 />
-                <p className="text-xs text-green-600 mt-1">Diameter at Breast Height</p>
+                <p className="text-xs text-green-600 mt-1">
+                  {formData.is_multi_stem 
+                    ? "Auto-calculated using ISA formula: √(d1² + d2² + ...)" 
+                    : "Diameter at Breast Height"}
+                </p>
               </div>
             </div>
 
@@ -758,7 +764,15 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 type="checkbox"
                 id="is_multi_stem"
                 checked={formData.is_multi_stem || false}
-                onChange={(e) => setFormData(prev => ({ ...prev, is_multi_stem: e.target.checked }))}
+                onChange={(e) => {
+                  const isMultiStem = e.target.checked;
+                  setFormData(prev => ({ 
+                    ...prev, 
+                    is_multi_stem: isMultiStem,
+                    // Clear stem diameters and DBH calculation when unchecking multi-stem
+                    ...(isMultiStem ? {} : { stem_diameters: undefined, dbh_cm: undefined })
+                  }));
+                }}
                 className="w-4 h-4 text-green-600 bg-green-100 border-green-300 rounded focus:ring-green-500"
               />
               <label htmlFor="is_multi_stem" className="text-green-700 font-medium">
@@ -777,7 +791,21 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   value={formData.stem_diameters?.join(', ') || ''}
                   onChange={(e) => {
                     const values = e.target.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
-                    setFormData(prev => ({ ...prev, stem_diameters: values.length > 0 ? values : undefined }));
+                    
+                    // Calculate ISA multi-stem DBH: √(d1² + d2² + d3² + ...)
+                    let calculatedDBH: number | undefined = undefined;
+                    if (values.length > 1) {
+                      const sumOfSquares = values.reduce((sum, diameter) => sum + (diameter * diameter), 0);
+                      calculatedDBH = Math.sqrt(sumOfSquares);
+                    } else if (values.length === 1) {
+                      calculatedDBH = values[0];
+                    }
+                    
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      stem_diameters: values.length > 0 ? values : undefined,
+                      dbh_cm: calculatedDBH
+                    }));
                   }}
                   placeholder="e.g., 12.5, 15.3, 18.0"
                   className="border-green-200 focus:border-green-400"
