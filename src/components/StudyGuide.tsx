@@ -28,8 +28,8 @@ const categories = [
   'Soil Management',
   'Safe Work Practices',
   'Tree Biology',
-  'Tree Identification',
-  'Tree Assessment and Risk Management',
+  'Identification and Selection',
+  'Tree Risk Management',
   'Pest and Disease Management',
   'Installation and Establishment',
   'Pruning',
@@ -37,26 +37,26 @@ const categories = [
   'Diagnosis and Treatment',
   'Trees and Construction',
   'Tree Support Systems',
-  'Management of Trees and Shrubs',
-  'Other'
+  'Tree Protection',
+  'Urban Forestry'
 ];
 
 // Exam simulation weights based on domains
 const examWeights = {
-  'Soil Management': 0.05,
-  'Safe Work Practices': 0.10,
-  'Tree Biology': 0.10,
-  'Tree Identification': 0.10,
-  'Tree Assessment and Risk Management': 0.10,
-  'Pest and Disease Management': 0.10,
+  'Soil Management': 0.08,
+  'Safe Work Practices': 0.16,
+  'Tree Biology': 0.14,
+  'Identification and Selection': 0.07,
+  'Tree Risk Management': 0.08,
+  'Pest and Disease Management': 0.05,
   'Installation and Establishment': 0.10,
   'Pruning': 0.10,
   'Tree and Shrub Nutrition and Fertilization': 0.05,
-  'Diagnosis and Treatment': 0.05,
-  'Trees and Construction': 0.05,
-  'Tree Support Systems': 0.05,
-  'Management of Trees and Shrubs': 0.05,
-  'Other': 0
+  'Diagnosis and Treatment': 0.15,
+  'Trees and Construction': 0.02,
+  'Tree Support Systems': 0.02,
+  'Tree Protection': 0.07,
+  'Urban Forestry': 0.06
 };
 
 export default function StudyGuide() {
