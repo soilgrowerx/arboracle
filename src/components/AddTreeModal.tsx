@@ -768,7 +768,11 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   min="0"
                   step="0.1"
                   value={formData.dbh_cm !== undefined ? formData.dbh_cm.toString() : ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, dbh_cm: e.target.value ? parseFloat(e.target.value) : undefined }))}
+                  onChange={(e) => {
+                    // Don't allow manual changes when multi-stem is enabled
+                    if (formData.is_multi_stem) return;
+                    setFormData(prev => ({ ...prev, dbh_cm: e.target.value ? parseFloat(e.target.value) : undefined }));
+                  }}
                   placeholder="e.g., 45.5"
                   className="border-green-200 focus:border-green-400"
                   readOnly={formData.is_multi_stem}
