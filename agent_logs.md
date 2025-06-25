@@ -38,9 +38,14 @@
 
 **⚠️ REMAINING CRITICAL ISSUES:**
 1. **Multi-stem DBH Calculation**: String concatenation bug (highest priority)
-2. **Unit Conversion Global Application**: Settings not applied to form fields
-3. **ArborCast Backend**: TTS integration needed
+2. **Unit Conversion Global Application**: ⚠️ TESTED - Settings UI works but not applied to form field labels
+3. **ArborCast Backend**: TTS integration needed  
 4. **Tree Nursery Module**: Not yet implemented
+
+**🎯 UNIT CONVERSION TESTING RESULTS:**
+- **Settings UI**: ✅ Working perfectly - can switch between Metric/Imperial
+- **Global Application**: ❌ Form labels still show "(cm)", "(m)" instead of "(ft)", "(in)" 
+- **Fix Needed**: Connect settings to dynamic label display in AddTreeModal component
 
 **💡 KEY INSIGHTS DISCOVERED:**
 - Platform is significantly more functional than previous logs indicated
