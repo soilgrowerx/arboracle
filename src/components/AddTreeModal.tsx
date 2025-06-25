@@ -820,35 +820,56 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   onChange={(e) => {
                     const inputValue = e.target.value;
                     
+                    // Don't process if input is empty
+                    if (!inputValue.trim()) {
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        stem_diameters: undefined,
+                        dbh_cm: undefined
+                      }));
+                      return;
+                    }
+                    
                     // Split by comma and parse each value, filtering out invalid numbers
-                    const values = inputValue
-                      .split(',')
-                      .map(v => v.trim())
-                      .filter(v => v.length > 0)
-                      .map(v => parseFloat(v))
-                      .filter(v => !isNaN(v) && v > 0);
+                    const splitValues = inputValue.split(',');
+                    const trimmedValues = splitValues.map(v => v.trim());
+                    const nonEmptyValues = trimmedValues.filter(v => v.length > 0);
+                    const parsedValues = nonEmptyValues.map(v => parseFloat(v));
+                    const values = parsedValues.filter(v => !isNaN(v) && v > 0);
+                    
+                    console.log('DEBUG: Multi-stem parsing:', {
+                      inputValue,
+                      splitValues,
+                      trimmedValues,
+                      nonEmptyValues,
+                      parsedValues,
+                      values,
+                      step: 'parsing'
+                    });
                     
                     // Calculate ISA multi-stem DBH: √(d1² + d2² + d3² + ...)
                     let calculatedDBH: number | undefined = undefined;
                     if (values.length > 1) {
                       const sumOfSquares = values.reduce((sum, diameter) => sum + (diameter * diameter), 0);
-                      calculatedDBH = parseFloat((Math.sqrt(sumOfSquares)).toFixed(2)); // Ensure proper number format
+                      calculatedDBH = Math.round(Math.sqrt(sumOfSquares) * 100) / 100; // Round to 2 decimal places
                       console.log('Multi-stem calculation:', { 
                         inputValue, 
                         values, 
                         sumOfSquares, 
                         calculatedDBH,
-                        typeof: typeof calculatedDBH 
+                        typeof: typeof calculatedDBH,
+                        mathSqrt: Math.sqrt(sumOfSquares),
+                        debugStep: 'final calculation'
                       });
                     } else if (values.length === 1) {
                       calculatedDBH = values[0];
                     }
                     
-                    // Update state with proper type safety
+                    // Update state with proper type safety - ensure we only store parsed values
                     setFormData(prev => ({ 
                       ...prev, 
                       stem_diameters: values.length > 0 ? values : undefined,
-                      dbh_cm: calculatedDBH  // This should be a number, not string
+                      dbh_cm: calculatedDBH
                     }));
                   }}
                   placeholder="e.g., 12.5, 15.3, 18.0"
