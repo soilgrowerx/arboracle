@@ -120,6 +120,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
       return () => clearTimeout(timer);
     }
   }, [showLocationMap, isClient]);
+  const [stemDiametersInput, setStemDiametersInput] = useState('');
   const [formData, setFormData] = useState<TreeFormData>({
     species: '',
     location: { lat: 0, lng: 0 },
@@ -816,9 +817,10 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 </Label>
                 <Input
                   type="text"
-                  value={formData.stem_diameters?.join(', ') || ''}
+                  value={stemDiametersInput}
                   onChange={(e) => {
                     const inputValue = e.target.value;
+                    setStemDiametersInput(inputValue);
                     
                     // Don't process if input is empty
                     if (!inputValue.trim()) {
