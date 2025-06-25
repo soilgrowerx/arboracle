@@ -171,9 +171,19 @@ export default function ArborCast() {
               <span>Text Files</span>
             </div>
           </div>
-          <button className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-            Upload Resources (Coming Soon)
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+          >
+            Upload Resources
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.txt,.docx"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
         </div>
       </div>
 
