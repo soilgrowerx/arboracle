@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Font variable fix */
+:root {
+  --variable_5cfdac: "Geist", "Geist Fallback";
+  --variable_9a8899: "Geist Mono", "Geist Mono Fallback";
+}
+
 /* Leaflet CSS */
 @import 'leaflet/dist/leaflet.css';
 
