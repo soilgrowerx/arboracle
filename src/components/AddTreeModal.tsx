@@ -788,15 +788,9 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 </Label>
                 <Input
                   type="text"
-                  value={formData.stem_diameters_input || ''}
+                  value={formData.stem_diameters?.join(', ') || ''}
                   onChange={(e) => {
                     const inputValue = e.target.value;
-                    
-                    // Parse raw string input for display
-                    setFormData(prev => ({ 
-                      ...prev, 
-                      stem_diameters_input: inputValue
-                    }));
                     
                     // Split by comma and parse each value, filtering out invalid numbers
                     const values = inputValue
