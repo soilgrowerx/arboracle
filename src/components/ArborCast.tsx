@@ -1,7 +1,11 @@
 'use client';
 
-import React from 'react';
-import { Mic, Play, Upload, FileText, Calendar, Clock } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Mic, Play, Upload, FileText, Calendar, Clock, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const mockEpisodes = [
   {
@@ -38,7 +42,96 @@ const mockEpisodes = [
   }
 ];
 
+interface Podcast {
+  id: string;
+  title: string;
+  duration: number;
+  createdAt: string;
+  audioUrl: string;
+  originalFile: string;
+}
+
 export default function ArborCast() {
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [uploadMessage, setUploadMessage] = useState('');
+  const [myPodcasts, setMyPodcasts] = useState<Podcast[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchMyPodcasts();
+  }, []);
+
+  const fetchMyPodcasts = async () => {
+    try {
+      const response = await fetch('/api/arborcast');
+      const data = await response.json();
+      if (data.success) {
+        setMyPodcasts(data.podcasts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch podcasts:', error);
+    }
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setIsUploading(true);
+    setUploadStatus('idle');
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('voice', 'default');
+      formData.append('speed', '1.0');
+
+      const response = await fetch('/api/arborcast', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setUploadStatus('success');
+        setUploadMessage(`Successfully converted "${file.name}" to podcast! Estimated duration: ${Math.floor(data.duration / 60)} minutes.`);
+        fetchMyPodcasts(); // Refresh the list
+      } else {
+        setUploadStatus('error');
+        setUploadMessage(data.error || 'Failed to convert file to podcast.');
+      }
+    } catch (error) {
+      setUploadStatus('error');
+      setUploadMessage('Network error. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
+
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div className="p-6">
       {/* Header */}
