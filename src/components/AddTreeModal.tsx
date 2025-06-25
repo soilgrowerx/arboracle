@@ -156,27 +156,51 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
   });
 
   // Handle image upload from camera or gallery
-  const handleImageUpload = (event: Event) => {
+  const handleImageUpload = async (event: Event) => {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
-    const files = Array.from(input.files);
-    
-    files.forEach(file => {
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const result = e.target?.result as string;
-          if (result) {
-            setFormData(prev => ({
-              ...prev,
-              images: [...(prev.images || []), result]
-            }));
-          }
-        };
-        reader.readAsDataURL(file);
+    const files = Array.from(input.files).filter(file => file.type.startsWith('image/'));
+    if (files.length === 0) return;
+
+    try {
+      // Generate temporary tree ID if not editing
+      const treeId = editTree?.id || `temp-${Date.now()}`;
+      
+      const formData = new FormData();
+      files.forEach(file => formData.append('files', file));
+      formData.append('treeId', treeId);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
       }
-    });
+
+      const result = await response.json();
+      
+      if (result.success && result.urls) {
+        setFormData(prev => ({
+          ...prev,
+          images: [...(prev.images || []), ...result.urls]
+        }));
+        
+        toast({
+          title: "Images uploaded",
+          description: `${result.urls.length} image(s) uploaded successfully`,
+        });
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload images. Please try again.",
+        variant: "destructive",
+      });
+    }
     
     // Reset the input
     input.value = '';
