@@ -833,6 +833,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                     if (values.length > 1) {
                       const sumOfSquares = values.reduce((sum, diameter) => sum + (diameter * diameter), 0);
                       calculatedDBH = Math.round(Math.sqrt(sumOfSquares) * 100) / 100; // Round to 2 decimal places
+                      console.log('Multi-stem calculation:', { values, sumOfSquares, calculatedDBH });
                     } else if (values.length === 1) {
                       calculatedDBH = values[0];
                     }
