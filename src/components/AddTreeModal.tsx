@@ -743,7 +743,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   type="number"
                   min="0"
                   step="0.1"
-                  value={formData.dbh_cm || ''}
+                  value={formData.dbh_cm !== undefined ? formData.dbh_cm.toString() : ''}
                   onChange={(e) => setFormData(prev => ({ ...prev, dbh_cm: e.target.value ? parseFloat(e.target.value) : undefined }))}
                   placeholder="e.g., 45.5"
                   className="border-green-200 focus:border-green-400"
@@ -790,13 +790,20 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                   type="text"
                   value={formData.stem_diameters?.join(', ') || ''}
                   onChange={(e) => {
-                    const values = e.target.value.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+                    const inputValue = e.target.value;
+                    // Split by comma and parse each value, filtering out invalid numbers
+                    const values = inputValue
+                      .split(',')
+                      .map(v => v.trim())
+                      .filter(v => v.length > 0)
+                      .map(v => parseFloat(v))
+                      .filter(v => !isNaN(v) && v > 0);
                     
                     // Calculate ISA multi-stem DBH: √(d1² + d2² + d3² + ...)
                     let calculatedDBH: number | undefined = undefined;
                     if (values.length > 1) {
                       const sumOfSquares = values.reduce((sum, diameter) => sum + (diameter * diameter), 0);
-                      calculatedDBH = Math.sqrt(sumOfSquares);
+                      calculatedDBH = Math.round(Math.sqrt(sumOfSquares) * 100) / 100; // Round to 2 decimal places
                     } else if (values.length === 1) {
                       calculatedDBH = values[0];
                     }
