@@ -2,6 +2,51 @@
 
 ## Version History
 
+### Version 10.4.3 - 🔧 MULTI-STEM CALCULATION BUG ANALYSIS & FIX ATTEMPT ⚠️
+**Agent:** Fern Agent Polish-Agent-Deployer  
+**Date:** 2025-06-25  
+**Git Commit Hash:** 0dbbd1d  
+**Is Successfully Deployed:** true  
+**Major Milestone:** COMPREHENSIVE VISUAL TESTING & MULTI-STEM BUG INVESTIGATION  
+
+**🔍 CRITICAL BUG IDENTIFIED & PARTIALLY ADDRESSED:**
+
+**❌ MULTI-STEM DBH CALCULATION BUG - CONFIRMED & INVESTIGATED**
+- **Issue Confirmed**: Input "12, 14.5, 9" results in "121459" instead of proper ISA calculation (~20.86)
+- **Root Cause Analysis**: String concatenation occurring instead of mathematical calculation
+- **Expected Result**: √(12² + 14.5² + 9²) = √435.25 ≈ 20.86
+- **Actual Result**: "121459" (concatenated string without decimal point processing)
+
+**🔧 FIX ATTEMPTS MADE:**
+1. **Enhanced onChange Guard**: Added protection to prevent DBH field updates when multi-stem is active
+2. **Debug Logging**: Added console.log to track calculation values for troubleshooting
+3. **Code Review**: Confirmed calculation logic is mathematically correct in source code
+4. **Field Isolation**: Ensured DBH field is readOnly/disabled when multi-stem is enabled
+
+**📊 CURRENT STATUS:**
+- **UI Components**: ✅ Multi-stem interface working perfectly (checkbox, field appearance, formula display)
+- **Calculation Logic**: ✅ Mathematical formula implemented correctly in code  
+- **Bug Persistence**: ❌ Issue still occurs in production despite logical fixes
+- **User Experience**: ❌ Professional users cannot rely on multi-stem measurements
+
+**🎯 RECOMMENDATIONS FOR NEXT AGENT:**
+1. **Deep Debug Session** (30 min) - Add extensive logging to trace exact value flow
+2. **React State Analysis** (20 min) - Investigate potential React state update timing issues
+3. **Alternative Implementation** (45 min) - Consider refactoring calculation trigger mechanism
+4. **Input Field Investigation** (15 min) - Check if input type="text" vs type="number" affects parsing
+
+**💡 KEY INSIGHTS DISCOVERED:**
+- All visual aspects of multi-stem feature are implemented correctly
+- Issue appears to be in value processing/state management, not UI logic
+- Bug is reproducible and specific to comma-separated input parsing
+- Previous agent reports of this issue were accurate and well-documented
+
+**📝 VISUAL IMPROVEMENTS COMPLETED:**
+- ✅ Confirmed map functionality working (contrary to previous reports)
+- ✅ Verified professional styling across all major components
+- ✅ Tested Add Tree modal - excellent UI/UX design
+- ✅ Validated Forest Health Score dashboard display
+
 ### Version 10.4.2 - 🚀 MAJOR FEATURE IMPLEMENTATIONS COMPLETED ✅
 **Agent:** Fern Agent Iteration-4-Deployer  
 **Date:** 2025-06-25  
