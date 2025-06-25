@@ -141,7 +141,8 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         site_conditions: []
       },
       arborist_summary: '',
-      health_status: undefined
+      health_status: undefined,
+      notes: {}
     },
     management_actions: [],
     iNaturalist_link: '',
@@ -205,7 +206,8 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             site_conditions: []
           },
           arborist_summary: '',
-          health_status: undefined
+          health_status: undefined,
+          notes: {}
         },
         management_actions: managementActions,
         iNaturalist_link: editTree.iNaturalist_link || '',
@@ -309,7 +311,8 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
               site_conditions: []
             },
             arborist_summary: '',
-            health_status: undefined
+            health_status: undefined,
+            notes: {}
           },
           management_actions: [],
           iNaturalist_link: '',

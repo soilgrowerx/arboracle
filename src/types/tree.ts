@@ -143,6 +143,7 @@ export interface ConditionAssessment {
   checklist: ConditionChecklistData;
   arborist_summary: string;
   health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
+  notes?: { [key: string]: string }; // Key is "category-item", value is the note
 }
 
 export interface TreeFormData {

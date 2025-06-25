@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { BodhiSuggestions } from '@/components/BodhiSuggestions';
@@ -14,12 +15,17 @@ export interface ConditionChecklistData {
   site_conditions: string[];
 }
 
+export interface ConditionNotesData {
+  [key: string]: string; // Key is "category-item", value is the note
+}
+
 interface ConditionAssessmentProps {
   value: {
     checklist: ConditionChecklistData;
     arborist_summary: string;
+    notes?: ConditionNotesData;
   };
-  onChange: (value: { checklist: ConditionChecklistData; arborist_summary: string }) => void;
+  onChange: (value: { checklist: ConditionChecklistData; arborist_summary: string; notes?: ConditionNotesData }) => void;
 }
 
 // Fulcrum-style condition assessment checklists
@@ -84,12 +90,30 @@ const CATEGORY_LABELS = {
 export default function ConditionAssessment({ value, onChange }: ConditionAssessmentProps) {
   const handleChecklistChange = (category: keyof ConditionChecklistData, item: string, checked: boolean) => {
     const newChecklist = { ...value.checklist };
+    const newNotes = { ...(value.notes || {}) };
+    const noteKey = `${category}-${item}`;
+    
     if (checked) {
       newChecklist[category] = [...(newChecklist[category] || []), item];
     } else {
       newChecklist[category] = (newChecklist[category] || []).filter(i => i !== item);
+      // Remove the note when unchecking
+      delete newNotes[noteKey];
     }
-    onChange({ ...value, checklist: newChecklist });
+    onChange({ ...value, checklist: newChecklist, notes: newNotes });
+  };
+
+  const handleNoteChange = (category: string, item: string, note: string) => {
+    const newNotes = { ...(value.notes || {}) };
+    const noteKey = `${category}-${item}`;
+    
+    if (note.trim()) {
+      newNotes[noteKey] = note;
+    } else {
+      delete newNotes[noteKey];
+    }
+    
+    onChange({ ...value, notes: newNotes });
   };
 
   const handleSummaryChange = (summary: string) => {
@@ -128,25 +152,44 @@ export default function ConditionAssessment({ value, onChange }: ConditionAssess
             </Badge>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-            {CONDITION_CHECKLISTS[category].map((item) => (
-              <div key={item} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`${category}-${item}`}
-                  checked={(value.checklist[category] || []).includes(item)}
-                  onCheckedChange={(checked) => 
-                    handleChecklistChange(category, item, checked as boolean)
-                  }
-                  className="data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
-                />
-                <Label 
-                  htmlFor={`${category}-${item}`}
-                  className="text-xs sm:text-sm text-green-700 cursor-pointer leading-tight"
-                >
-                  {item}
-                </Label>
-              </div>
-            ))}
+          <div className="space-y-3">
+            {CONDITION_CHECKLISTS[category].map((item) => {
+              const isChecked = (value.checklist[category] || []).includes(item);
+              const noteKey = `${category}-${item}`;
+              
+              return (
+                <div key={item} className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`${category}-${item}`}
+                      checked={isChecked}
+                      onCheckedChange={(checked) => 
+                        handleChecklistChange(category, item, checked as boolean)
+                      }
+                      className="data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
+                    />
+                    <Label 
+                      htmlFor={`${category}-${item}`}
+                      className="text-xs sm:text-sm text-green-700 cursor-pointer leading-tight flex-1"
+                    >
+                      {item}
+                    </Label>
+                  </div>
+                  
+                  {/* Notes input field - shows when checkbox is checked */}
+                  {isChecked && (
+                    <div className="ml-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <Input
+                        placeholder="Add specific notes..."
+                        value={value.notes?.[noteKey] || ''}
+                        onChange={(e) => handleNoteChange(category, item, e.target.value)}
+                        className="text-xs h-8 border-orange-200 focus:border-orange-400 bg-orange-50/50"
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}
@@ -174,13 +217,29 @@ export default function ConditionAssessment({ value, onChange }: ConditionAssess
           <h5 className="font-medium text-orange-800 mb-2 text-sm">
             ⚠️ Identified Conditions Summary
           </h5>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {(Object.keys(value.checklist) as Array<keyof ConditionChecklistData>).map((category) => {
               const selectedItems = value.checklist[category] || [];
               if (selectedItems.length === 0) return null;
               return (
-                <div key={category} className="text-xs text-orange-700">
-                  <span className="font-medium">{CATEGORY_LABELS[category]}:</span> {selectedItems.join(', ')}
+                <div key={category} className="text-xs">
+                  <span className="font-medium text-orange-800">{CATEGORY_LABELS[category]}:</span>
+                  <ul className="ml-4 mt-1 space-y-1">
+                    {selectedItems.map((item) => {
+                      const noteKey = `${category}-${item}`;
+                      const note = value.notes?.[noteKey];
+                      return (
+                        <li key={item} className="text-orange-700">
+                          {item}
+                          {note && (
+                            <span className="text-orange-600 italic ml-2">
+                              - {note}
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               );
             })}
