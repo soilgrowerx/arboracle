@@ -832,16 +832,23 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                     let calculatedDBH: number | undefined = undefined;
                     if (values.length > 1) {
                       const sumOfSquares = values.reduce((sum, diameter) => sum + (diameter * diameter), 0);
-                      calculatedDBH = Math.round(Math.sqrt(sumOfSquares) * 100) / 100; // Round to 2 decimal places
-                      console.log('Multi-stem calculation:', { values, sumOfSquares, calculatedDBH });
+                      calculatedDBH = parseFloat((Math.sqrt(sumOfSquares)).toFixed(2)); // Ensure proper number format
+                      console.log('Multi-stem calculation:', { 
+                        inputValue, 
+                        values, 
+                        sumOfSquares, 
+                        calculatedDBH,
+                        typeof: typeof calculatedDBH 
+                      });
                     } else if (values.length === 1) {
                       calculatedDBH = values[0];
                     }
                     
+                    // Update state with proper type safety
                     setFormData(prev => ({ 
                       ...prev, 
                       stem_diameters: values.length > 0 ? values : undefined,
-                      dbh_cm: calculatedDBH
+                      dbh_cm: calculatedDBH  // This should be a number, not string
                     }));
                   }}
                   placeholder="e.g., 12.5, 15.3, 18.0"
