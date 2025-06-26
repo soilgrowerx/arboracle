@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Tree } from '@/types';
 import { TreeService } from '@/services/treeService';
+import { Project, ProjectService } from '@/services/projectService';
 import { AddTreeModal } from '@/components/AddTreeModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { 
   Trash2, MapPin, Calendar, Shield, CheckCircle, Clock, ArrowLeft, 
   Edit, Users, TreePine, Settings, Search, Filter, Crown, User, 
-  BarChart3, Database, Lock, Unlock
+  BarChart3, Database, Lock, Unlock, FolderOpen, Plus, Building
 } from 'lucide-react';
 import Link from 'next/link';
 import { calculateTreeAge } from '@/lib/utils';
@@ -30,12 +31,16 @@ const mockUsers = [
 
 export default function AdminPage() {
   const [trees, setTrees] = useState<Tree[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState(mockUsers);
   const [loading, setLoading] = useState(true);
   const [editingTree, setEditingTree] = useState<Tree | undefined>(undefined);
+  const [editingProject, setEditingProject] = useState<Project | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [userRoleFilter, setUserRoleFilter] = useState('all');
+  const [showAddProject, setShowAddProject] = useState(false);
+  const [newProject, setNewProject] = useState({ project_name: '', project_address: '', client_name: '', status: 'active' as const });
   const { toast } = useToast();
 
   const loadTrees = useCallback(() => {
@@ -54,9 +59,24 @@ export default function AdminPage() {
     }
   }, [toast]);
 
+  const loadProjects = useCallback(() => {
+    try {
+      const allProjects = ProjectService.getAllProjects();
+      setProjects(allProjects);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load projects",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
+
   useEffect(() => {
     loadTrees();
-  }, [loadTrees]);
+    loadProjects();
+  }, [loadTrees, loadProjects]);
 
   const handleDeleteTree = (treeId: string, species: string) => {
     if (confirm(`Are you sure you want to delete the ${species} tree? This action cannot be undone.`)) {
@@ -276,10 +296,14 @@ export default function AdminPage() {
 
         {/* Main Admin Tabs */}
         <Tabs defaultValue="trees" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-md mb-6">
+          <TabsList className="grid w-full grid-cols-4 max-w-2xl mb-6">
             <TabsTrigger value="trees" className="flex items-center gap-2">
               <TreePine size={16} />
               Trees
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="flex items-center gap-2">
+              <FolderOpen size={16} />
+              Projects
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users size={16} />
