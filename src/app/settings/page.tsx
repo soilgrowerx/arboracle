@@ -46,7 +46,7 @@ const aiPersonalities = [
   },
   {
     id: 'silva',
-    name: 'Silva',
+    name: 'Sequoia',
     emoji: '🌲',
     description: 'Practical forest guardian focused on conservation and ecosystem management',
     traits: ['Practical', 'Action-oriented', 'Conservation-minded', 'Protective'],
@@ -55,7 +55,7 @@ const aiPersonalities = [
   },
   {
     id: 'willowmind',
-    name: 'WillowMind',
+    name: 'Willow',
     emoji: '🌿',
     description: 'Gentle and adaptive AI companion that flows with your learning style',
     traits: ['Adaptive', 'Gentle', 'Flexible', 'Supportive'],
