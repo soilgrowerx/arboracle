@@ -134,7 +134,7 @@ export default function ConditionAssessment({ value, onChange }: ConditionAssess
         <span className="text-lg">📋</span>
         <h3 className="text-lg font-semibold text-green-800">Condition Assessment</h3>
         <Badge variant="secondary" className="text-xs">
-          Fulcrum Model
+          Professional Condition Assessment
         </Badge>
       </div>
 
