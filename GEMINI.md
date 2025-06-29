@@ -140,7 +140,7 @@ Section 5: Media Attachment: Utilize existing photo upload for this specific rep
 
 Construction Data Integration into "Identified Conditions Summary": The dashboard widget for conditions should pull from the most recent assessment (if "Construction Monitoring" type, show TPZ/CRZ details).
 
-Printable PDF Report Function: Add an "Export to PDF" button on the Construction Monitoring report page. This PDF must include all fields from the assessment, narrative notes, and attached photo thumbnails.
+Printable PDF Report Function: Add an "Export to PDF" button on the Construction Monitoring report page. This PDF must include all fields from the assessment, narrative notes, and attached photo thumbnails. Use Stirling PDF at https://github.com/Stirling-Tools/Stirling-PDF
 
 Phase 2: Platform & Ecosystem Growth (P2 - Medium Priority)
 
@@ -172,4 +172,4 @@ Let's build.
 Let's evolve.
 Let's pioneer.
 
-P.S. Development Agents: All instances of "Fern Labs" are to be removed from this codebase. Any similar proprietary mentions you discover during this sprint must also be expunged. Ensure a clean, branded final product.
+Any proprietary mentions you discover during this sprint must also be expunged. Ensure a clean, branded final product.
