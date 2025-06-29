@@ -1,22 +1,40 @@
 'use client';
 
 import React from 'react';
+import { Tree } from '@/types/tree';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Leaf, TreePine, AlertTriangle, CheckCircle, Download, FileText } from 'lucide-react';
 
-export function ForestHealthScore() {
-  // Mock data for forest health metrics
-  const healthScore = 87;
-  const treeCount = 0; // Since no trees are added yet
+interface ForestHealthScoreProps {
+  trees: Tree[];
+  aiPersona: string;
+}
+
+export function ForestHealthScore({ trees, aiPersona }: ForestHealthScoreProps) {
+  const totalTrees = trees.length;
+
+  // Calculate health metrics based on tree data
+  const healthyTrees = trees.filter(tree => tree.health_status === 'Excellent' || tree.health_status === 'Good').length;
+  const monitoringTrees = trees.filter(tree => tree.health_status === 'Fair').length;
+  const atRiskTrees = trees.filter(tree => tree.health_status === 'Poor' || tree.health_status === 'Dead').length;
+
   const healthMetrics = {
-    healthy: 0,
-    monitoring: 0,
-    atRisk: 0,
-    total: 0
+    healthy: healthyTrees,
+    monitoring: monitoringTrees,
+    atRisk: atRiskTrees,
+    total: totalTrees
   };
+
+  // Calculate health score (example logic, can be refined)
+  // This is a simplified example. A real health score would involve more complex factors.
+  const healthScore = totalTrees > 0
+    ? Math.round(
+        ((healthyTrees * 1.0) + (monitoringTrees * 0.5) + (atRiskTrees * 0.1)) / totalTrees * 100
+      )
+    : 0;
 
   const exportHealthReport = () => {
     const reportData = {
@@ -26,7 +44,7 @@ export function ForestHealthScore() {
       healthScore: healthScore,
       status: getScoreStatus(healthScore),
       metrics: healthMetrics,
-      summary: `Forest health assessment shows ${getScoreStatus(healthScore).toLowerCase()} condition with a score of ${healthScore}/100. ${treeCount === 0 ? 'No trees currently tracked. Begin adding trees to generate detailed health analytics.' : `Analysis based on ${treeCount} tracked trees with comprehensive condition data.`}`,
+      summary: `Forest health assessment shows ${getScoreStatus(healthScore).toLowerCase()} condition with a score of ${healthScore}/100. ${totalTrees === 0 ? 'No trees currently tracked. Begin adding trees to generate detailed health analytics.' : `Analysis based on ${totalTrees} tracked trees with comprehensive condition data. Powered by ${aiPersona}.`}`,
       recommendations: [
         'Regular condition assessments every 6 months',
         'Monitor for pest and disease indicators',
@@ -135,7 +153,7 @@ export function ForestHealthScore() {
                 <Leaf className="w-4 h-4 text-gray-500 mr-1" />
                 <span className="text-sm font-medium text-gray-700">Total Trees</span>
               </div>
-              <div className="text-lg font-bold text-gray-600">{treeCount}</div>
+              const treeCount = totalTrees;
             </div>
           </div>
 

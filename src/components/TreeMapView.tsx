@@ -1,193 +1,34 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Tree } from '@/types/tree';
 import { TreeService } from '@/services/treeService';
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF, GroundOverlayF } from '@react-google-maps/api';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { EcosystemService } from '@/services/ecosystemService';
 import { calculateTreeAge } from '@/lib/utils';
-
-// Extensible tile layer configuration for future Earth Engine integration
-interface TileLayerConfig {
-  name: string;
-  url: string;
-  attribution: string;
-  maxZoom?: number;
-  opacity?: number;
-  className?: string;
-  type: 'base' | 'overlay';
-  checked?: boolean;
-}
-
-const TILE_LAYERS: TileLayerConfig[] = [
-  {
-    name: "🗺️ Street Map",
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    type: 'base',
-    checked: true
-  },
-  {
-    name: "🛰️ Satellite (High-Res)",
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution: 'Satellite &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
-    maxZoom: 19,
-    type: 'base'
-  },
-  {
-    name: "🌍 Satellite + Streets",
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attribution: 'Hybrid view &copy; Esri &mdash; Satellite imagery with street overlays',
-    maxZoom: 19,
-    type: 'base'
-  },
-  {
-    name: "🗺️ Terrain",
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-    attribution: 'Terrain &copy; Esri &mdash; Topographic map with elevation data',
-    maxZoom: 19,
-    type: 'base'
-  },
-  {
-    name: "🏷️ Street Labels",
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    attribution: 'Labels from OpenStreetMap',
-    opacity: 0.6,
-    className: 'labels-overlay',
-    type: 'overlay'
-  },
-  {
-    name: "🛣️ Transportation",
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}",
-    attribution: 'Transportation overlay from Esri',
-    opacity: 0.8,
-    className: 'transportation-overlay',
-    type: 'overlay'
-  },
-  {
-    name: "🌿 Forest Coverage (Beta)",
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/World_Navigation_Charts/MapServer/tile/{z}/{y}/{x}",
-    attribution: 'Forest data &copy; Esri &mdash; Vegetation and land cover information',
-    opacity: 0.7,
-    className: 'forest-overlay',
-    type: 'overlay'
-  }
-  // Future Earth Engine layers for Genesis Sprint III:
-  // {
-  //   name: "🌱 NDVI Vegetation Index",
-  //   url: "https://earthengine.googleapis.com/v1alpha/projects/{projectId}/maps/{mapId}/tiles/{z}/{x}/{y}",
-  //   attribution: 'Earth Engine NDVI Analysis - Vegetation health monitoring',
-  //   type: 'overlay'
-  // },
-  // {
-  //   name: "💧 Water Capacity Analysis",
-  //   url: "https://earthengine.googleapis.com/v1alpha/projects/{projectId}/maps/{mapId}/tiles/{z}/{x}/{y}", 
-  //   attribution: 'Earth Engine Water Analysis - Soil moisture and water retention',
-  //   type: 'overlay'
-  // },
-  // {
-  //   name: "🌡️ Carbon Storage Potential",
-  //   url: "https://earthengine.googleapis.com/v1alpha/projects/{projectId}/maps/{mapId}/tiles/{z}/{x}/{y}",
-  //   attribution: 'Earth Engine Carbon Analysis - CO2 sequestration mapping',
-  //   type: 'overlay'
-  // }
-];
-
-// Dynamically import map components to avoid SSR issues
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const LayersControl = dynamic(() => import('react-leaflet').then(mod => mod.LayersControl), { ssr: false });
-const BaseLayer = dynamic(() => import('react-leaflet').then(mod => mod.LayersControl.BaseLayer), { ssr: false });
-const Overlay = dynamic(() => import('react-leaflet').then(mod => mod.LayersControl.Overlay), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
-const MarkerClusterGroup = dynamic(() => import('react-leaflet-cluster'), { ssr: false });
-
-// Enhanced tree icon with status colors
-const createTreeIcon = (tree: Tree) => {
-  if (typeof window === 'undefined') return null;
-  
-  const L = require('leaflet');
-  
-  // Get color based on verification status
-  const getStatusColor = () => {
-    switch (tree.verification_status) {
-      case 'verified': return '#15803d'; // Green
-      case 'manual': return '#2563eb'; // Blue  
-      case 'pending': return '#d97706'; // Orange
-      default: return '#6b7280'; // Gray
-    }
-  };
-
-  // Get icon based on tree age or species
-  const getTreeIcon = () => {
-    const age = new Date().getFullYear() - new Date(tree.date_planted).getFullYear();
-    if (age >= 5) return '🌳'; // Mature tree
-    if (age >= 2) return '🌲'; // Medium tree
-    return '🌱'; // Young tree
-  };
-
-  return L.divIcon({
-    html: `
-      <div style="
-        width: 28px; 
-        height: 28px; 
-        background-color: ${getStatusColor()}; 
-        border-radius: 50%; 
-        border: 3px solid #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-        cursor: pointer;
-        transition: transform 0.2s;
-      " 
-      onmouseover="this.style.transform='scale(1.2)'"
-      onmouseout="this.style.transform='scale(1)'">
-        <span style="color: white; font-size: 14px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">${getTreeIcon()}</span>
-      </div>
-    `,
-    className: 'custom-tree-marker',
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -14]
-  });
-};
-
-// Component to fit map bounds to show all trees
-function MapBounds({ trees }: { trees: Tree[] }) {
-  const { useMap } = require('react-leaflet');
-  const map = useMap();
-
-  useEffect(() => {
-    if (trees.length > 0 && typeof window !== 'undefined') {
-      const L = require('leaflet');
-      const group = new L.FeatureGroup(
-        trees.map(tree => 
-          L.marker([tree.lat, tree.lng])
-        )
-      );
-      
-      if (trees.length === 1) {
-        // If only one tree, center on it with a reasonable zoom
-        map.setView([trees[0].lat, trees[0].lng], 15);
-      } else {
-        // Fit bounds to show all trees
-        map.fitBounds(group.getBounds(), { padding: [20, 20] });
-      }
-    }
-  }, [trees, map]);
-
-  return null;
-}
+import { SkyFiService } from '@/services/skyfiService';
 
 interface TreeMapViewProps {
   onTreeSelect?: (tree: Tree) => void;
   filteredTrees?: Tree[];
 }
+
+const containerStyle = {
+  width: '100%',
+  height: '100%'
+};
+
+const defaultMapOptions = {
+  zoomControl: true,
+  mapTypeControl: false,
+  scaleControl: false,
+  streetViewControl: false,
+  rotateControl: false,
+  fullscreenControl: false,
+};
 
 export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees }: TreeMapViewProps) {
   const [trees, setTrees] = useState<Tree[]>([]);
@@ -196,13 +37,46 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
   const [isClient, setIsClient] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [speciesFilter, setSpeciesFilter] = useState<string>('all');
+  const [selectedOverlay, setSelectedOverlay] = useState<string | null>(null);
+  const [overlayImageUrl, setOverlayImageUrl] = useState<string | null>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [selectedMarker, setSelectedMarker] = useState<Tree | null>(null);
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
+  });
+
+  const onLoad = useCallback(function callback(map: google.maps.Map) {
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(function callback(map: google.maps.Map) {
+    setMap(null);
+  }, []);
+
+  const getTreeIcon = (age: number) => {
+    if (age < 5) return '/images/tree-icon-young.png';
+    if (age >= 5 && age < 20) return '/images/tree-icon-medium.png';
+    return '/images/tree-icon-mature.png';
+  };
+
+  const handleMarkerClick = (tree: Tree) => {
+    setSelectedMarker(tree);
+    if (onTreeSelect) {
+      onTreeSelect(tree);
+    }
+  };
+
+  const handleMapClick = () => {
+    setSelectedMarker(null);
+  };
 
   useEffect(() => {
     setIsClient(true);
     const loadTrees = () => {
       try {
         const allTrees = TreeService.getAllTrees();
-        // Filter trees that have valid coordinates (not 0,0)
         const treesWithCoords = allTrees.filter(
           tree => tree.lat !== 0 && tree.lng !== 0
         );
@@ -218,7 +92,6 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
     loadTrees();
   }, []);
 
-  // Filter trees based on status and species (only if external filtered trees not provided)
   useEffect(() => {
     if (externalFilteredTrees) {
       setFilteredTrees(externalFilteredTrees);
@@ -227,12 +100,10 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
 
     let filtered = trees;
 
-    // Filter by status
     if (statusFilter !== 'all') {
       filtered = filtered.filter(tree => tree.verification_status === statusFilter);
     }
 
-    // Filter by species
     if (speciesFilter !== 'all') {
       filtered = filtered.filter(tree => 
         (tree.commonName || tree.species).toLowerCase().includes(speciesFilter.toLowerCase())
@@ -242,12 +113,28 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
     setFilteredTrees(filtered);
   }, [trees, statusFilter, speciesFilter, externalFilteredTrees]);
 
+  useEffect(() => {
+    if (selectedOverlay && filteredTrees.length > 0) {
+      const centerTree = filteredTrees[0]; // Use the first filtered tree as center for overlay fetch
+      SkyFiService.fetchOverlay(centerTree.lat, centerTree.lng, selectedOverlay)
+        .then(url => {
+          setOverlayImageUrl(url);
+        })
+        .catch(error => {
+          console.error('Error fetching overlay:', error);
+          setOverlayImageUrl(null);
+        });
+    } else {
+      setOverlayImageUrl(null);
+    }
+  }, [selectedOverlay, filteredTrees]);
+
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Unknown';
     return new Date(dateString).toLocaleDateString();
   };
 
-  if (!isClient || loading) {
+  if (!isLoaded || !isClient || loading) {
     return (
       <div className="h-96 bg-green-50 rounded-lg flex items-center justify-center">
         <div className="text-green-700 flex items-center gap-2">
@@ -258,22 +145,17 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
     );
   }
 
-  // Show empty state overlay if no trees, but still show the map
   const showEmptyState = trees.length === 0;
 
-  // Get unique species for filter
   const uniqueSpecies = [...new Set(trees.map(tree => tree.commonName || tree.species))];
 
-  // Default center - use first tree's location or fallback
-  const defaultCenter: [number, number] = filteredTrees.length > 0 
-    ? [filteredTrees[0].lat, filteredTrees[0].lng]
-    : trees.length > 0 
-    ? [trees[0].lat, trees[0].lng]
-    : [40.7128, -74.0060]; // New York as fallback
+  const defaultCenter = useMemo(() => ({
+    lat: filteredTrees.length > 0 ? filteredTrees[0].lat : (trees.length > 0 ? trees[0].lat : 40.7128),
+    lng: filteredTrees.length > 0 ? filteredTrees[0].lng : (trees.length > 0 ? trees[0].lng : -74.0060),
+  }), [filteredTrees, trees]);
 
   return (
     <div className="space-y-4">
-      {/* Map Controls - only show if no external filtering */}
       {!externalFilteredTrees && (
       <div className="bg-white rounded-lg border border-green-200 mobile-card-content shadow-sm">
         <div className="map-controls-mobile mb-3">
@@ -286,7 +168,6 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
         </div>
         
         <div className="map-controls-mobile">
-          {/* Status Filter */}
           <div className="flex items-center mobile-gap">
             <span className="mobile-text text-gray-700 min-w-fit">Status:</span>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -318,25 +199,26 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
             </Select>
           </div>
 
-          {/* Reset Filters */}
-          {(statusFilter !== 'all' || speciesFilter !== 'all') && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => {
-                setStatusFilter('all');
-                setSpeciesFilter('all');
-              }}
-              className="touch-target mobile-button w-full sm:w-auto"
-            >
-              Reset Filters
-            </Button>
-          )}
+          {/* Overlay Selection */}
+          <div className="flex items-center mobile-gap">
+            <span className="mobile-text text-gray-700 min-w-fit">Overlay:</span>
+            <Select value={selectedOverlay || 'none'} onValueChange={setSelectedOverlay}>
+              <SelectTrigger className="map-filter-mobile touch-target">
+                <SelectValue placeholder="Select Overlay" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="canopy_coverage">Canopy Coverage</SelectItem>
+                <SelectItem value="heat_stress">Heat Stress</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          
         </div>
       </div>
       )}
 
-      {/* Map Legend & Controls */}
       <div className="bg-white rounded-lg border border-green-200 mobile-card-content shadow-sm">
         <div className="map-legend-mobile">
           <div className="map-legend-mobile">
@@ -372,250 +254,67 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
               <span className="inline-flex items-center gap-1 bg-green-600 text-white px-1 sm:px-2 py-1 rounded text-xs font-semibold">
                 📋 <span className="hidden xs:inline">Layer Control</span>
               </span>
-              <span className="font-medium hidden sm:inline">in top-right corner</span>
+              <span className="font-medium hidden sm:inline">for layers</span>
               <span className="font-medium sm:hidden">for layers</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Map Container */}
       <div className={`map-container-mobile w-full rounded-lg overflow-hidden border border-green-200 shadow-sm relative ${externalFilteredTrees ? 'sm:h-[600px]' : 'sm:h-[500px]'}`}>
-        <MapContainer
+        <GoogleMap
+          mapContainerStyle={containerStyle}
           center={defaultCenter}
-          zoom={showEmptyState ? 8 : 10}
-          style={{ height: '100%', width: '100%' }}
-          className="leaflet-container"
+          zoom={10}
+          onLoad={onLoad}
+          onUnmount={onUnmount}
+          options={defaultMapOptions}
+          onClick={handleMapClick}
         >
-          <LayersControl position="topright">
-            {/* Dynamically render base layers */}
-            {TILE_LAYERS.filter(layer => layer.type === 'base').map((layer) => {
-              // Special handling for hybrid satellite + streets view
-              if (layer.name === "🌍 Satellite + Streets") {
-                return (
-                  <BaseLayer 
-                    key={layer.name}
-                    checked={layer.checked}
-                    name={layer.name}
-                  >
-                    <>
-                      {/* Satellite base */}
-                      <TileLayer
-                        attribution={layer.attribution}
-                        url={layer.url}
-                        maxZoom={layer.maxZoom}
-                        opacity={1}
-                      />
-                      {/* Street labels overlay */}
-                      <TileLayer
-                        attribution="Street labels &copy; OpenStreetMap"
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        maxZoom={19}
-                        opacity={0.6}
-                        className="hybrid-labels"
-                      />
-                    </>
-                  </BaseLayer>
-                );
-              }
-              
-              return (
-                <BaseLayer 
-                  key={layer.name}
-                  checked={layer.checked}
-                  name={layer.name}
+          {filteredTrees.map((tree) => (
+            <MarkerF
+              key={tree.id}
+              position={{ lat: tree.lat, lng: tree.lng }}
+              onClick={() => handleMarkerClick(tree)}
+              icon={{
+                url: getTreeIcon(calculateTreeAge(tree.date_planted).years),
+                scaledSize: new google.maps.Size(32, 32),
+              }}
+            />
+          ))}
+
+          {selectedMarker && (
+            <InfoWindowF
+              position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
+              onCloseClick={() => setSelectedMarker(null)}
+            >
+              <div className="p-2">
+                <h2 className="font-bold text-lg">{selectedMarker.commonName || selectedMarker.species}</h2>
+                <p>{selectedMarker.scientificName}</p>
+                <p>Age: {calculateTreeAge(selectedMarker.date_planted).displayText}</p>
+                <button
+                  onClick={() => onTreeSelect && onTreeSelect(selectedMarker)}
+                  className="text-blue-500 hover:underline mt-2"
                 >
-                  <TileLayer
-                    attribution={layer.attribution}
-                    url={layer.url}
-                    maxZoom={layer.maxZoom}
-                    opacity={layer.opacity}
-                    className={layer.className}
-                  />
-                </BaseLayer>
-              );
-            })}
-            
-            {/* Dynamically render overlay layers */}
-            {TILE_LAYERS.filter(layer => layer.type === 'overlay').map((layer) => (
-              <Overlay 
-                key={layer.name}
-                name={layer.name}
-              >
-                <TileLayer
-                  attribution={layer.attribution}
-                  url={layer.url}
-                  maxZoom={layer.maxZoom}
-                  opacity={layer.opacity}
-                  className={layer.className}
-                />
-              </Overlay>
-            ))}
-          </LayersControl>
-          
-          {!showEmptyState && <MapBounds trees={filteredTrees} />}
-          
-          <MarkerClusterGroup
-            chunkedLoading
-            iconCreateFunction={(cluster: any) => {
-              if (typeof window === 'undefined') return null;
-              const L = require('leaflet');
-              const childCount = cluster.getChildCount();
-              
-              let c = ' marker-cluster-';
-              if (childCount < 10) {
-                c += 'small';
-              } else if (childCount < 100) {
-                c += 'medium';
-              } else {
-                c += 'large';
-              }
-
-              return new L.DivIcon({
-                html: `<div><span>${childCount}</span></div>`,
-                className: 'marker-cluster' + c,
-                iconSize: new L.Point(40, 40)
-              });
-            }}
-            maxClusterRadius={80}
-            spiderfyOnMaxZoom={true}
-            showCoverageOnHover={false}
-            zoomToBoundsOnClick={true}
-            disableClusteringAtZoom={15}
-          >
-            {filteredTrees.map((tree) => (
-              <Marker
-                key={tree.id}
-                position={[tree.lat, tree.lng]}
-                icon={createTreeIcon(tree)}
-              >
-                <Popup className="enhanced-tree-popup" maxWidth={320} minWidth={280}>
-              <div className="enhanced-popup-content">
-                {/* Header Section with Gradient */}
-                <div className="popup-header">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="tree-icon-large">
-                      {calculateTreeAge(tree.date_planted).totalDays >= 1825 ? '🌳' : calculateTreeAge(tree.date_planted).totalDays >= 730 ? '🌲' : '🌱'}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="popup-title">
-                        {tree.commonName || tree.species}
-                      </h3>
-                      {tree.scientificName && (
-                        <p className="popup-scientific-name">
-                          {tree.scientificName}
-                        </p>
-                      )}
-                    </div>
-                    <div className="status-indicator">
-                      {tree.verification_status === 'verified' && <span className="status-verified">✅</span>}
-                      {tree.verification_status === 'manual' && <span className="status-manual">🔵</span>}
-                      {tree.verification_status === 'pending' && <span className="status-pending">🟡</span>}
-                    </div>
-                  </div>
-                  
-                  {/* Health Status Indicator */}
-                  {(() => {
-                    const ecosystemCount = EcosystemService.getEcosystemSpeciesCount(tree.id);
-                    const age = calculateTreeAge(tree.date_planted);
-                    const hasScientificName = !!tree.scientificName;
-                    const isVerified = tree.verification_status === 'verified';
-                    
-                    // Calculate simple health score
-                    let healthScore = 0;
-                    if (isVerified) healthScore += 30;
-                    if (hasScientificName) healthScore += 20;
-                    if (age.totalDays > 365) healthScore += 25;
-                    if (ecosystemCount > 0) healthScore += 25;
-                    
-                    const getHealthStatus = () => {
-                      if (healthScore >= 80) return { label: 'Excellent', emoji: '💚', color: 'text-green-600' };
-                      if (healthScore >= 60) return { label: 'Good', emoji: '💛', color: 'text-yellow-600' };
-                      if (healthScore >= 40) return { label: 'Fair', emoji: '🧡', color: 'text-orange-600' };
-                      return { label: 'Basic', emoji: '❤️', color: 'text-red-600' };
-                    };
-                    
-                    const health = getHealthStatus();
-                    
-                    return (
-                      <div className="health-indicator">
-                        <span className={`health-emoji ${health.color}`}>{health.emoji}</span>
-                        <span className={`health-text ${health.color}`}>Data Quality: {health.label}</span>
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Content Section */}
-                <div className="popup-content">
-                  <div className="info-grid">
-                    <div className="info-item">
-                      <span className="info-icon">📅</span>
-                      <span className="info-text">Planted: {formatDate(tree.date_planted)}</span>
-                    </div>
-                    
-                    <div className="info-item">
-                      <span className="info-icon">🕐</span>
-                      <span className="info-text">Age: {calculateTreeAge(tree.date_planted).displayText}</span>
-                    </div>
-                    
-                    <div className="info-item">
-                      <span className="info-icon">📍</span>
-                      <div className="plus-code-container">
-                        <div className="plus-code-label">Plus Code:</div>
-                        <div className="plus-code-global">{tree.plus_code_global}</div>
-                        <div className="plus-code-local">{tree.plus_code_local}</div>
-                      </div>
-                    </div>
-
-                    {(() => {
-                      const ecosystemCount = EcosystemService.getEcosystemSpeciesCount(tree.id);
-                      return ecosystemCount > 0 && (
-                        <div className="info-item">
-                          <span className="info-icon">🌍</span>
-                          <span className="info-text">{ecosystemCount} ecosystem species documented</span>
-                        </div>
-                      );
-                    })()}
-                    
-                    {tree.condition_notes && (
-                      <div className="info-item condition-notes">
-                        <span className="info-icon">🩺</span>
-                        <span className="info-text">{tree.condition_notes}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="popup-footer">
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => onTreeSelect?.(tree)}
-                      className="view-details-btn"
-                    >
-                      <span className="btn-icon">🔍</span>
-                      <span className="btn-text">Details</span>
-                    </button>
-                    {tree.iNaturalist_link && (
-                      <button
-                        onClick={() => window.open(tree.iNaturalist_link, '_blank', 'noopener,noreferrer')}
-                        className="view-details-btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-                      >
-                        <span className="btn-icon">🔬</span>
-                        <span className="btn-text">iNaturalist</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
+                  View Details
+                </button>
               </div>
-            </Popup>
-              </Marker>
-            ))}
-          </MarkerClusterGroup>
-        </MapContainer>
+            </InfoWindowF>
+          )}
+
+          {overlayImageUrl && (
+            <GroundOverlayF
+              url={overlayImageUrl}
+              bounds={{
+                north: defaultCenter.lat + 0.1, // Placeholder bounds, adjust as needed
+                south: defaultCenter.lat - 0.1,
+                east: defaultCenter.lng + 0.1,
+                west: defaultCenter.lng - 0.1,
+              }}
+            />
+          )}
+        </GoogleMap>
       
-      {/* Empty State Overlay */}
       {showEmptyState && (
         <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center rounded-lg">
           <div className="text-center text-green-600 p-8">

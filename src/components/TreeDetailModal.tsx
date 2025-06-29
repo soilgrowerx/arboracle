@@ -130,6 +130,50 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                   iNaturalist
                 </Button>
               )}
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    const treeDataForPdf = {
+                      name: tree.commonName || tree.species,
+                      species: tree.species,
+                      age: treeAge.displayText,
+                      healthScore: tree.health_score || 'N/A',
+                      location: `${tree.lat.toFixed(6)}, ${tree.lng.toFixed(6)}`,
+                      datePlanted: formatDate(tree.date_planted),
+                      lastAssessment: tree.last_assessment ? formatDate(tree.last_assessment) : 'N/A',
+                      notes: tree.notes || 'No additional notes.',
+                    };
+
+                    const response = await fetch('/api/generate-pdf', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ treeData: treeDataForPdf }),
+                    });
+
+                    if (!response.ok) {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `tree-report-${tree.id}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                  } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Failed to generate PDF report.');
+                  }
+                }}
+              >
+                Generate PDF Report
+              </Button>
               <Button variant="ghost" size="sm" onClick={onClose}>
                 <X size={16} />
               </Button>

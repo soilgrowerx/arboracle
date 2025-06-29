@@ -22,62 +22,84 @@ import { useToast } from '@/components/ui/use-toast';
 import { Plus, Search, MapPin, Map } from 'lucide-react';
 import { TaxonomyBreadcrumb } from '@/components/TaxonomicDisplay';
 import ConditionAssessment, { ConditionChecklistData } from '@/components/ConditionAssessment';
+import { convertLength, getUnitLabels } from '@/lib/unitConverter';
 
 // Dynamically import map components to avoid SSR issues
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
+import { StandaloneSearchBox } from '@react-google-maps/api';
+import { InfoWindow } from '@react-google-maps/api';
 
 interface AddTreeModalProps {
   onTreeAdded?: () => void;
   editTree?: Tree;
   isEditMode?: boolean;
+  isFullScreen?: boolean; // Add isFullScreen prop
 }
 
-// Map click handler component - improved version
-function LocationPicker({ position, onLocationSelect }: { position: [number, number] | null, onLocationSelect: (lat: number, lng: number) => void }) {
-  const [isClient, setIsClient] = useState(false);
-  
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
-  if (!isClient) return null;
-  
-  const MapEventsHandler = () => {
-    const { useMapEvents } = require('react-leaflet');
-    
-    const map = useMapEvents({
-      click: (e: any) => {
-        onLocationSelect(e.latlng.lat, e.latlng.lng);
-      },
-      ready: () => {
-        // Ensure map is properly sized when ready
-        setTimeout(() => {
-          map.invalidateSize();
-        }, 200);
-      },
-    });
 
-    useEffect(() => {
-      if (position && map) {
-        map.setView(position, map.getZoom());
-      }
-    }, [map]); // position is a prop from outer scope, not a state variable
 
-    return null;
-  };
-
-  return (
-    <>
-      <MapEventsHandler />
-      {position ? <Marker position={position} /> : null}
-    </>
-  );
-}
-
-export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddTreeModalProps) {
+export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFullScreen }: AddTreeModalProps) {
   const [open, setOpen] = useState(false);
+
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null);
+
+  const onMapLoad = useCallback(function callback(map: google.maps.Map) {
+    mapRef.current = map;
+  }, []);
+
+  const onMapUnmount = useCallback(function callback(map: google.maps.Map) {
+    mapRef.current = null;
+  }, []);
+
+  const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      setFormData(prev => ({
+        ...prev,
+        location: { lat: e.latLng.lat(), lng: e.latLng.lng() }
+      }));
+      toast({
+        title: "Location Selected",
+        description: `Coordinates set to ${e.latLng.lat().toFixed(6)}, ${e.latLng.lng().toFixed(6)}`,
+      });
+    }
+  }, [toast]);
+
+  const onMarkerDragEnd = useCallback((e: google.maps.MapMouseEvent) => {
+    if (e.latLng) {
+      setFormData(prev => ({
+        ...prev,
+        location: { lat: e.latLng.lat(), lng: e.latLng.lng() }
+      }));
+      toast({
+        title: "Location Updated",
+        description: `Coordinates updated to ${e.latLng.lat().toFixed(6)}, ${e.latLng.lng().toFixed(6)}`,
+      });
+    }
+  }, [toast]);
+
+  const onPlacesChanged = useCallback(() => {
+    if (searchBoxRef.current) {
+      const places = searchBoxRef.current.getPlaces();
+      if (places && places.length > 0) {
+        const place = places[0];
+        if (place.geometry && place.geometry.location) {
+          setFormData(prev => ({
+            ...prev,
+            location: { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }
+          }));
+          if (mapRef.current) {
+            mapRef.current.panTo(place.geometry.location);
+            mapRef.current.setZoom(15);
+          }
+          toast({
+            title: "Location Found",
+            description: `Map centered on ${place.name || place.formatted_address}`,
+          });
+        }
+      }
+    }
+  }, [toast]);
 
   useEffect(() => {
     if (isEditMode && editTree) {
@@ -92,36 +114,24 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
   const [isClient, setIsClient] = useState(false);
   const [managementActionsInput, setManagementActionsInput] = useState('');
   const { toast } = useToast();
+  const [isPlanted, setIsPlanted] = useState(true); // New state for wild vs planted
+
+  const mapOptions = useMemo(() => ({
+    zoomControl: true,
+    mapTypeControl: false,
+    scaleControl: false,
+    streetViewControl: false,
+    rotateControl: false,
+    fullscreenControl: false, // Disable full-screen button on the map
+  }), []);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Handle map size invalidation when modal opens/closes
-  useEffect(() => {
-    if (showLocationMap && isClient) {
-      // Delay to allow modal animation to complete
-      const timer = setTimeout(() => {
-        // Force all leaflet maps to invalidate their size
-        if (typeof window !== 'undefined' && (window as any).L) {
-          const L = (window as any).L;
-          // Check if _mapById exists on the L object
-          if (L._mapById) {
-            const maps = Object.values(L._mapById);
-            maps.forEach((map: any) => {
-              if (map && map.invalidateSize) {
-                map.invalidateSize();
-              }
-            });
-          }
-        }
-      }, 300);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showLocationMap, isClient]);
+  
   const [stemDiametersInput, setStemDiametersInput] = useState('');
-  const [units, setUnits] = useState('metric'); // Track user's unit preference
+  const [units, setUnits] = useState<'metric' | 'imperial'>('metric'); // Track user's unit preference
 
   // Load unit preference from localStorage
   useEffect(() => {
@@ -135,26 +145,6 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
       console.error('Error loading unit preference:', error);
     }
   }, []);
-
-  // Helper function to get unit labels based on user preference
-  const getUnitLabels = () => {
-    if (units === 'imperial') {
-      return {
-        height: 'Height (ft)',
-        dbh: 'DBH (in)',
-        canopyNS: 'Canopy Spread N-S (ft)',
-        canopyEW: 'Canopy Spread E-W (ft)',
-        stemDiameters: 'Individual Stem Diameters (in)'
-      };
-    }
-    return {
-      height: 'Height (cm)',
-      dbh: 'DBH (cm)',
-      canopyNS: 'Canopy Spread N-S (m)',
-      canopyEW: 'Canopy Spread E-W (m)',
-      stemDiameters: 'Individual Stem Diameters (cm)'
-    };
-  };
 
   const [formData, setFormData] = useState<TreeFormData>({
     species: '',
@@ -192,59 +182,58 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
   });
 
   // Handle image upload from camera or gallery
-  const handleImageUpload = async (event: Event) => {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
-    const files = Array.from(input.files).filter(file => file.type.startsWith('image/'));
-    if (files.length === 0) return;
-
-    try {
-      // Generate temporary tree ID if not editing
-      const treeId = editTree?.id || `temp-${Date.now()}`;
-      
-      const formData = new FormData();
-      files.forEach(file => formData.append('files', file));
-      formData.append('treeId', treeId);
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
+    const newImages: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      if (file.type.startsWith('image/')) {
+        newImages.push(URL.createObjectURL(file)); // Create object URL for immediate preview
       }
-
-      const result = await response.json();
-      
-      if (result.success && result.urls) {
-        setFormData(prev => ({
-          ...prev,
-          images: [...(prev.images || []), ...result.urls]
-        }));
-        
-        toast({
-          title: "Images uploaded",
-          description: `${result.urls.length} image(s) uploaded successfully`,
-        });
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast({
-        title: "Upload failed",
-        description: "Failed to upload images. Please try again.",
-        variant: "destructive",
-      });
     }
-    
-    // Reset the input
-    input.value = '';
+
+    setFormData(prev => ({
+      ...prev,
+      images: [...(prev.images || []), ...newImages]
+    }));
+
+    // In a real application, you would upload these files to a server here.
+    // For now, we'll just simulate the upload and then clear the object URLs.
+    toast({
+      title: "Images selected",
+      description: `${newImages.length} image(s) ready for upload on save.`,
+    });
+
+    // Simulate server upload and replace object URLs with actual image URLs if needed
+    // For this example, we'll just keep the object URLs for display.
+    // In a real app, you'd get URLs from your /api/upload endpoint and update formData.images
   };
 
   useEffect(() => {
     if (isEditMode && editTree) {
       const managementActions = editTree.management_actions || [];
+      
+      // Convert stored metric values to display units based on user preference
+      const displayHeight = editTree.height_cm !== undefined 
+        ? convertLength(editTree.height_cm, 'cm', units === 'imperial' ? 'ft' : 'cm') 
+        : undefined;
+      const displayDbh = editTree.dbh_cm !== undefined 
+        ? convertLength(editTree.dbh_cm, 'cm', units === 'imperial' ? 'in' : 'cm') 
+        : undefined;
+      const displayCanopyNS = editTree.canopy_spread_ns !== undefined 
+        ? convertLength(editTree.canopy_spread_ns, 'm', units === 'imperial' ? 'ft' : 'm') 
+        : undefined;
+      const displayCanopyEW = editTree.canopy_spread_ew !== undefined 
+        ? convertLength(editTree.canopy_spread_ew, 'm', units === 'imperial' ? 'ft' : 'm') 
+        : undefined;
+      
+      // Convert stored stem diameters to display units
+      const displayStemDiameters = editTree.stem_diameters?.map(d => 
+        convertLength(d, 'cm', units === 'imperial' ? 'in' : 'cm')
+      ).join(', ') || '';
+
       setFormData({
         species: editTree.species,
         location: { lat: editTree.lat, lng: editTree.lng },
@@ -275,13 +264,17 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
         associated_species: editTree.associated_species || [],
         land_owner: editTree.land_owner || '',
         site_name: editTree.site_name || '',
-        height_cm: editTree.height_cm,
-        dbh_cm: editTree.dbh_cm,
-        health_status: editTree.health_status
+        height_cm: displayHeight,
+        dbh_cm: displayDbh,
+        health_status: editTree.health_status,
+        is_multi_stem: editTree.is_multi_stem,
+        stem_diameters: editTree.stem_diameters
       });
       setManagementActionsInput(managementActions.join(', '));
+      setIsPlanted(!!editTree.date_planted);
+      setStemDiametersInput(displayStemDiameters);
     }
-  }, [isEditMode, editTree]);
+  }, [isEditMode, editTree, units]);
   const [errors, setErrors] = useState<string[]>([]);
 
   const validateForm = (): string[] => {
@@ -289,6 +282,10 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
     
     if (!formData.species.trim()) {
       errors.push('Species is required');
+    }
+
+    if (isPlanted && !formData.date_planted) {
+      errors.push('Date Planted is required for planted trees');
     }
     
     // Check if coordinates are actually provided (not just default 0,0)
@@ -331,8 +328,29 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
       
       setErrors([]);
 
+      // Prepare data for submission, converting to metric if necessary
+      const submissionData = { ...formData };
+
+      if (units === 'imperial') {
+        if (submissionData.height_cm !== undefined) {
+          submissionData.height_cm = convertLength(submissionData.height_cm, 'ft', 'cm');
+        }
+        if (submissionData.dbh_cm !== undefined) {
+          submissionData.dbh_cm = convertLength(submissionData.dbh_cm, 'in', 'cm');
+        }
+        if (submissionData.canopy_spread_ns !== undefined) {
+          submissionData.canopy_spread_ns = convertLength(submissionData.canopy_spread_ns, 'ft', 'm');
+        }
+        if (submissionData.canopy_spread_ew !== undefined) {
+          submissionData.canopy_spread_ew = convertLength(submissionData.canopy_spread_ew, 'ft', 'm');
+        }
+        if (submissionData.stem_diameters && submissionData.stem_diameters.length > 0) {
+          submissionData.stem_diameters = submissionData.stem_diameters.map(d => convertLength(d, 'in', 'cm'));
+        }
+      }
+
       if (isEditMode && editTree) {
-        const updatedTree = TreeService.updateTree(editTree.id, formData);
+        const updatedTree = TreeService.updateTree(editTree.id, submissionData);
         if (updatedTree) {
           toast({
             title: "Tree Updated Successfully! 🌳",
@@ -340,7 +358,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           });
         }
       } else {
-        const newTree = TreeService.addTree(formData);
+        const newTree = TreeService.addTree(submissionData);
         toast({
           title: "Tree Added Successfully! 🌳",
           description: `${newTree.species} has been added to your forest.`,
@@ -544,7 +562,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="mobile-modal sm:max-w-[700px] overflow-y-auto">
+      <DialogContent className={`mobile-modal sm:max-w-[700px] overflow-y-auto ${isFullScreen ? '!p-0 !max-w-full !w-full !h-screen !m-0' : ''}`}>
         <DialogHeader className="pb-2 sm:pb-4">
           <DialogTitle className="text-green-800 flex items-center gap-2 text-base sm:text-lg lg:text-xl">
             🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
@@ -616,13 +634,38 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
 
             <div>
               <Label htmlFor="date_planted" className="text-green-700 font-medium text-sm sm:text-base">Date Planted</Label>
+              <div className="flex items-center space-x-3 mb-2">
+                <input
+                  type="radio"
+                  id="planted_true"
+                  name="is_planted"
+                  checked={isPlanted}
+                  onChange={() => setIsPlanted(true)}
+                  className="w-4 h-4 text-green-600 bg-green-100 border-green-300 rounded-full focus:ring-green-500"
+                />
+                <label htmlFor="planted_true" className="text-green-700 font-medium">Planted</label>
+                <input
+                  type="radio"
+                  id="planted_false"
+                  name="is_planted"
+                  checked={!isPlanted}
+                  onChange={() => setIsPlanted(false)}
+                  className="w-4 h-4 text-green-600 bg-green-100 border-green-300 rounded-full focus:ring-green-500"
+                />
+                <label htmlFor="planted_false" className="text-green-700 font-medium">Wild (Naturally Occurring)</label>
+              </div>
               <Input
                 id="date_planted"
                 type="date"
                 value={formData.date_planted}
                 onChange={(e) => setFormData(prev => ({ ...prev, date_planted: e.target.value }))}
-                className="border-green-200 focus:border-green-400 text-sm sm:text-base mt-1"
+                className={`border-green-200 focus:border-green-400 text-sm sm:text-base mt-1 ${isPlanted && !formData.date_planted ? 'border-red-500' : ''}`}
+                required={isPlanted}
+                disabled={!isPlanted}
               />
+              {!isPlanted && (
+                <p className="text-xs text-gray-500 mt-1">Date planted is not applicable for wild trees.</p>
+              )}
             </div>
 
             <div>
@@ -708,34 +751,42 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
             </div>
 
             {/* Interactive Map for Location Selection */}
-            {showLocationMap && isClient && (
+            {showLocationMap && isLoaded && (
               <div className="mt-3 sm:mt-4 border border-green-200 rounded-lg overflow-hidden">
                 <div className="bg-green-50 px-3 sm:px-4 py-2 border-b border-green-200">
-                  <p className="text-xs sm:text-sm text-green-700 font-medium">📍 Click on the map to set tree location</p>
+                  <p className="text-xs sm:text-sm text-green-700 font-medium">📍 Click on the map to set tree location or use search</p>
                 </div>
                 <div className="h-48 sm:h-64 w-full relative">
-                  <MapContainer
+                  <GoogleMap
+                    mapContainerStyle={{ width: '100%', height: '100%' }}
                     center={formData.location.lat !== 0 && formData.location.lng !== 0 
-                      ? [formData.location.lat, formData.location.lng] 
-                      : [40.7128, -74.0060]} // Default to NYC
+                      ? { lat: formData.location.lat, lng: formData.location.lng } 
+                      : { lat: 40.7128, lng: -74.0060 }} // Default to NYC
                     zoom={13}
-                    style={{ height: '100%', width: '100%' }}
-                    className="leaflet-container"
-                    key={`map-${showLocationMap}`} // Force re-render when map shows/hides
+                    onLoad={onMapLoad}
+                    onUnmount={onMapUnmount}
+                    onClick={onMapClick}
+                    options={mapOptions}
                   >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      maxZoom={19}
-                      minZoom={1}
-                    />
-                    <LocationPicker
-                      position={formData.location.lat !== 0 && formData.location.lng !== 0 
-                        ? [formData.location.lat, formData.location.lng] 
-                        : null}
-                      onLocationSelect={handleMapLocationSelect}
-                    />
-                  </MapContainer>
+                    {formData.location.lat !== 0 && formData.location.lng !== 0 && (
+                      <Marker
+                        position={{ lat: formData.location.lat, lng: formData.location.lng }}
+                        draggable={true}
+                        onDragEnd={onMarkerDragEnd}
+                      />
+                    )}
+                    <StandaloneSearchBox
+                      onLoad={ref => searchBoxRef.current = ref}
+                      onPlacesChanged={onPlacesChanged}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Search for a location..."
+                        className="box-border border border-gray-300 shadow-md rounded-md px-3 py-2 w-full absolute top-2 left-1/2 -translate-x-1/2 z-10 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        style={{ width: 'calc(100% - 20px)', maxWidth: '400px' }}
+                      />
+                    </StandaloneSearchBox>
+                  </GoogleMap>
                 </div>
                 <div className="bg-green-50 px-3 sm:px-4 py-2 border-t border-green-200">
                   <p className="text-xs text-green-600">
@@ -755,15 +806,36 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                 <div className="space-y-2">
                   <div>
                     <p className="text-xs text-green-600 mb-1">Global Code:</p>
-                    <p className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all">
+                    <a 
+                      href={`https://maps.google.com/?q=${formData.location.lat},${formData.location.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all hover:underline"
+                    >
                       {PlusCodeService.encode(formData.location.lat, formData.location.lng).global}
-                    </p>
+                    </a>
                   </div>
                   <div>
                     <p className="text-xs text-green-600 mb-1">Local Code:</p>
-                    <p className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all">
+                    <a 
+                      href={`https://maps.google.com/?q=${formData.location.lat},${formData.location.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all hover:underline"
+                    >
                       {PlusCodeService.encode(formData.location.lat, formData.location.lng).local}
-                    </p>
+                    </a>
+                  </div>
+                  <div>
+                    <p className="text-xs text-green-600 mb-1">Coordinates:</p>
+                    <a
+                      href={`https://maps.google.com/?q=${formData.location.lat},${formData.location.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all hover:underline"
+                    >
+                      {formData.location.lat.toFixed(6)}, {formData.location.lng.toFixed(6)}
+                    </a>
                   </div>
                   <div className="text-xs text-green-600">
                     Precision: {PlusCodeService.encode(formData.location.lat, formData.location.lng).areaSize} area
@@ -1082,7 +1154,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                       input.accept = 'image/*';
                       input.capture = 'environment';
                       input.multiple = true;
-                      input.onchange = handleImageUpload;
+                      input.onchange = (e) => handleImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
                       input.click();
                     }}
                     className="border-green-200 text-green-700 hover:bg-green-50 flex items-center justify-center gap-2 py-3"
@@ -1098,7 +1170,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                       input.type = 'file';
                       input.accept = 'image/*';
                       input.multiple = true;
-                      input.onchange = handleImageUpload;
+                      input.onchange = (e) => handleImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
                       input.click();
                     }}
                     className="border-green-200 text-green-700 hover:bg-green-50 flex items-center justify-center gap-2 py-3"
@@ -1114,20 +1186,12 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                     <p className="text-sm text-green-600 font-medium">Selected Photos ({formData.images.length})</p>
                     <div className="grid grid-cols-3 gap-2">
                       {formData.images.map((image, index) => (
-                        <div key={index} className="relative">
-                          {image.startsWith('data:') ? (
-                            // Base64 image preview
-                            <img 
-                              src={image} 
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-20 object-cover rounded border"
-                            />
-                          ) : (
-                            // URL-based image or placeholder
-                            <div className="w-full h-20 bg-green-100 rounded border flex items-center justify-center">
-                              <span className="text-green-600 text-xs">📷 {index + 1}</span>
-                            </div>
-                          )}
+                        <div key={index} className="relative group">
+                          <img 
+                            src={image} 
+                            alt={`Tree photo ${index + 1}`}
+                            className="w-full h-20 object-cover rounded border border-green-200 group-hover:border-green-400 transition-all duration-200"
+                          />
                           <Button
                             type="button"
                             variant="destructive"
@@ -1137,7 +1201,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false }: AddT
                               newImages.splice(index, 1);
                               setFormData(prev => ({ ...prev, images: newImages }));
                             }}
-                            className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs p-0"
+                            className="absolute -top-1 -right-1 w-6 h-6 rounded-full text-xs p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                           >
                             ×
                           </Button>

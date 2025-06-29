@@ -1,4 +1,4 @@
-'use client';
+use client';
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -8,10 +8,9 @@ import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen } from 'lucide-react';
-import { ArborCastGenerator } from '@/components/ArborCastGenerator';
+import { ArrowLeft, Code, GitPullRequest } from 'lucide-react';
 
-export default function LearnPage() {
+export default function ContributePage() {
   const [markdown, setMarkdown] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +18,7 @@ export default function LearnPage() {
   useEffect(() => {
     const fetchMarkdown = async () => {
       try {
-        const response = await fetch('/knowledge/introduction.md');
+        const response = await fetch('/knowledge/contribute.md');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -40,7 +39,7 @@ export default function LearnPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
         <div className="text-green-700 flex items-center gap-2">
-          <span className="animate-spin">📚</span> Loading knowledge base...
+          <span className="animate-spin">💡</span> Loading contribution guidelines...
         </div>
       </div>
     );
@@ -57,16 +56,16 @@ export default function LearnPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-4 sm:p-6 lg:p-8">
       <header className="mb-6">
-        <Link href="/">
+        <Link href="/learn">
           <Button variant="ghost" size="sm" className="text-green-700 hover:bg-green-100">
             <ArrowLeft size={16} className="mr-2" />
-            Back to Dashboard
+            Back to Knowledge Base
           </Button>
         </Link>
         <h1 className="text-3xl font-bold text-green-800 mt-4 flex items-center gap-2">
-          <BookOpen size={28} /> Arboracle Knowledge Base
+          <GitPullRequest size={28} /> Contribute to Arboracle
         </h1>
-        <p className="text-green-600">Your comprehensive guide to arboriculture.</p>
+        <p className="text-green-600">Help us grow our collective knowledge.</p>
       </header>
 
       <Card className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg border border-green-200 markdown-body">
@@ -95,10 +94,6 @@ export default function LearnPage() {
           </ReactMarkdown>
         </CardContent>
       </Card>
-
-      <div className="mt-8">
-        <ArborCastGenerator />
-      </div>
     </div>
   );
 }

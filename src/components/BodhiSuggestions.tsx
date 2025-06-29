@@ -1,80 +1,53 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, ExternalLink } from 'lucide-react';
+import { AIService, AISuggestion } from '@/services/aiService';
 
 interface BodhiSuggestionsProps {
   selectedConditions: string[];
   onDismiss?: () => void;
+  aiPersona?: 'Sequoia' | 'Willow' | 'Bodhi';
 }
 
-interface Suggestion {
-  condition: string;
-  message: string;
-  action: string;
-  learnMoreUrl?: string;
-  persona: 'Sequoia' | 'Willow';
-}
+export function BodhiSuggestions({ selectedConditions, onDismiss, aiPersona = 'Bodhi' }: BodhiSuggestionsProps) {
+  const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
 
-const BODHI_SUGGESTIONS: Suggestion[] = [
-  {
-    condition: 'Co-dominant stems',
-    message: 'Trees with co-dominant stems may require subordination pruning to prevent structural failure.',
-    action: 'Consider structural pruning to establish a dominant leader',
-    persona: 'Sequoia',
-    learnMoreUrl: '/knowledge'
-  },
-  {
-    condition: 'Girdling roots',
-    message: 'Girdling roots can strangle the tree over time. Early intervention is crucial.',
-    action: 'Schedule root collar excavation and selective root removal',
-    persona: 'Willow',
-    learnMoreUrl: '/knowledge'
-  },
-  {
-    condition: 'Included bark',
-    message: 'Included bark creates weak branch unions prone to failure during storms.',
-    action: 'Recommend cabling or subordination pruning of affected branches',
-    persona: 'Sequoia',
-    learnMoreUrl: '/knowledge'
-  },
-  {
-    condition: 'Dead branches (>2 inches)',
-    message: 'Dead branches over 2 inches pose safety risks and should be removed promptly.',
-    action: 'Schedule deadwood removal during dormant season',
-    persona: 'Willow',
-    learnMoreUrl: '/knowledge'
-  },
-  {
-    condition: 'Leaf discoloration',
-    message: 'Leaf discoloration often indicates nutrient deficiency or disease stress.',
-    action: 'Conduct soil test and consider foliar analysis for diagnosis',
-    persona: 'Sequoia',
-    learnMoreUrl: '/knowledge'
-  },
-  {
-    condition: 'Soil compaction',
-    message: 'Compacted soil limits root growth and water infiltration.',
-    action: 'Consider vertical mulching or pneumatic soil decompaction',
-    persona: 'Willow',
-    learnMoreUrl: '/knowledge'
+  useEffect(() => {
+    setLoading(true);
+    AIService.fetchSuggestions(selectedConditions)
+      .then(data => {
+        // Filter suggestions by selected AI persona
+        const filteredByPersona = data.filter(s => aiPersona === 'Bodhi' || s.persona === aiPersona);
+        setSuggestions(filteredByPersona);
+      })
+      .catch(error => {
+        console.error('Error fetching AI suggestions:', error);
+        setSuggestions([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [selectedConditions, aiPersona]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-4 text-green-700">
+        <span className="animate-spin mr-2">💡</span> Fetching AI insights...
+      </div>
+    );
   }
-];
 
-export function BodhiSuggestions({ selectedConditions, onDismiss }: BodhiSuggestionsProps) {
-  const relevantSuggestions = BODHI_SUGGESTIONS.filter(suggestion =>
-    selectedConditions.includes(suggestion.condition)
-  );
-
-  if (relevantSuggestions.length === 0) {
+  if (suggestions.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-3 mt-4">
-      {relevantSuggestions.map((suggestion, index) => (
+      {suggestions.map((suggestion, index) => (
         <Alert key={index} className="bg-amber-50 border-amber-200">
           <Lightbulb className="h-4 w-4 text-amber-600" />
           <AlertDescription>

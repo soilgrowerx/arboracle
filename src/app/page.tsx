@@ -25,20 +25,50 @@ import { EcosystemService } from '@/services/ecosystemService';
 export default function Home() {
   const router = useRouter();
   const [trees, setTrees] = useState<Tree[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('date-newest');
   const [filterBy, setFilterBy] = useState('all');
   const [editingTree, setEditingTree] = useState<Tree | undefined>(undefined);
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [activeView, setActiveView] = useState('list');
+  const [aiPersona, setAiPersona] = useState('Bodhi'); // New state for AI persona
+
+  useEffect(() => {
+    // Load AI persona from localStorage
+    try {
+      const savedSettings = localStorage.getItem('arboracle_user_settings');
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        setAiPersona(settings.preferences?.aiPersona || 'Bodhi');
+      }
+    } catch (error) {
+      console.error('Error loading AI persona preference:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save AI persona to localStorage whenever it changes
+    try {
+      const savedSettings = localStorage.getItem('arboracle_user_settings');
+      const settings = savedSettings ? JSON.parse(savedSettings) : {};
+      settings.preferences = { ...settings.preferences, aiPersona: aiPersona };
+      localStorage.setItem('arboracle_user_settings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Error saving AI persona preference:', error);
+    }
+  }, [aiPersona]);
 
   const loadTrees = () => {
+    setLoading(true);
     try {
       const allTrees = TreeService.getAllTrees();
       setTrees(allTrees);
     } catch (error) {
       console.error('Error loading trees:', error);
       setTrees([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -419,188 +449,197 @@ export default function Home() {
             <TreeStatistics trees={trees} />
           </div>
           <div className="lg:col-span-1">
-            <ForestHealthScore />
+            <ForestHealthScore trees={trees} aiPersona={aiPersona} />
           </div>
         </div>
 
-        {/* View Tabs */}
-        {trees.length > 0 && (
-          <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-10 dashboard-card-enhanced p-2 bg-transparent border-0">
-              <TabsTrigger 
-                value="list" 
-                className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:btn-primary-enhanced data-[state=active]:text-white transition-all duration-300"
-              >
-                <List size={18} />
-                List View
-              </TabsTrigger>
-              <TabsTrigger 
-                value="map" 
-                className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white transition-all duration-300"
-              >
-                <Map size={18} />
-                🗺️ Map View
-              </TabsTrigger>
-              <TabsTrigger 
-                value="analytics" 
-                className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:btn-primary-enhanced data-[state=active]:text-white transition-all duration-300"
-              >
-                <BarChart3 size={18} />
-                Analytics
-              </TabsTrigger>
-            </TabsList>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-green-500"></div>
+            <p className="ml-4 text-green-700">Loading trees...</p>
+          </div>
+        ) : (
+          <>
+            {/* View Tabs */}
+            {trees.length > 0 && (
+              <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto mb-10 dashboard-card-enhanced p-2 bg-transparent border-0">
+                  <TabsTrigger 
+                    value="list" 
+                    className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:btn-primary-enhanced data-[state=active]:text-white transition-all duration-300"
+                  >
+                    <List size={18} />
+                    List View
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="map" 
+                    className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:text-white transition-all duration-300"
+                  >
+                    <Map size={18} />
+                    🗺️ Map View
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="analytics" 
+                    className="flex items-center gap-3 py-4 px-6 btn-enhanced text-base font-semibold data-[state=active]:btn-primary-enhanced data-[state=active]:text-white transition-all duration-300"
+                  >
+                    <BarChart3 size={18} />
+                    Analytics
+                  </TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="list" className="space-y-4 sm:space-y-6 lg:space-y-8">
-              {/* Search and Filter Section */}
-              <div className="dashboard-card-enhanced mobile-card-content space-y-4 sm:space-y-6 float-animation">
-                {/* Search Bar */}
-                <div className="search-container-enhanced w-full">
-                  <Search className="search-icon-enhanced absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-green-600" size={18} />
-                  <Input
-                    type="text"
-                    placeholder="Search by species..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input-enhanced mobile-input pl-10 sm:pl-12"
-                  />
-                </div>
-
-                {/* Sort and Filter Controls */}
-                <div className="mobile-stack lg:flex-row lg:items-center lg:justify-between">
-                  {/* Sort Dropdown */}
-                  <div className="flex items-center mobile-gap">
-                    <SortAsc className="text-green-600 flex-shrink-0 transition-transform duration-300 hover:scale-110 mobile-icon" />
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-full lg:w-64 btn-outline-enhanced mobile-button">
-                        <SelectValue placeholder="Sort by..." />
-                      </SelectTrigger>
-                      <SelectContent className="dashboard-card-enhanced">
-                        <SelectItem value="date-newest">Date Added (Newest)</SelectItem>
-                        <SelectItem value="date-oldest">Date Added (Oldest)</SelectItem>
-                        <SelectItem value="species-az">Species Name (A-Z)</SelectItem>
-                        <SelectItem value="species-za">Species Name (Z-A)</SelectItem>
-                        <SelectItem value="scientific-az">Scientific Name (A-Z)</SelectItem>
-                        <SelectItem value="scientific-za">Scientific Name (Z-A)</SelectItem>
-                        <SelectItem value="age-oldest">Age (Oldest First)</SelectItem>
-                        <SelectItem value="age-youngest">Age (Youngest First)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Filter Buttons */}
-                  <div className="flex items-center mobile-gap">
-                    <Filter className="text-green-600 transition-transform duration-300 hover:scale-110 flex-shrink-0 mobile-icon" />
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        variant={filterBy === 'all' ? 'default' : 'outline'}
-                        onClick={() => setFilterBy('all')}
-                        className={`btn-enhanced mobile-button touch-target ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
-                      >
-                        All Trees
-                      </Button>
-                      <Button
-                        variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
-                        onClick={() => setFilterBy('inaturalist')}
-                        className={`btn-enhanced mobile-button touch-target ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
-                      >
-                        <span className="mr-1 xs:mr-2 transition-transform duration-300 hover:scale-110">🔬</span>
-                        <span className="hidden xs:inline">iNaturalist</span>
-                        <span className="xs:hidden mobile-text">iNat</span>
-                      </Button>
-                      <Button
-                        variant={filterBy === 'manual' ? 'default' : 'outline'}
-                        onClick={() => setFilterBy('manual')}
-                        className={`btn-enhanced mobile-button touch-target ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
-                      >
-                        <span className="mr-1 xs:mr-2 transition-transform duration-300 hover:scale-110">✏️</span>
-                        <span className="mobile-text">Manual</span>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trees Grid */}
-              {filteredTrees.length === 0 ? (
-                <div className="text-center py-12 sm:py-16 lg:py-20">
-                  <div className="dashboard-card-enhanced p-6 sm:p-10 lg:p-16 max-w-xs sm:max-w-lg mx-auto float-animation">
-                    <div className="text-6xl sm:text-7xl lg:text-8xl mb-6 sm:mb-8 float-animation">🔍</div>
-                    <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-800 mb-4 sm:mb-6">No Trees Match Your Criteria</h3>
-                    <p className="text-green-700 mb-6 sm:mb-8 text-sm sm:text-base lg:text-lg leading-relaxed">
-                      Try adjusting your search, sort, or filter settings to discover more trees in your collection.
-                    </p>
-                    <div className="space-y-4">
-                      <button
-                        onClick={() => {
-                          setSearchTerm('');
-                          setFilterBy('all');
-                          setSortBy('date-newest');
-                        }}
-                        className="block w-full btn-primary-enhanced py-3 sm:py-4 px-4 sm:px-8 text-sm sm:text-base lg:text-lg"
-                      >
-                        Clear All Filters
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-                  {filteredTrees.map((tree, index) => (
-                    <div key={tree.id} className={`grid-fade-in`} style={{animationDelay: `${index * 0.1}s`}}>
-                      <TreeCard
-                        tree={tree}
-                        onClick={() => handleTreeClick(tree)}
-                        onEdit={handleEditTree}
+                <TabsContent value="list" className="space-y-4 sm:space-y-6 lg:space-y-8">
+                  {/* Search and Filter Section */}
+                  <div className="dashboard-card-enhanced mobile-card-content space-y-4 sm:space-y-6 float-animation">
+                    {/* Search Bar */}
+                    <div className="search-container-enhanced w-full">
+                      <Search className="search-icon-enhanced absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-green-600" size={18} />
+                      <Input
+                        type="text"
+                        placeholder="Search by species..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="search-input-enhanced mobile-input pl-10 sm:pl-12"
                       />
                     </div>
-                  ))}
+
+                    {/* Sort and Filter Controls */}
+                    <div className="mobile-stack lg:flex-row lg:items-center lg:justify-between">
+                      {/* Sort Dropdown */}
+                      <div className="flex items-center mobile-gap">
+                        <SortAsc className="text-green-600 flex-shrink-0 transition-transform duration-300 hover:scale-110 mobile-icon" />
+                        <Select value={sortBy} onValueChange={setSortBy}>
+                          <SelectTrigger className="w-full lg:w-64 btn-outline-enhanced mobile-button">
+                            <SelectValue placeholder="Sort by..." />
+                          </SelectTrigger>
+                          <SelectContent className="dashboard-card-enhanced">
+                            <SelectItem value="date-newest">Date Added (Newest)</SelectItem>
+                            <SelectItem value="date-oldest">Date Added (Oldest)</SelectItem>
+                            <SelectItem value="species-az">Species Name (A-Z)</SelectItem>
+                            <SelectItem value="species-za">Species Name (Z-A)</SelectItem>
+                            <SelectItem value="scientific-az">Scientific Name (A-Z)</SelectItem>
+                            <SelectItem value="scientific-za">Scientific Name (Z-A)</SelectItem>
+                            <SelectItem value="age-oldest">Age (Oldest First)</SelectItem>
+                            <SelectItem value="age-youngest">Age (Youngest First)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Filter Buttons */}
+                      <div className="flex items-center mobile-gap">
+                        <Filter className="text-green-600 transition-transform duration-300 hover:scale-110 flex-shrink-0 mobile-icon" />
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant={filterBy === 'all' ? 'default' : 'outline'}
+                            onClick={() => setFilterBy('all')}
+                            className={`btn-enhanced mobile-button touch-target ${filterBy === 'all' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                          >
+                            All Trees
+                          </Button>
+                          <Button
+                            variant={filterBy === 'inaturalist' ? 'default' : 'outline'}
+                            onClick={() => setFilterBy('inaturalist')}
+                            className={`btn-enhanced mobile-button touch-target ${filterBy === 'inaturalist' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                          >
+                            <span className="mr-1 xs:mr-2 transition-transform duration-300 hover:scale-110">🔬</span>
+                            <span className="hidden xs:inline">iNaturalist</span>
+                            <span className="xs:hidden mobile-text">iNat</span>
+                          </Button>
+                          <Button
+                            variant={filterBy === 'manual' ? 'default' : 'outline'}
+                            onClick={() => setFilterBy('manual')}
+                            className={`btn-enhanced mobile-button touch-target ${filterBy === 'manual' ? 'btn-primary-enhanced' : 'btn-outline-enhanced'}`}
+                          >
+                            <span className="mr-1 xs:mr-2 transition-transform duration-300 hover:scale-110">✏️</span>
+                            <span className="mobile-text">Manual</span>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Trees Grid */}
+                  {filteredTrees.length === 0 ? (
+                    <div className="text-center py-12 sm:py-16 lg:py-20">
+                      <div className="dashboard-card-enhanced p-6 sm:p-10 lg:p-16 max-w-xs sm:max-w-lg mx-auto float-animation">
+                        <div className="text-6xl sm:text-7xl lg:text-8xl mb-6 sm:mb-8 float-animation">🔍</div>
+                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-800 mb-4 sm:mb-6">No Trees Match Your Criteria</h3>
+                        <p className="text-green-700 mb-6 sm:mb-8 text-sm sm:text-base lg:text-lg leading-relaxed">
+                          Try adjusting your search, sort, or filter settings to discover more trees in your collection.
+                        </p>
+                        <div className="space-y-4">
+                          <button
+                            onClick={() => {
+                              setSearchTerm('');
+                              setFilterBy('all');
+                              setSortBy('date-newest');
+                            }}
+                            className="block w-full btn-primary-enhanced py-3 sm:py-4 px-4 sm:px-8 text-sm sm:text-base lg:text-lg"
+                          >
+                            Clear All Filters
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                      {filteredTrees.map((tree, index) => (
+                        <div key={tree.id} className={`grid-fade-in`} style={{animationDelay: `${index * 0.1}s`}}>
+                          <TreeCard
+                            tree={tree}
+                            onClick={() => handleTreeClick(tree)}
+                            onEdit={handleEditTree}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="map" className="space-y-6">
+                  <TreeMapView onTreeSelect={handleTreeSelect} />
+                </TabsContent>
+
+                <TabsContent value="analytics" className="space-y-6">
+                  <AnalyticsDashboard trees={trees} />
+                </TabsContent>
+              </Tabs>
+            )}
+
+            {/* Empty State - Show when no trees */}
+            {trees.length === 0 && !loading && (
+              <div className="text-center py-12 sm:py-16 lg:py-24">
+                <div className="dashboard-card-enhanced p-6 sm:p-12 lg:p-20 max-w-md sm:max-w-lg lg:max-w-2xl mx-auto float-animation">
+                  <div className="text-6xl sm:text-7xl lg:text-9xl mb-6 sm:mb-8 lg:mb-10 float-animation">🌱</div>
+                  <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-800 mb-4 sm:mb-6">Welcome to Your Digital Forest</h3>
+                  <p className="text-green-700 mb-6 sm:mb-8 lg:mb-10 text-sm sm:text-base lg:text-xl leading-relaxed">
+                    Begin your journey of cultivating knowledge and preserving nature by adding your first tree to the collection!
+                  </p>
+                  <div className="space-y-4 sm:space-y-6">
+                    <AddTreeModal 
+                      onTreeAdded={handleTreeAdded} 
+                      editTree={editingTree}
+                      isEditMode={!!editingTree}
+                    />
+                    <div className="flex items-center justify-center gap-2 sm:gap-4">
+                      <div className="h-px bg-green-200 flex-1"></div>
+                      <span className="text-green-600 font-medium px-2 sm:px-4 text-sm sm:text-base">or</span>
+                      <div className="h-px bg-green-200 flex-1"></div>
+                    </div>
+                    <Link href="/map">
+                      <Button
+                        variant="outline"
+                        className="w-full btn-outline-enhanced py-3 sm:py-4 px-4 sm:px-8 text-sm sm:text-base lg:text-lg border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
+                      >
+                        <Map size={16} className="sm:size-18 lg:size-20 mr-2 sm:mr-3" />
+                        <span className="hidden xs:inline">🗺️ Explore Map & Add Trees by Location</span>
+                        <span className="xs:hidden">🗺️ Map View</span>
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="map" className="space-y-6">
-              <TreeMapView onTreeSelect={handleTreeSelect} />
-            </TabsContent>
-
-            <TabsContent value="analytics" className="space-y-6">
-              <AnalyticsDashboard trees={trees} />
-            </TabsContent>
-          </Tabs>
-        )}
-
-        {/* Empty State - Show when no trees */}
-        {trees.length === 0 && (
-          <div className="text-center py-12 sm:py-16 lg:py-24">
-            <div className="dashboard-card-enhanced p-6 sm:p-12 lg:p-20 max-w-md sm:max-w-lg lg:max-w-2xl mx-auto float-animation">
-              <div className="text-6xl sm:text-7xl lg:text-9xl mb-6 sm:mb-8 lg:mb-10 float-animation">🌱</div>
-              <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-800 mb-4 sm:mb-6">Welcome to Your Digital Forest</h3>
-              <p className="text-green-700 mb-6 sm:mb-8 lg:mb-10 text-sm sm:text-base lg:text-xl leading-relaxed">
-                Begin your journey of cultivating knowledge and preserving nature by adding your first tree to the collection!
-              </p>
-              <div className="space-y-4 sm:space-y-6">
-                <AddTreeModal 
-                  onTreeAdded={handleTreeAdded} 
-                  editTree={editingTree}
-                  isEditMode={!!editingTree}
-                />
-                <div className="flex items-center justify-center gap-2 sm:gap-4">
-                  <div className="h-px bg-green-200 flex-1"></div>
-                  <span className="text-green-600 font-medium px-2 sm:px-4 text-sm sm:text-base">or</span>
-                  <div className="h-px bg-green-200 flex-1"></div>
-                </div>
-                <Link href="/map">
-                  <Button
-                    variant="outline"
-                    className="w-full btn-outline-enhanced py-3 sm:py-4 px-4 sm:px-8 text-sm sm:text-base lg:text-lg border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
-                  >
-                    <Map size={16} className="sm:size-18 lg:size-20 mr-2 sm:mr-3" />
-                    <span className="hidden xs:inline">🗺️ Explore Map & Add Trees by Location</span>
-                    <span className="xs:hidden">🗺️ Map View</span>
-                  </Button>
-                </Link>
               </div>
-            </div>
-          </div>
+            )}
+          </>
         )}
       </main>
 

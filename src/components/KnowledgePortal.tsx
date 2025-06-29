@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { KnowledgeArticle } from '@/types/knowledge';
 import { KnowledgeBase } from '@/components/KnowledgeBase';
 import { KnowledgeArticleReader } from '@/components/KnowledgeArticleReader';
@@ -15,6 +15,20 @@ import ArborCast from '@/components/ArborCast';
 export function KnowledgePortal() {
   const [activeTab, setActiveTab] = useState('browse');
   const [selectedArticle, setSelectedArticle] = useState<KnowledgeArticle | null>(null);
+  const [aiPersona, setAiPersona] = useState('Bodhi'); // Default AI persona
+
+  useEffect(() => {
+    // Load AI persona from localStorage
+    try {
+      const savedSettings = localStorage.getItem('arboracle_user_settings');
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        setAiPersona(settings.preferences?.aiPersona || 'Bodhi');
+      }
+    } catch (error) {
+      console.error('Error loading AI persona preference:', error);
+    }
+  }, []);
 
   const handleArticleSelect = (article: KnowledgeArticle) => {
     setSelectedArticle(article);
@@ -105,7 +119,7 @@ export function KnowledgePortal() {
             </TabsContent>
 
             <TabsContent value="ask" className="space-y-6 mt-0">
-              <AskBodhi onClose={handleBackToBrowse} />
+              <AskBodhi onClose={handleBackToBrowse} aiPersona={aiPersona} />
             </TabsContent>
 
             <TabsContent value="study" className="space-y-6 mt-0">

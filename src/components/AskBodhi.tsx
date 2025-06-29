@@ -12,9 +12,10 @@ import { useToast } from '@/components/ui/use-toast';
 
 interface AskBodhiProps {
   onClose?: () => void;
+  aiPersona: string;
 }
 
-export function AskBodhi({ onClose }: AskBodhiProps) {
+export function AskBodhi({ onClose, aiPersona }: AskBodhiProps) {
   const [question, setQuestion] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
@@ -84,7 +85,7 @@ export function AskBodhi({ onClose }: AskBodhiProps) {
           <CardTitle className="flex items-center gap-3">
             <span className="text-3xl">🧠</span>
             <div>
-              <span className="text-purple-800">Bodhi AI</span>
+              <span className="text-purple-800">{aiPersona} AI</span>
               <Badge className="ml-2 bg-purple-100 text-purple-800">STIM-Powered</Badge>
             </div>
           </CardTitle>
@@ -96,7 +97,7 @@ export function AskBodhi({ onClose }: AskBodhiProps) {
               <div className="inline-flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg border border-purple-200">
                 <div className="animate-spin text-2xl">🧠</div>
                 <div className="text-left">
-                  <div className="font-semibold text-purple-800">Bodhi is thinking...</div>
+                  <div className="font-semibold text-purple-800">{aiPersona} is thinking...</div>
                   <div className="text-sm text-purple-600">Analyzing knowledge base and generating response</div>
                 </div>
               </div>
@@ -281,7 +282,7 @@ export function AskBodhi({ onClose }: AskBodhiProps) {
               ) : (
                 <div className="flex items-center gap-2">
                   <MessageSquare size={16} />
-                  <span>Ask Bodhi</span>
+                  <span>Ask {aiPersona}</span>
                 </div>
               )}
             </Button>

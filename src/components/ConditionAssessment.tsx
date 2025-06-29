@@ -7,6 +7,96 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { BodhiSuggestions } from '@/components/BodhiSuggestions';
+import { ChevronDown, ChevronUp } from 'lucide-react'; // Import icons
+
+export interface ConditionChecklistData {
+  structure: string[];
+  canopy_health: string[];
+  pests_diseases: string[];
+  site_conditions: string[];
+}
+
+export interface ConditionNotesData {
+  [key: string]: string; // Key is "category-item", value is the note
+}
+
+interface ConditionAssessmentProps {
+  value: {
+    checklist: ConditionChecklistData;
+    arborist_summary: string;
+    notes?: ConditionNotesData;
+  };
+  onChange: (value: { checklist: ConditionChecklistData; arborist_summary: string; notes?: ConditionNotesData }) => void;
+}
+
+// Fulcrum-style condition assessment checklists
+const CONDITION_CHECKLISTS = {
+  structure: [
+    'Co-dominant stems',
+    'Included bark',
+    'Weak branch attachments',
+    'Dead branches (>2 inches)',
+    'Broken branches',
+    'Cavity/decay',
+    'Root damage visible',
+    'Lean/instability',
+    'Girdling roots',
+    'Crown imbalance'
+  ],
+  canopy_health: [
+    'Leaf discoloration',
+    'Early leaf drop',
+    'Sparse foliage',
+    'Branch dieback',
+    'Epicormic sprouting',
+    'Stunted growth',
+    'Wilting symptoms',
+    'Abnormal leaf size',
+    'Premature autumn color',
+    'Crown transparency >50%'
+  ],
+  pests_diseases: [
+    'Fungal infection visible',
+    'Bacterial infection signs',
+    'Insect damage',
+    'Boring insect holes',
+    'Scale insects',
+    'Aphid infestation',
+    'Cankers present',
+    'Powdery mildew',
+    'Rust disease',
+    'Viral symptoms'
+  ],
+  site_conditions: [
+    'Soil compaction',
+    'Poor drainage',
+    'Construction damage',
+    'Salt damage',
+    'Drought stress',
+    'Over-watering signs',
+    'Nutrient deficiency',
+    'Chemical damage',
+    'Mechanical damage',
+    'Inadequate planting space'
+  ]
+};
+
+const CATEGORY_LABELS = {
+  structure: '🏗️ Structure',
+  canopy_health: '🍃 Canopy Health',
+  pests_diseases: '🐛 Pests & Diseases',
+  site_conditions: '🌍 Site Conditions'
+};
+
+export default function ConditionAssessment({ value, onChange }: ConditionAssessmentProps) {
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
 
 export interface ConditionChecklistData {
   structure: string[];
@@ -138,61 +228,72 @@ export default function ConditionAssessment({ value, onChange }: ConditionAssess
         </Badge>
       </div>
 
-      {(Object.keys(CONDITION_CHECKLISTS) as Array<keyof ConditionChecklistData>).map((category) => (
-        <div key={category} className="border border-green-200 rounded-lg p-3 sm:p-4 bg-green-50/30">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="font-medium text-green-800 text-sm sm:text-base">
-              {CATEGORY_LABELS[category]}
-            </h4>
-            <Badge 
-              variant={getSelectedCount(category) > 0 ? "destructive" : "secondary"}
-              className="text-xs"
+      {(Object.keys(CONDITION_CHECKLISTS) as Array<keyof ConditionChecklistData>).map((category) => {
+        const isExpanded = expandedCategories[category];
+        return (
+          <div key={category} className="border border-green-200 rounded-lg p-3 sm:p-4 bg-green-50/30">
+            <div 
+              className="flex items-center justify-between mb-3 cursor-pointer"
+              onClick={() => toggleCategory(category)}
             >
-              {getSelectedCount(category)}/{getTotalCount(category)} selected
-            </Badge>
-          </div>
-          
-          <div className="space-y-3">
-            {CONDITION_CHECKLISTS[category].map((item) => {
-              const isChecked = (value.checklist[category] || []).includes(item);
-              const noteKey = `${category}-${item}`;
-              
-              return (
-                <div key={item} className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${category}-${item}`}
-                      checked={isChecked}
-                      onCheckedChange={(checked) => 
-                        handleChecklistChange(category, item, checked as boolean)
-                      }
-                      className="data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
-                    />
-                    <Label 
-                      htmlFor={`${category}-${item}`}
-                      className="text-xs sm:text-sm text-green-700 cursor-pointer leading-tight flex-1"
-                    >
-                      {item}
-                    </Label>
-                  </div>
+              <h4 className="font-medium text-green-800 text-sm sm:text-base">
+                {CATEGORY_LABELS[category]}
+              </h4>
+              <div className="flex items-center gap-2">
+                <Badge 
+                  variant={getSelectedCount(category) > 0 ? "destructive" : "secondary"}
+                  className="text-xs"
+                >
+                  {getSelectedCount(category)}/{getTotalCount(category)} selected
+                </Badge>
+                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </div>
+            </div>
+            
+            {isExpanded && (
+              <div className="space-y-3 mt-3">
+                {CONDITION_CHECKLISTS[category].map((item) => {
+                  const isChecked = (value.checklist[category] || []).includes(item);
+                  const noteKey = `${category}-${item}`;
                   
-                  {/* Notes input field - shows when checkbox is checked */}
-                  {isChecked && (
-                    <div className="ml-6 animate-in fade-in slide-in-from-top-1 duration-200">
-                      <Input
-                        placeholder="Add specific notes..."
-                        value={value.notes?.[noteKey] || ''}
-                        onChange={(e) => handleNoteChange(category, item, e.target.value)}
-                        className="text-xs h-8 border-orange-200 focus:border-orange-400 bg-orange-50/50"
-                      />
+                  return (
+                    <div key={item} className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${category}-${item}`}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => 
+                            handleChecklistChange(category, item, checked as boolean)
+                          }
+                          className="data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
+                        />
+                        <Label 
+                          htmlFor={`${category}-${item}`}
+                          className="text-xs sm:text-sm text-green-700 cursor-pointer leading-tight flex-1"
+                        >
+                          {item}
+                        </Label>
+                      </div>
+                      
+                      {/* Notes input field - shows when checkbox is checked */}
+                      {isChecked && (
+                        <div className="ml-6 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <Input
+                            placeholder="Add specific notes..."
+                            value={value.notes?.[noteKey] || ''}
+                            onChange={(e) => handleNoteChange(category, item, e.target.value)}
+                            className="text-xs h-8 border-orange-200 focus:border-orange-400 bg-orange-50/50"
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       <div className="border-t border-green-200 pt-4">
         <Label htmlFor="arborist_summary" className="text-green-700 font-medium text-sm sm:text-base">
