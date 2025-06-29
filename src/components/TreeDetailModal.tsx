@@ -73,7 +73,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] w-[95vw] sm:w-full overflow-hidden flex flex-col">
+      <DialogContent className="max-w-6xl max-h-[90vh] w-[95vw] sm:w-full overflow-y-auto flex flex-col">
         <DialogHeader className="flex-shrink-0 border-b pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-start gap-3 sm:gap-4">
@@ -181,7 +181,7 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
             <TabsList className="grid w-full grid-cols-4 mb-6 flex-shrink-0 bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 border border-green-200 rounded-xl p-1">
               <TabsTrigger 

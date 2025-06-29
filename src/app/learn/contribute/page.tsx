@@ -1,4 +1,4 @@
-use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -73,7 +73,7 @@ export default function ContributePage() {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
-              code({node, inline, className, children, ...props}) {
+              code({node, inline, className, children, ...props}: React.HTMLAttributes<HTMLElement> & { inline?: boolean; node?: any; }) {
                 const match = /language-(\w+)/.exec(className || '')
                 return !inline && match ? (
                   <SyntaxHighlighter

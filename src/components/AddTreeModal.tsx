@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { TreeFormData, Tree } from '@/types/tree';
 import { TreeService } from '@/services/treeService';
@@ -20,8 +20,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Plus, Search, MapPin, Map } from 'lucide-react';
+import Image from 'next/image';
 import { TaxonomyBreadcrumb } from '@/components/TaxonomicDisplay';
-import ConditionAssessment, { ConditionChecklistData } from '@/components/ConditionAssessment';
+import ConditionAssessment from '@/components/ConditionAssessment';
 import { convertLength, getUnitLabels } from '@/lib/unitConverter';
 
 // Dynamically import map components to avoid SSR issues
@@ -34,12 +35,19 @@ interface AddTreeModalProps {
   editTree?: Tree;
   isEditMode?: boolean;
   isFullScreen?: boolean; // Add isFullScreen prop
+  onClose?: () => void;
 }
 
 
 
 export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFullScreen }: AddTreeModalProps) {
   const [open, setOpen] = useState(false);
+  const { toast } = useToast(); // Moved to the top
+
+  const { isLoaded } = useLoadScript({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
+  });
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null);
@@ -56,11 +64,11 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
     if (e.latLng) {
       setFormData(prev => ({
         ...prev,
-        location: { lat: e.latLng.lat(), lng: e.latLng.lng() }
+        location: { lat: e.latLng!.lat(), lng: e.latLng!.lng() }
       }));
       toast({
         title: "Location Selected",
-        description: `Coordinates set to ${e.latLng.lat().toFixed(6)}, ${e.latLng.lng().toFixed(6)}`,
+        description: `Coordinates set to ${e.latLng!.lat().toFixed(6)}, ${e.latLng!.lng().toFixed(6)}`,
       });
     }
   }, [toast]);
@@ -69,11 +77,11 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
     if (e.latLng) {
       setFormData(prev => ({
         ...prev,
-        location: { lat: e.latLng.lat(), lng: e.latLng.lng() }
+        location: { ...prev.location, lat: e.latLng!.lat(), lng: e.latLng!.lng() }
       }));
       toast({
         title: "Location Updated",
-        description: `Coordinates updated to ${e.latLng.lat().toFixed(6)}, ${e.latLng.lng().toFixed(6)}`,
+        description: `Coordinates updated to ${e.latLng!.lat().toFixed(6)}, ${e.latLng!.lng().toFixed(6)}`,
       });
     }
   }, [toast]);
@@ -86,7 +94,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
         if (place.geometry && place.geometry.location) {
           setFormData(prev => ({
             ...prev,
-            location: { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }
+            location: { lat: place.geometry!.location!.lat(), lng: place.geometry!.location!.lng() }
           }));
           if (mapRef.current) {
             mapRef.current.panTo(place.geometry.location);
@@ -113,7 +121,6 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
   const [showLocationMap, setShowLocationMap] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [managementActionsInput, setManagementActionsInput] = useState('');
-  const { toast } = useToast();
   const [isPlanted, setIsPlanted] = useState(true); // New state for wild vs planted
 
   const mapOptions = useMemo(() => ({
@@ -1187,10 +1194,12 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
                     <div className="grid grid-cols-3 gap-2">
                       {formData.images.map((image, index) => (
                         <div key={index} className="relative group">
-                          <img 
+                          <Image 
                             src={image} 
                             alt={`Tree photo ${index + 1}`}
-                            className="w-full h-20 object-cover rounded border border-green-200 group-hover:border-green-400 transition-all duration-200"
+                            layout="fill"
+                            objectFit="cover"
+                            className="rounded border border-green-200 group-hover:border-green-400 transition-all duration-200"
                           />
                           <Button
                             type="button"

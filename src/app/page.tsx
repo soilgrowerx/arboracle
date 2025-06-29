@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, SortAsc, Download, List, Map, Settings, BarChart3, BookOpen } from 'lucide-react';
+import { Search, Filter, SortAsc, Download, List, Map, Settings, BarChart3, BookOpen, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { calculateTreeAge } from '@/lib/utils';
@@ -33,6 +33,7 @@ export default function Home() {
   const [selectedTree, setSelectedTree] = useState<Tree | null>(null);
   const [activeView, setActiveView] = useState('list');
   const [aiPersona, setAiPersona] = useState('Bodhi'); // New state for AI persona
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false); // State to control AddTreeModal visibility
 
   useEffect(() => {
     // Load AI persona from localStorage
@@ -79,18 +80,25 @@ export default function Home() {
   const handleTreeAdded = () => {
     loadTrees();
     setEditingTree(undefined);
+    setIsAddModalOpen(false); // Close modal after tree is added
+  };
+
+  const handleOpenAddModal = () => {
+    setEditingTree(undefined); // Ensure it's in add mode
+    setIsAddModalOpen(true);
+  };
+
+  const handleTreeClick = (tree: Tree) => {
+    setSelectedTree(tree);
   };
 
   const handleEditTree = (tree: Tree) => {
     setEditingTree(tree);
+    setIsAddModalOpen(true); // Open modal in edit mode
   };
 
   const handleTreeSelect = (tree: Tree) => {
-    router.push(`/tree/${tree.id}`);
-  };
-
-  const handleTreeClick = (tree: Tree) => {
-    router.push(`/tree/${tree.id}`);
+    setSelectedTree(tree);
   };
 
   const exportToCSV = () => {
@@ -362,6 +370,8 @@ export default function Home() {
                     onTreeAdded={handleTreeAdded} 
                     editTree={editingTree}
                     isEditMode={!!editingTree}
+                    
+                    
                   />
                 </div>
               </div>
@@ -449,7 +459,7 @@ export default function Home() {
             <TreeStatistics trees={trees} />
           </div>
           <div className="lg:col-span-1">
-            <ForestHealthScore trees={trees} aiPersona={aiPersona} />
+            <ForestHealthScore trees={trees} aiPersona={aiPersona} treeCount={trees.length} />
           </div>
         </div>
 
@@ -615,11 +625,17 @@ export default function Home() {
                     Begin your journey of cultivating knowledge and preserving nature by adding your first tree to the collection!
                   </p>
                   <div className="space-y-4 sm:space-y-6">
-                    <AddTreeModal 
-                      onTreeAdded={handleTreeAdded} 
-                      editTree={editingTree}
-                      isEditMode={!!editingTree}
-                    />
+                    <Button
+                      onClick={handleOpenAddModal} // Use the new handler
+                      className="w-full btn-primary-enhanced group touch-target mobile-button font-bold bg-gradient-to-r from-green-600 via-green-700 to-emerald-700 hover:from-green-700 hover:via-green-800 hover:to-emerald-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0 h-14 sm:h-16"
+                    >
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all duration-300">
+                          <Plus size={18} className="text-white transition-transform duration-300 group-hover:rotate-90" />
+                        </div>
+                        <span className="text-lg font-bold">+ Add Tree</span>
+                      </div>
+                    </Button>
                     <div className="flex items-center justify-center gap-2 sm:gap-4">
                       <div className="h-px bg-green-200 flex-1"></div>
                       <span className="text-green-600 font-medium px-2 sm:px-4 text-sm sm:text-base">or</span>

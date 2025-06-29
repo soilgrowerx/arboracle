@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Camera, Image as ImageIcon, X } from 'lucide-react';
+import Image from 'next/image';
 
 interface ImageUploadProps {
   onImagesChange: (images: File[]) => void;
@@ -72,7 +73,7 @@ export function ImageUpload({ onImagesChange, maxImages = 3 }: ImageUploadProps)
         URL.revokeObjectURL(preview.url);
       });
     };
-  }, []);
+  }, [imagePreviews]);
 
   return (
     <div className="space-y-4">
@@ -125,10 +126,12 @@ export function ImageUpload({ onImagesChange, maxImages = 3 }: ImageUploadProps)
         <div className="grid grid-cols-3 gap-2">
           {imagePreviews.map((preview, index) => (
             <div key={index} className="relative group">
-              <img
+              <Image
                 src={preview.url}
                 alt={`Preview ${index + 1}`}
-                className="w-full h-20 object-cover rounded-lg border border-green-200"
+                layout="fill"
+                objectFit="cover"
+                className="rounded-lg border border-green-200"
               />
               <button
                 type="button"

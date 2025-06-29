@@ -134,6 +134,11 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
     return new Date(dateString).toLocaleDateString();
   };
 
+  const defaultCenter = useMemo(() => ({
+    lat: filteredTrees.length > 0 ? filteredTrees[0].lat : (trees.length > 0 ? trees[0].lat : 40.7128),
+    lng: filteredTrees.length > 0 ? filteredTrees[0].lng : (trees.length > 0 ? trees[0].lng : -74.0060),
+  }), [filteredTrees, trees]);
+
   if (!isLoaded || !isClient || loading) {
     return (
       <div className="h-96 bg-green-50 rounded-lg flex items-center justify-center">
@@ -148,11 +153,6 @@ export function TreeMapView({ onTreeSelect, filteredTrees: externalFilteredTrees
   const showEmptyState = trees.length === 0;
 
   const uniqueSpecies = [...new Set(trees.map(tree => tree.commonName || tree.species))];
-
-  const defaultCenter = useMemo(() => ({
-    lat: filteredTrees.length > 0 ? filteredTrees[0].lat : (trees.length > 0 ? trees[0].lat : 40.7128),
-    lng: filteredTrees.length > 0 ? filteredTrees[0].lng : (trees.length > 0 ? trees[0].lng : -74.0060),
-  }), [filteredTrees, trees]);
 
   return (
     <div className="space-y-4">

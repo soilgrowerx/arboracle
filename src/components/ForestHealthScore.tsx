@@ -11,9 +11,10 @@ import { Leaf, TreePine, AlertTriangle, CheckCircle, Download, FileText } from '
 interface ForestHealthScoreProps {
   trees: Tree[];
   aiPersona: string;
+  treeCount: number;
 }
 
-export function ForestHealthScore({ trees, aiPersona }: ForestHealthScoreProps) {
+export function ForestHealthScore({ trees, aiPersona, treeCount }: ForestHealthScoreProps) {
   const totalTrees = trees.length;
 
   // Calculate health metrics based on tree data
@@ -153,7 +154,7 @@ export function ForestHealthScore({ trees, aiPersona }: ForestHealthScoreProps) 
                 <Leaf className="w-4 h-4 text-gray-500 mr-1" />
                 <span className="text-sm font-medium text-gray-700">Total Trees</span>
               </div>
-              const treeCount = totalTrees;
+              
             </div>
           </div>
 
