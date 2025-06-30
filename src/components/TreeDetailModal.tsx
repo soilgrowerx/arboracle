@@ -138,10 +138,10 @@ export function TreeDetailModal({ tree, isOpen, onClose, onEdit }: TreeDetailMod
                       name: tree.commonName || tree.species,
                       species: tree.species,
                       age: treeAge.displayText,
-                      healthScore: tree.health_score || 'N/A',
+                      healthStatus: tree.health_status || 'N/A',
                       location: `${tree.lat.toFixed(6)}, ${tree.lng.toFixed(6)}`,
                       datePlanted: formatDate(tree.date_planted),
-                      lastAssessment: tree.last_assessment ? formatDate(tree.last_assessment) : 'N/A',
+                      
                       notes: tree.notes || 'No additional notes.',
                     };
 

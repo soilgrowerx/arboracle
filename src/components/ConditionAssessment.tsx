@@ -15,6 +15,9 @@ export interface ConditionChecklistData {
   canopy_health: string[];
   pests_diseases: string[];
   site_conditions: string[];
+  arborist_summary: string;
+  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
+  notes?: { [key: string]: string };
 }
 
 export interface ConditionAssessmentProps {
@@ -28,10 +31,13 @@ const ConditionAssessment: React.FC<ConditionAssessmentProps> = ({ value, onChan
   const [healthStatus, setHealthStatus] = useState(value.health_status || undefined);
 
   const handleCheckboxChange = (category: keyof ConditionChecklistData, item: string, checked: boolean) => {
-    const updatedCategory = checked
-      ? [...value[category], item]
-      : value[category].filter((i) => i !== item);
-    onChange({ ...value, [category]: updatedCategory });
+    if (Array.isArray(value[category])) {
+      const currentCategory = value[category] as string[];
+      const updatedCategory = checked
+        ? [...currentCategory, item]
+        : currentCategory.filter((i) => i !== item);
+      onChange({ ...value, [category]: updatedCategory });
+    }
   };
 
   const handleSummaryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -40,8 +46,9 @@ const ConditionAssessment: React.FC<ConditionAssessmentProps> = ({ value, onChan
   };
 
   const handleHealthStatusChange = (status: string) => {
-    setHealthStatus(status);
-    onChange({ ...value, health_status: status });
+    const newStatus: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead' | undefined = status === '' ? undefined : status as 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
+    setHealthStatus(newStatus);
+    onChange({ ...value, health_status: newStatus });
   };
 
   const checklistItems = {
@@ -88,7 +95,7 @@ const ConditionAssessment: React.FC<ConditionAssessmentProps> = ({ value, onChan
                   <div key={item} className="flex items-center space-x-2">
                     <Checkbox
                       id={`${category}-${item}`}
-                      checked={value[category as keyof ConditionChecklistData]?.includes(item)}
+                                            checked={(value[category as keyof ConditionChecklistData] as string[]).includes(item)}
                       onCheckedChange={(checked) =>
                         handleCheckboxChange(category as keyof ConditionChecklistData, item, checked as boolean)
                       }

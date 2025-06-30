@@ -40,7 +40,15 @@ export interface Tree {
   seed_source?: string;
   nursery_stock_id?: string;
   // Genesis Sprint IV: Structured condition assessment (replaces condition_notes)
-  condition_assessment?: ConditionAssessment;
+  condition_assessment?: {
+    structure: string[];
+    canopy_health: string[];
+    pests_diseases: string[];
+    site_conditions: string[];
+    arborist_summary: string;
+    health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
+    notes?: { [key: string]: string };
+  };
   // Legacy field for backward compatibility (will be migrated)
   condition_notes?: string;
   management_actions?: string[];
@@ -140,7 +148,10 @@ export interface ConditionChecklistData {
 }
 
 export interface ConditionAssessment {
-  checklist: ConditionChecklistData;
+  structure: string[];
+  canopy_health: string[];
+  pests_diseases: string[];
+  site_conditions: string[];
   arborist_summary: string;
   health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
   notes?: { [key: string]: string }; // Key is "category-item", value is the note

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import dynamic from 'next/dynamic';
+
 import { TreeFormData, Tree } from '@/types/tree';
 import { TreeService } from '@/services/treeService';
 import { iNaturalistService } from '@/services/inaturalistService';
@@ -25,10 +25,28 @@ import { TaxonomyBreadcrumb } from '@/components/TaxonomicDisplay';
 import ConditionAssessment from '@/components/ConditionAssessment';
 import { convertLength, getUnitLabels } from '@/lib/unitConverter';
 
-// Dynamically import map components to avoid SSR issues
-import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
-import { StandaloneSearchBox } from '@react-google-maps/api';
-import { InfoWindow } from '@react-google-maps/api';
+
+
+const SimpleMapView = ({ lat, lng, onLocationSelect }: { 
+  lat: number; 
+  lng: number; 
+  onLocationSelect?: (lat: number, lng: number) => void 
+}) => {
+  return (
+    <div className="w-full h-64 border rounded">
+      <iframe
+        width="100%"
+        height="100%"
+        frameBorder="0"
+        src={`https://www.google.com/maps/embed/v1/view?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&center=${lat},${lng}&zoom=15`}
+        allowFullScreen
+      />
+      <p className="text-sm text-gray-500 mt-2">
+        Click to set location: {lat.toFixed(6)}, {lng.toFixed(6)}
+      </p>
+    </div>
+  );
+};
 
 interface AddTreeModalProps {
   onTreeAdded?: () => void;
@@ -44,70 +62,9 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
   const [open, setOpen] = useState(false);
   const { toast } = useToast(); // Moved to the top
 
-  const { isLoaded } = useLoadScript({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
-  });
+  
 
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null);
-
-  const onMapLoad = useCallback(function callback(map: google.maps.Map) {
-    mapRef.current = map;
-  }, []);
-
-  const onMapUnmount = useCallback(function callback(map: google.maps.Map) {
-    mapRef.current = null;
-  }, []);
-
-  const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-    if (e.latLng) {
-      setFormData(prev => ({
-        ...prev,
-        location: { lat: e.latLng!.lat(), lng: e.latLng!.lng() }
-      }));
-      toast({
-        title: "Location Selected",
-        description: `Coordinates set to ${e.latLng!.lat().toFixed(6)}, ${e.latLng!.lng().toFixed(6)}`,
-      });
-    }
-  }, [toast]);
-
-  const onMarkerDragEnd = useCallback((e: google.maps.MapMouseEvent) => {
-    if (e.latLng) {
-      setFormData(prev => ({
-        ...prev,
-        location: { ...prev.location, lat: e.latLng!.lat(), lng: e.latLng!.lng() }
-      }));
-      toast({
-        title: "Location Updated",
-        description: `Coordinates updated to ${e.latLng!.lat().toFixed(6)}, ${e.latLng!.lng().toFixed(6)}`,
-      });
-    }
-  }, [toast]);
-
-  const onPlacesChanged = useCallback(() => {
-    if (searchBoxRef.current) {
-      const places = searchBoxRef.current.getPlaces();
-      if (places && places.length > 0) {
-        const place = places[0];
-        if (place.geometry && place.geometry.location) {
-          setFormData(prev => ({
-            ...prev,
-            location: { lat: place.geometry!.location!.lat(), lng: place.geometry!.location!.lng() }
-          }));
-          if (mapRef.current) {
-            mapRef.current.panTo(place.geometry.location);
-            mapRef.current.setZoom(15);
-          }
-          toast({
-            title: "Location Found",
-            description: `Map centered on ${place.name || place.formatted_address}`,
-          });
-        }
-      }
-    }
-  }, [toast]);
+  
 
   useEffect(() => {
     if (isEditMode && editTree) {
@@ -123,14 +80,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
   const [managementActionsInput, setManagementActionsInput] = useState('');
   const [isPlanted, setIsPlanted] = useState(true); // New state for wild vs planted
 
-  const mapOptions = useMemo(() => ({
-    zoomControl: true,
-    mapTypeControl: false,
-    scaleControl: false,
-    streetViewControl: false,
-    rotateControl: false,
-    fullscreenControl: false, // Disable full-screen button on the map
-  }), []);
+  
 
   useEffect(() => {
     setIsClient(true);
@@ -167,12 +117,10 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
     seed_source: '',
     nursery_stock_id: '',
     condition_assessment: {
-      checklist: {
-        structure: [],
-        canopy_health: [],
-        pests_diseases: [],
-        site_conditions: []
-      },
+      structure: [],
+      canopy_health: [],
+      pests_diseases: [],
+      site_conditions: [],
       arborist_summary: '',
       health_status: undefined,
       notes: {}
@@ -255,12 +203,10 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
         seed_source: editTree.seed_source || '',
         nursery_stock_id: editTree.nursery_stock_id || '',
         condition_assessment: editTree.condition_assessment || {
-          checklist: {
-            structure: [],
-            canopy_health: [],
-            pests_diseases: [],
-            site_conditions: []
-          },
+          structure: [],
+          canopy_health: [],
+          pests_diseases: [],
+          site_conditions: [],
           arborist_summary: '',
           health_status: undefined,
           notes: {}
@@ -389,12 +335,10 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
           seed_source: '',
           nursery_stock_id: '',
           condition_assessment: {
-            checklist: {
-              structure: [],
-              canopy_health: [],
-              pests_diseases: [],
-              site_conditions: []
-            },
+            structure: [],
+            canopy_health: [],
+            pests_diseases: [],
+            site_conditions: [],
             arborist_summary: '',
             health_status: undefined,
             notes: {}
@@ -758,42 +702,17 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
             </div>
 
             {/* Interactive Map for Location Selection */}
-            {showLocationMap && isLoaded && (
+            {showLocationMap && (
               <div className="mt-3 sm:mt-4 border border-green-200 rounded-lg overflow-hidden">
                 <div className="bg-green-50 px-3 sm:px-4 py-2 border-b border-green-200">
-                  <p className="text-xs sm:text-sm text-green-700 font-medium">📍 Click on the map to set tree location or use search</p>
+                  <p className="text-xs sm:text-sm text-green-700 font-medium">📍 Click on the map to set tree location</p>
                 </div>
                 <div className="h-48 sm:h-64 w-full relative">
-                  <GoogleMap
-                    mapContainerStyle={{ width: '100%', height: '100%' }}
-                    center={formData.location.lat !== 0 && formData.location.lng !== 0 
-                      ? { lat: formData.location.lat, lng: formData.location.lng } 
-                      : { lat: 40.7128, lng: -74.0060 }} // Default to NYC
-                    zoom={13}
-                    onLoad={onMapLoad}
-                    onUnmount={onMapUnmount}
-                    onClick={onMapClick}
-                    options={mapOptions}
-                  >
-                    {formData.location.lat !== 0 && formData.location.lng !== 0 && (
-                      <Marker
-                        position={{ lat: formData.location.lat, lng: formData.location.lng }}
-                        draggable={true}
-                        onDragEnd={onMarkerDragEnd}
-                      />
-                    )}
-                    <StandaloneSearchBox
-                      onLoad={ref => searchBoxRef.current = ref}
-                      onPlacesChanged={onPlacesChanged}
-                    >
-                      <input
-                        type="text"
-                        placeholder="Search for a location..."
-                        className="box-border border border-gray-300 shadow-md rounded-md px-3 py-2 w-full absolute top-2 left-1/2 -translate-x-1/2 z-10 focus:outline-none focus:ring-2 focus:ring-green-500"
-                        style={{ width: 'calc(100% - 20px)', maxWidth: '400px' }}
-                      />
-                    </StandaloneSearchBox>
-                  </GoogleMap>
+                  <SimpleMapView 
+                    lat={formData.location.lat} 
+                    lng={formData.location.lng}
+                    onLocationSelect={handleMapLocationSelect}
+                  />
                 </div>
                 <div className="bg-green-50 px-3 sm:px-4 py-2 border-t border-green-200">
                   <p className="text-xs text-green-600">
@@ -862,7 +781,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="height_cm" className="text-green-700 font-medium text-sm sm:text-base">{getUnitLabels().height}</Label>
+                <Label htmlFor="height_cm" className="text-green-700 font-medium text-sm sm:text-base">{getUnitLabels(units).height}</Label>
                 <Input
                   id="height_cm"
                   type="number"
@@ -876,7 +795,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
               </div>
               
               <div>
-                <Label htmlFor="dbh_cm" className="text-green-700 font-medium text-sm sm:text-base">{getUnitLabels().dbh}</Label>
+                <Label htmlFor="dbh_cm" className="text-green-700 font-medium text-sm sm:text-base">{getUnitLabels(units).dbh}</Label>
                 <Input
                   id="dbh_cm"
                   type="number"
@@ -927,7 +846,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
             {formData.is_multi_stem && (
               <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
                 <Label className="text-green-700 font-medium text-sm mb-2 block">
-                  {getUnitLabels().stemDiameters}
+                  {getUnitLabels(units).stemDiameters}
                 </Label>
                 <Input
                   type="text"
@@ -999,7 +918,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
               <div>
                 <Label htmlFor="canopy_spread_ns" className="text-green-700 font-medium text-sm sm:text-base">
-                  {getUnitLabels().canopyNS}
+                  {getUnitLabels(units).canopyNS}
                 </Label>
                 <Input
                   id="canopy_spread_ns"
@@ -1015,7 +934,7 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
               
               <div>
                 <Label htmlFor="canopy_spread_ew" className="text-green-700 font-medium text-sm sm:text-base">
-                  {getUnitLabels().canopyEW}
+                  {getUnitLabels(units).canopyEW}
                 </Label>
                 <Input
                   id="canopy_spread_ew"
