@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { atomOneDark } from 'react-syntax-highlighter/dist/styles/prism/atom-one-dark';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -74,15 +73,7 @@ export default function ContributePage() {
             remarkPlugins={[remarkGfm]}
             components={{
               code({node, inline, className, children, ...props}: React.HTMLAttributes<HTMLElement> & { inline?: boolean; node?: any; }) {
-                const match = /language-(\w+)/.exec(className || '')
-                return !inline && match ? (
-                  <SyntaxHighlighter
-                    {...props}
-                    style={atomOneDark}
-                    language={match[1]}
-                    PreTag="div"
-                  >{String(children).replace(/\n$/, '')}</SyntaxHighlighter>
-                ) : (
+                return (
                   <code {...props} className={className}>
                     {children}
                   </code>
