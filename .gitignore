@@ -43,3 +43,6 @@ next-env.d.ts
 # SSH keys and sensitive files
 .ssh/
 id_rsa
+
+# Agent-specific files
+command_history.md
