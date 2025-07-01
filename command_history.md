@@ -16,6 +16,9 @@ This document summarizes the commands executed during our interaction, categoriz
 *   **`git pull`**
     *   **Purpose:** Fetches and integrates changes from a remote repository into the current branch.
     *   **Context:** Attempted to pull changes from the Namecheap server, but consistently failed due to SSH connection issues.
+*   **`git stash`**
+    *   **Purpose:** Temporarily saves changes that are not ready to be committed, allowing you to switch branches or pull new changes.
+    *   **Context:** Used on the remote server to temporarily save local modifications to `package.json` before pulling new changes.
 
 ## File System Operations
 
@@ -31,6 +34,12 @@ This document summarizes the commands executed during our interaction, categoriz
 *   **`rm -rf .next node_modules/.cache .turbo`**
     *   **Purpose:** Removes directories and their contents recursively and forcefully.
     *   **Context:** Used to clear Next.js build caches and temporary files to ensure a clean build.
+*   **`rm package-lock.json`**
+    *   **Purpose:** Removes the `package-lock.json` file.
+    *   **Context:** Used on the remote server to remove an untracked `package-lock.json` that was preventing `git pull`.
+*   **`rm -rf .next`**
+    *   **Purpose:** Removes the `.next` directory.
+    *   **Context:** Used on the remote server to clear the Next.js build cache.
 
 ## Package Management (npm)
 
@@ -61,6 +70,12 @@ This document summarizes the commands executed during our interaction, categoriz
 *   **`npm install --save-dev @types/mdast`**
     *   **Purpose:** Installs TypeScript type definitions for the `mdast` library as a development dependency.
     *   **Context:** Used to resolve a `Type error: Cannot find type definition file for 'mdast'` after the previous combined install failed.
+*   **`npm install`**
+    *   **Purpose:** Installs all dependencies listed in `package.json`.
+    *   **Context:** Used on the remote server after `git pull` to ensure all dependencies are up-to-date.
+*   **`npm cache clean --force`**
+    *   **Purpose:** Clears the npm cache forcefully.
+    *   **Context:** Used on the remote server to resolve persistent module resolution issues.
 
 ## SSH/Remote Operations
 
@@ -73,6 +88,9 @@ This document summarizes the commands executed during our interaction, categoriz
 *   **`ssh -p 12098 arbofitp@162.0.209.160 "cd /home/arbofitp/arboracle && git pull"`**
     *   **Purpose:** Attempts to connect to the remote server via SSH using the IP address and the specified port (12098), then executes a `git pull` command.
     *   **Context:** Latest attempt to sync, failed due to connection refused on the specified port.
+*   **`ssh -p 21098 arbofitp@162.0.209.160 "cd /home/arbofitp/arboracle && git pull && npm install && npm run build"`**
+    *   **Purpose:** Attempts to connect to the remote server via SSH using the IP address and the specified port (21098), then executes a sequence of commands to pull, install, and build.
+    *   **Context:** Attempt to automate the deployment process, initially failed due to permission denied.
 *   **`pkill -f next`**
     *   **Purpose:** Terminates processes whose names match 'next'.
     *   **Context:** Used to stop any running Next.js development servers or build processes that might interfere with clean builds or file operations.
@@ -85,3 +103,12 @@ This document summarizes the commands executed during our interaction, categoriz
 *   **`glob` (tool)**
     *   **Purpose:** Finds files matching specific glob patterns.
     *   **Context:** Not explicitly used in the provided conversation history, but is a general utility for file discovery.
+*   **`ls -F node_modules/react-syntax-highlighter/dist/esm/styles/prism/`**
+    *   **Purpose:** Lists the contents of a specific directory within `node_modules`.
+    *   **Context:** Used to verify the exact path of `atom-dark.js` on the local machine.
+*   **`cd /home/arbofitp/public_html/arboracle/node_modules/react-syntax-highlighter/dist/styles/`**
+    *   **Purpose:** Navigates to a specific directory on the remote server.
+    *   **Context:** Used to investigate the actual location of `react-syntax-highlighter` styles on the Namecheap server.
+*   **`ls -F` (after navigating to a directory)**
+    *   **Purpose:** Lists the contents of the current directory.
+    *   **Context:** Used repeatedly to explore directory structures and confirm file presence on both local and remote systems.
