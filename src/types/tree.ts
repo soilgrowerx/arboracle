@@ -25,6 +25,9 @@ export interface Tree {
   lng: number;
   plus_code_global: string;
   plus_code_local: string;
+  plus_code_precise?: string; // Up to 15 characters for extreme accuracy
+  tree_address?: string; // Human-readable tree address
+  soil_responsibility_area?: number; // Area in square meters
   date_planted: string;
   notes?: string;
   images: string[];
