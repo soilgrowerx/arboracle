@@ -1,108 +1,113 @@
+
 'use client';
 
-import React from 'react';
-import { Tree } from '@/types/tree';
+import { Tree } from '@/types/tree'; // Updated import
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Leaf, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Gauge, Leaf, MessageSquare } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+import { AiPersonaService } from '@/services/AiPersonaService';
 
 interface ForestHealthScoreProps {
   trees: Tree[];
-  aiPersona: string;
+  aiPersona: string; // This will now be the persona ID
   treeCount: number;
 }
 
-const ForestHealthScore: React.FC<ForestHealthScoreProps> = ({ trees, aiPersona, treeCount }) => {
-  // Calculate health score based on tree conditions
-  const calculateHealthScore = () => {
-    if (trees.length === 0) return 0;
-    
-    const healthValues = {
-      'Excellent': 100,
-      'Good': 80,
-      'Fair': 60,
-      'Poor': 40,
-      'Dead': 0
-    };
-    
-    const totalScore = trees.reduce((sum, tree) => {
-      const status = tree.condition_assessment?.health_status || 'Fair';
-      return sum + (healthValues[status] || 60);
-    }, 0);
-    
-    return Math.round(totalScore / trees.length);
-  };
+export function ForestHealthScore({ trees, aiPersona, treeCount }: ForestHealthScoreProps) {
+  const [healthScore, setHealthScore] = useState(0);
+  const [healthMessage, setHealthMessage] = useState('');
+  const [currentPersona, setCurrentPersona] = useState<AiPersona | null>(null);
 
-  const healthScore = calculateHealthScore();
-  
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+  useEffect(() => {
+    setCurrentPersona(AiPersonaService.getPersonaById(aiPersona) || AiPersonaService.getDefaultPersona());
+  }, [aiPersona]);
 
-  const getScoreIcon = (score: number) => {
-    if (score >= 80) return CheckCircle;
-    if (score >= 60) return TrendingUp;
-    return AlertTriangle;
-  };
+  useEffect(() => {
+    if (treeCount === 0) {
+      setHealthScore(100); // Perfect score if no trees
+      setHealthMessage(currentPersona?.initialPrompt || 'Add trees to start assessing your forest health!');
+      return;
+    }
 
-  const ScoreIcon = getScoreIcon(healthScore);
+    let totalScore = 0;
+    let maxPossibleScore = 0;
+
+    trees.forEach(tree => {
+      // Each tree contributes to the overall score
+      // Max score for a tree could be 100, reduced by issues
+      let treeCurrentScore = 100;
+      maxPossibleScore += 100;
+
+      if (tree.conditionAssessment) {
+        const assessment = tree.conditionAssessment;
+
+        // Penalize for each true boolean in standard assessment sections
+        Object.values(assessment.structure).forEach(val => {
+          if (typeof val === 'boolean' && val) treeCurrentScore -= 5; // Small penalty
+        });
+        Object.values(assessment.canopyHealth).forEach(val => {
+          if (typeof val === 'boolean' && val) treeCurrentScore -= 7; // Medium penalty
+        });
+        Object.values(assessment.pestsDiseases).forEach(val => {
+          if (typeof val === 'boolean' && val) treeCurrentScore -= 10; // Larger penalty
+        });
+        Object.values(assessment.siteConditions).forEach(val => {
+          if (typeof val === 'boolean' && val) treeCurrentScore -= 5; // Small penalty
+        });
+
+        // Penalize for construction monitoring issues if present
+        if (assessment.tpzFencing && assessment.tpzFencing !== 'good_condition') treeCurrentScore -= 10;
+        if (assessment.tpzIncursions && assessment.tpzIncursions !== 'none') treeCurrentScore -= 15;
+        if (assessment.tpzMulch && assessment.tpzMulch !== 'adequate') treeCurrentScore -= 5;
+        if (assessment.crzImpacts) {
+          Object.values(assessment.crzImpacts).forEach(val => {
+            if (val) treeCurrentScore -= 10;
+          });
+        }
+        if (assessment.overallCondition && (assessment.overallCondition === 'poor' || assessment.overallCondition === 'dead')) treeCurrentScore -= 20;
+        if (assessment.canopyDensity && assessment.canopyDensity === 'sparse') treeCurrentScore -= 10;
+        if (assessment.canopyColor && (assessment.canopyColor === 'chlorotic' || assessment.canopyColor === 'necrotic')) treeCurrentScore -= 10;
+        if (assessment.canopyDieback && (assessment.canopyDieback === 'moderate' || assessment.canopyDieback === 'severe')) treeCurrentScore -= 15;
+      }
+
+      totalScore += Math.max(0, treeCurrentScore); // Ensure score doesn't go below 0
+    });
+
+    const calculatedScore = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
+    setHealthScore(calculatedScore);
+
+    // Generate message based on score and AI persona
+    let message = '';
+    if (calculatedScore >= 80) {
+      message = `Your forest is thriving! ${currentPersona?.name || ''} is impressed with its vitality.`;
+    } else if (calculatedScore >= 50) {
+      message = `Good progress! ${currentPersona?.name || ''} suggests reviewing some trees for potential improvements.`;
+    } else {
+      message = `Attention needed. ${currentPersona?.name || ''} recommends immediate action to improve forest health.`;
+    }
+    setHealthMessage(message);
+
+  }, [trees, currentPersona, treeCount]);
 
   return (
-    <Card className="dashboard-card-enhanced">
-      <CardHeader>
-        <CardTitle className="text-green-800 flex items-center gap-2">
-          <Leaf className="h-5 w-5" />
-          Forest Health Score
+    <Card className="dashboard-card-enhanced h-full flex flex-col">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-bold text-green-800 flex items-center gap-2">
+          <Gauge className="h-5 w-5 text-green-600" /> Forest Health Score
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="text-center">
-          <div className={`text-4xl font-bold ${getScoreColor(healthScore)} flex items-center justify-center gap-2`}>
-            <ScoreIcon className="h-8 w-8" />
-            {healthScore}
-          </div>
-          <p className="text-sm text-gray-600 mt-1">Overall Health Score</p>
+      <CardContent className="flex-grow flex flex-col justify-between pt-4">
+        <div className="text-center mb-4">
+          <p className="text-5xl font-bold text-green-700">{healthScore}%</p>
+          <Progress value={healthScore} className="w-full mt-2" />
         </div>
-        
-        <Progress value={healthScore} className="h-3" />
-        
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="text-center p-2 bg-green-50 rounded">
-            <div className="font-semibold text-green-700">{treeCount}</div>
-            <div className="text-green-600">Total Trees</div>
-          </div>
-          <div className="text-center p-2 bg-blue-50 rounded">
-            <div className="font-semibold text-blue-700">
-              {trees.filter(t => t.condition_assessment?.health_status === 'Excellent' || t.condition_assessment?.health_status === 'Good').length}
-            </div>
-            <div className="text-blue-600">Healthy Trees</div>
-          </div>
+        <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <MessageSquare className="h-4 w-4 flex-shrink-0" />
+          <p className="italic">{healthMessage}</p>
         </div>
-
-        <div className="pt-3 border-t">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">AI Persona:</span>
-            <Badge variant="outline" className="text-green-600">
-              {aiPersona}
-            </Badge>
-          </div>
-        </div>
-
-        {healthScore < 60 && (
-          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">
-              <AlertTriangle className="h-4 w-4 inline mr-1" />
-              Forest health needs attention. Consider professional assessment.
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
-};
-
-export { ForestHealthScore };
-export default ForestHealthScore;
+}

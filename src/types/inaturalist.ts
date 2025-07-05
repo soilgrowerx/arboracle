@@ -1,3 +1,19 @@
+export interface INaturalistTaxon {
+    id: number;
+    name: string;
+    rank: string;
+    preferred_common_name?: string;
+    default_photo?: {
+        square_url: string;
+        attribution: string;
+    };
+    ancestors?: INaturalistTaxon[];
+}
+
+export interface INaturalistSearchResponse {
+    results: { taxon: INaturalistTaxon }[];
+}
+
 export interface iNaturalistObservation {
   id: number;
   species_guess: string;

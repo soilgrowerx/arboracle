@@ -14,8 +14,8 @@ export interface KnowledgeArticle {
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   estimatedReadTime: number; // in minutes
   featuredImage?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   isVerified: boolean; // Verified by experts
   sources?: string[]; // External references
 }
@@ -36,7 +36,7 @@ export interface KnowledgeComment {
   content: string;
   upvotes: number;
   downvotes: number;
-  created_at: string;
+  createdAt: string;
   isExpert: boolean;
 }
 
@@ -64,7 +64,7 @@ export interface BodhiQuery {
   relatedArticles: string[]; // Article IDs that might be relevant
   aiResponse?: string; // Future AI response
   confidence?: number; // AI confidence in response
-  created_at: string;
+  createdAt: string;
   isAnswered: boolean;
   category?: string;
 }

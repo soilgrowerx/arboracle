@@ -28,8 +28,8 @@ export interface Tree {
   date_planted: string;
   notes?: string;
   images: string[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   scientificName?: string;
   commonName?: string;
   taxonomicRank?: string;
@@ -78,8 +78,8 @@ export interface EcosystemSpecies {
   iNaturalistId?: number;
   isVerified: boolean;
   photos?: EnhancedPhoto[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type EcosystemCategory = 

@@ -18,65 +18,63 @@ export interface TaxonomicHierarchy {
   form?: string;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  address: string;
+  client: string;
+}
+
+export interface NurseryItem {
+  id: string;
+  name: string;
+  species: string;
+  quantity: number;
+  price: number; // per unit
+  projectAssociation?: string; // Optional: Link to a project
+  notes?: string;
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Tree {
   id: string;
   species: string;
-  lat: number;
-  lng: number;
-  plus_code_global: string;
-  plus_code_local: string;
-  plus_code_precise?: string; // Up to 15 characters for extreme accuracy
-  tree_address?: string; // Human-readable tree address
-  soil_responsibility_area?: number; // Area in square meters
-  date_planted: string;
-  notes?: string;
-  images: string[];
-  created_at: string;
-  updated_at: string;
+  commonName: string;
+  generalNotes?: string;
+  latitude: number;
+  longitude: number;
+  plusCode: string;
+  height: number;
+  dbh: number;
+  multiStem: boolean;
+  individualStemDiameters?: string;
+  canopySpreadNS: number;
+  canopySpreadEW: number;
+  projectAssociation: string;
+  conditionAssessment?: ConditionAssessment;
+  managementActions?: string;
+  photos: string[]; // Base64 encoded image strings
+  plantedDate: string; // ISO date string
+  createdAt?: string;
+  updatedAt?: string;
   scientificName?: string;
-  commonName?: string;
   taxonomicRank?: string;
   iNaturalistId?: number;
-  // Full taxonomic hierarchy for scientific rigor
   taxonomy?: TaxonomicHierarchy;
-  // Enhanced forestry management fields
-  seed_source?: string;
-  nursery_stock_id?: string;
-  // Genesis Sprint IV: Structured condition assessment (replaces condition_notes)
-  condition_assessment?: {
-    structure: string[];
-    canopy_health: string[];
-    pests_diseases: string[];
-    site_conditions: string[];
-    arborist_summary: string;
-    health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
-    notes?: { [key: string]: string };
-  };
-  // Legacy field for backward compatibility (will be migrated)
-  condition_notes?: string;
-  management_actions?: string[];
-  iNaturalist_link?: string;
-  verification_status: 'verified' | 'manual' | 'pending';
-  // Enhanced species data from iNaturalist
+  seedSource?: string;
+  nurseryStockId?: string;
+  iNaturalistLink?: string;
+  verificationStatus: 'verified' | 'manual' | 'pending';
   description?: string;
-  distribution_info?: string;
-  conservation_status?: string;
-  photos?: EnhancedPhoto[];
-  // Tree Ecosystem Management
+  distributionInfo?: string;
+  conservationStatus?: string;
   ecosystemSpecies?: EcosystemSpecies[];
-  // Associated ecosystem species
-  associated_species?: AssociatedSpecies[];
-  // Professional arborist fields for Genesis Sprint III
-  land_owner?: string;
-  site_name?: string;
-  height_cm?: number;
-  dbh_cm?: number; // Diameter at Breast Height
-  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
-  // Genesis Sprint IV: Advanced Measurements
-  is_multi_stem?: boolean;
-  stem_diameters?: number[]; // Array of individual stem measurements in cm
-  canopy_spread_ns?: number; // North-South canopy spread in meters
-  canopy_spread_ew?: number; // East-West canopy spread in meters
+  associatedSpecies?: AssociatedSpecies[];
+  landOwner?: string;
+  siteName?: string;
+  healthStatus?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
 }
 
 export interface EnhancedPhoto {
@@ -117,8 +115,8 @@ export interface EcosystemSpecies {
   iNaturalistId?: number;
   isVerified: boolean;
   photos?: EnhancedPhoto[];
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type EcosystemCategory = 
@@ -151,49 +149,52 @@ export interface ConditionChecklistData {
 }
 
 export interface ConditionAssessment {
-  structure: string[];
-  canopy_health: string[];
-  pests_diseases: string[];
-  site_conditions: string[];
-  arborist_summary: string;
-  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
-  notes?: { [key: string]: string }; // Key is "category-item", value is the note
+  structure: {
+    codominantStems: boolean;
+    includedBark: boolean;
+    decay: boolean;
+    cracks: boolean;
+    previousFailure: boolean;
+    rootProblems: boolean;
+    notes: Record<string, string>;
+  };
+  canopyHealth: {
+    leafDiscoloration: boolean;
+    pestDisease: boolean;
+    canopyDieback: boolean;
+    thinning: boolean;
+    notes: Record<string, string>;
+  };
+  pestsDiseases: {
+    aphids: boolean;
+    borers: boolean;
+    fungus: boolean;
+    cankers: boolean;
+    notes: Record<string, string>;
+  };
+  siteConditions: {
+    soilCompaction: boolean;
+    drainageIssues: boolean;
+    girdlingRoots: boolean;
+    constructionImpact: boolean;
+    notes: Record<string, string>;
+  };
+  // For construction monitoring
+  tpzFencing?: 'good_condition' | 'not_installed' | 'damaged' | 'breached';
+  tpzIncursions?: 'none' | 'partial' | 'significant';
+  tpzMulch?: 'adequate' | 'inadequate' | 'none';
+  crzImpacts?: {
+    rootSeverance: boolean;
+    soilCompaction: boolean;
+    gradeChange: boolean;
+    chemicalSpill: boolean;
+  };
+  overallCondition?: 'excellent' | 'good' | 'fair' | 'poor' | 'dead';
+  canopyDensity?: 'dense' | 'moderate' | 'sparse';
+  canopyColor?: 'normal' | 'chlorotic' | 'necrotic';
+  canopyDieback?: 'none' | 'minor' | 'moderate' | 'severe';
+  canopyImpactNotes?: string;
+  specificNotes?: string;
+  recommendedAction?: string;
 }
 
-export interface TreeFormData {
-  species: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
-  date_planted: string;
-  notes?: string;
-  images: string[];
-  scientificName?: string;
-  commonName?: string;
-  taxonomicRank?: string;
-  iNaturalistId?: number;
-  // Full taxonomic hierarchy for scientific rigor
-  taxonomy?: TaxonomicHierarchy;
-  // Enhanced forestry management fields
-  seed_source?: string;
-  nursery_stock_id?: string;
-  // Genesis Sprint IV: Structured condition assessment (replaces condition_notes)
-  condition_assessment?: ConditionAssessment;
-  management_actions?: string[];
-  iNaturalist_link?: string;
-  verification_status?: 'verified' | 'manual' | 'pending';
-  // Associated ecosystem species
-  associated_species?: AssociatedSpecies[];
-  // Professional arborist fields for Genesis Sprint III
-  land_owner?: string;
-  site_name?: string;
-  height_cm?: number;
-  dbh_cm?: number; // Diameter at Breast Height
-  health_status?: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead';
-  // Genesis Sprint IV: Advanced Measurements
-  is_multi_stem?: boolean;
-  stem_diameters?: number[]; // Array of individual stem measurements in cm
-  canopy_spread_ns?: number; // North-South canopy spread in meters
-  canopy_spread_ew?: number; // East-West canopy spread in meters
-}
