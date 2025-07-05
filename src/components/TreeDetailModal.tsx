@@ -3,7 +3,11 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tree } from '@/types/tree';
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
+const format = (date: string | Date, formatStr: string) => {
+  const d = new Date(date);
+  return d.toLocaleDateString();
+};
 import { calculateTreeAge } from '@/lib/utils';
 import { UnitService, UnitSystem } from '@/services/unitService';
 
