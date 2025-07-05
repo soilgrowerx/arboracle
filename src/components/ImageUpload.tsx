@@ -20,8 +20,10 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const [images, setImages] = useState<string[]>(initialImages);
 
   useEffect(() => {
-    setImages(initialImages);
-  }, [initialImages]);
+    if (JSON.stringify(images) !== JSON.stringify(initialImages)) {
+      setImages(initialImages);
+    }
+  }, [initialImages]); // Removed images from dependency to prevent infinite loop
 
   const handleImageChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;

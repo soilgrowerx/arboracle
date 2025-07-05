@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tree } from '@/types/tree';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,12 @@ export default function Home() {
   const [aiPersona, setAiPersona] = useState('Bodhi');
   const [isAddTreeModalOpen, setIsAddTreeModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [isClient, setIsClient] = useState(false);
+
+  // Fix hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Mock data for demonstration
   const mockTrees: Tree[] = [
