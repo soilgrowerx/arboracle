@@ -45,29 +45,14 @@ export class EcosystemService {
   /**
    * Add new ecosystem species to a tree
    */
-  static addEcosystemSpecies(treeId: string, formData: EcosystemSpeciesFormData): EcosystemSpecies {
+  static addEcosystemSpecies(newSpecies: EcosystemSpecies): EcosystemSpecies {
     const allSpecies = this.getAllEcosystemSpecies();
     
-    const newSpecies: EcosystemSpecies = {
-      id: uuidv4(),
-      treeId,
-      speciesName: formData.speciesName,
-      scientificName: formData.scientificName,
-      category: formData.category,
-      relationship: formData.relationship,
-      observationDate: formData.observationDate,
-      notes: formData.notes,
-      iNaturalistId: formData.iNaturalistId,
-      isVerified: formData.isVerified || !!formData.iNaturalistId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
     allSpecies.push(newSpecies);
     this.saveEcosystemSpecies(allSpecies);
     
     // Update the tree's ecosystem species array
-    this.updateTreeEcosystemSpecies(treeId);
+    this.updateTreeEcosystemSpecies(newSpecies.treeId);
     
     return newSpecies;
   }

@@ -1,121 +1,49 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-
-import { TreeFormData, Tree } from '@/types/tree';
-import { TreeService } from '@/services/treeService';
-import { iNaturalistService } from '@/services/inaturalistService';
-import { PlusCodeService } from '@/services/plusCodeService';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { Plus, Search, MapPin, Map } from 'lucide-react';
-import Image from 'next/image';
-import { TaxonomyBreadcrumb } from '@/components/TaxonomicDisplay';
-import ConditionAssessment from '@/components/ConditionAssessment';
-import { convertLength, getUnitLabels } from '@/lib/unitConverter';
+import { Tree, ConditionChecklistData } from '@/types/tree';
+import { TreeService } from '@/services/treeService';
+import { generatePlusCode } from '@/lib/utils';
 
-
-
-const SimpleMapView = ({ lat, lng, onLocationSelect }: { 
-  lat: number; 
-  lng: number; 
-  onLocationSelect?: (lat: number, lng: number) => void 
-}) => {
-  return (
-    <div className="w-full h-64 border rounded">
-      <iframe
-        width="100%"
-        height="100%"
-        frameBorder="0"
-        src={`https://www.google.com/maps/embed/v1/view?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&center=${lat},${lng}&zoom=15`}
-        allowFullScreen
-      />
-      <p className="text-sm text-gray-500 mt-2">
-        Click to set location: {lat.toFixed(6)}, {lng.toFixed(6)}
-      </p>
-    </div>
-  );
-};
+import { Plus } from 'lucide-react';
+import { LocationPickerMap } from './LocationPickerMap';
+import { useRouter } from 'next/navigation';
+import { ImageUpload } from './ImageUpload';
+import { ConditionAssessmentForm } from './ConditionAssessmentForm';
+import { UnitService, UnitSystem } from '@/services/unitService';
 
 interface AddTreeModalProps {
-  onTreeAdded?: () => void;
+  onTreeAdded: () => void;
   editTree?: Tree;
   isEditMode?: boolean;
-  isFullScreen?: boolean; // Add isFullScreen prop
-  onClose?: () => void;
 }
 
-
-
-export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFullScreen }: AddTreeModalProps) {
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast(); // Moved to the top
-
-  
-
-  
-
-  useEffect(() => {
-    if (isEditMode && editTree) {
-      setOpen(true);
-    }
-  }, [isEditMode, editTree]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showLocationMap, setShowLocationMap] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [managementActionsInput, setManagementActionsInput] = useState('');
-  const [isPlanted, setIsPlanted] = useState(true); // New state for wild vs planted
-
-  
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  
-  const [stemDiametersInput, setStemDiametersInput] = useState('');
-  const [units, setUnits] = useState<'metric' | 'imperial'>('metric'); // Track user's unit preference
-
-  // Load unit preference from localStorage
-  useEffect(() => {
-    try {
-      const savedSettings = localStorage.getItem('arboracle_user_settings');
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        setUnits(settings.preferences?.units || 'metric');
-      }
-    } catch (error) {
-      console.error('Error loading unit preference:', error);
-    }
-  }, []);
-
-  const [formData, setFormData] = useState<TreeFormData>({
+export const AddTreeModal: React.FC<AddTreeModalProps> = ({ onTreeAdded, editTree, isEditMode = false }) => {
+  const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState<Tree>({
+    id: '',
     species: '',
-    location: { lat: 0, lng: 0 },
-    date_planted: '',
-    notes: '',
-    images: [],
-    scientificName: undefined,
-    commonName: undefined,
-    taxonomicRank: undefined,
-    iNaturalistId: undefined,
-    taxonomy: undefined,
-    seed_source: '',
-    nursery_stock_id: '',
+    commonName: '',
+    scientificName: '',
+    lat: 0,
+    lng: 0,
+    plus_code_global: '',
+    plus_code_local: '',
+    date_planted: new Date().toISOString().split('T')[0],
+    height_cm: 0,
+    dbh_cm: 0,
+    is_multi_stem: false,
+    individual_stem_diameters_cm: '',
+    canopy_spread_ns_cm: 0,
+    canopy_spread_ew_cm: 0,
     condition_assessment: {
       structure: [],
       canopy_health: [],
@@ -123,85 +51,43 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
       site_conditions: [],
       arborist_summary: '',
       health_status: undefined,
-      notes: {}
+      notes: {},
     },
     management_actions: [],
-    iNaturalist_link: '',
+    seed_source: '',
+    nursery_stock_id: '',
     verification_status: 'pending',
-    associated_species: [],
-    land_owner: '',
-    site_name: '',
-    height_cm: undefined,
-    dbh_cm: undefined,
-    health_status: undefined
+    notes: '',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    iNaturalistId: '',
+    project_id: '', // New field for project association
   });
+  const [dbhInput, setDbhInput] = useState('');
+  const [individualStemDiametersInput, setIndividualStemDiametersInput] = useState('');
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>(UnitService.getPreferredUnitSystem());
+  const router = useRouter();
 
-  // Handle image upload from camera or gallery
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    const newImages: string[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file.type.startsWith('image/')) {
-        newImages.push(URL.createObjectURL(file)); // Create object URL for immediate preview
-      }
+  useEffect(() => {
+    // Check for selected location from map page
+    const storedLocation = localStorage.getItem('selectedMapLocation');
+    if (storedLocation) {
+      const { lat, lng } = JSON.parse(storedLocation);
+      handleLocationSelect(lat, lng);
+      localStorage.removeItem('selectedMapLocation'); // Clean up
     }
-
-    setFormData(prev => ({
-      ...prev,
-      images: [...(prev.images || []), ...newImages]
-    }));
-
-    // In a real application, you would upload these files to a server here.
-    // For now, we'll just simulate the upload and then clear the object URLs.
-    toast({
-      title: "Images selected",
-      description: `${newImages.length} image(s) ready for upload on save.`,
-    });
-
-    // Simulate server upload and replace object URLs with actual image URLs if needed
-    // For this example, we'll just keep the object URLs for display.
-    // In a real app, you'd get URLs from your /api/upload endpoint and update formData.images
-  };
+  }, []);
 
   useEffect(() => {
     if (isEditMode && editTree) {
-      const managementActions = editTree.management_actions || [];
-      
-      // Convert stored metric values to display units based on user preference
-      const displayHeight = editTree.height_cm !== undefined 
-        ? convertLength(editTree.height_cm, 'cm', units === 'imperial' ? 'ft' : 'cm') 
-        : undefined;
-      const displayDbh = editTree.dbh_cm !== undefined 
-        ? convertLength(editTree.dbh_cm, 'cm', units === 'imperial' ? 'in' : 'cm') 
-        : undefined;
-      const displayCanopyNS = editTree.canopy_spread_ns !== undefined 
-        ? convertLength(editTree.canopy_spread_ns, 'm', units === 'imperial' ? 'ft' : 'm') 
-        : undefined;
-      const displayCanopyEW = editTree.canopy_spread_ew !== undefined 
-        ? convertLength(editTree.canopy_spread_ew, 'm', units === 'imperial' ? 'ft' : 'm') 
-        : undefined;
-      
-      // Convert stored stem diameters to display units
-      const displayStemDiameters = editTree.stem_diameters?.map(d => 
-        convertLength(d, 'cm', units === 'imperial' ? 'in' : 'cm')
-      ).join(', ') || '';
+      const currentUnitSystem = UnitService.getPreferredUnitSystem();
+      setUnitSystem(currentUnitSystem);
 
       setFormData({
-        species: editTree.species,
-        location: { lat: editTree.lat, lng: editTree.lng },
-        date_planted: editTree.date_planted,
-        notes: editTree.notes,
-        images: editTree.images,
-        scientificName: editTree.scientificName,
-        commonName: editTree.commonName,
-        taxonomicRank: editTree.taxonomicRank,
-        iNaturalistId: editTree.iNaturalistId,
-        taxonomy: editTree.taxonomy,
-        seed_source: editTree.seed_source || '',
-        nursery_stock_id: editTree.nursery_stock_id || '',
+        ...editTree,
+        date_planted: editTree.date_planted ? new Date(editTree.date_planted).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        created_at: editTree.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         condition_assessment: editTree.condition_assessment || {
           structure: [],
           canopy_health: [],
@@ -209,967 +95,416 @@ export function AddTreeModal({ onTreeAdded, editTree, isEditMode = false, isFull
           site_conditions: [],
           arborist_summary: '',
           health_status: undefined,
-          notes: {}
+          notes: {},
         },
-        management_actions: managementActions,
-        iNaturalist_link: editTree.iNaturalist_link || '',
-        verification_status: editTree.verification_status || 'pending',
-        associated_species: editTree.associated_species || [],
-        land_owner: editTree.land_owner || '',
-        site_name: editTree.site_name || '',
-        height_cm: displayHeight,
-        dbh_cm: displayDbh,
-        health_status: editTree.health_status,
-        is_multi_stem: editTree.is_multi_stem,
-        stem_diameters: editTree.stem_diameters
+        management_actions: editTree.management_actions || [],
+        height_cm: currentUnitSystem === 'imperial' && editTree.height_cm ? UnitService.convertCmToIn(editTree.height_cm) : editTree.height_cm,
+        dbh_cm: currentUnitSystem === 'imperial' && editTree.dbh_cm ? UnitService.convertCmToIn(editTree.dbh_cm) : editTree.dbh_cm,
+        canopy_spread_ns_cm: currentUnitSystem === 'imperial' && editTree.canopy_spread_ns_cm ? UnitService.convertCmToIn(editTree.canopy_spread_ns_cm) : editTree.canopy_spread_ns_cm,
+        canopy_spread_ew_cm: currentUnitSystem === 'imperial' && editTree.canopy_spread_ew_cm ? UnitService.convertCmToIn(editTree.canopy_spread_ew_cm) : editTree.canopy_spread_ew_cm,
       });
-      setManagementActionsInput(managementActions.join(', '));
-      setIsPlanted(!!editTree.date_planted);
-      setStemDiametersInput(displayStemDiameters);
-    }
-  }, [isEditMode, editTree, units]);
-  const [errors, setErrors] = useState<string[]>([]);
-
-  const validateForm = (): string[] => {
-    const errors: string[] = [];
-    
-    if (!formData.species.trim()) {
-      errors.push('Species is required');
-    }
-
-    if (isPlanted && !formData.date_planted) {
-      errors.push('Date Planted is required for planted trees');
-    }
-    
-    // Check if coordinates are actually provided (not just default 0,0)
-    const latInput = document.getElementById('latitude') as HTMLInputElement;
-    const lngInput = document.getElementById('longitude') as HTMLInputElement;
-    
-    if (!latInput?.value || !lngInput?.value) {
-      errors.push('Location coordinates are required');
+      setDbhInput(currentUnitSystem === 'imperial' && editTree.dbh_cm ? String(UnitService.convertCmToIn(editTree.dbh_cm)) : String(editTree.dbh_cm || ''));
+      setIndividualStemDiametersInput(editTree.individual_stem_diameters_cm ? 
+        (currentUnitSystem === 'imperial' ? 
+          editTree.individual_stem_diameters_cm.split(',').map(s => UnitService.convertCmToIn(parseFloat(s.trim())).toFixed(2)).join(', ') : 
+          editTree.individual_stem_diameters_cm) : '');
     } else {
-      // Only validate ranges if values are provided
-      if (formData.location.lat < -90 || formData.location.lat > 90) {
-        errors.push('Latitude must be between -90 and 90');
-      }
-      
-      if (formData.location.lng < -180 || formData.location.lng > 180) {
-        errors.push('Longitude must be between -180 and 180');
-      }
-    }
-    
-    return errors;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const validationErrors = validateForm();
-      setErrors(validationErrors);
-      
-      if (validationErrors.length > 0) {
-        toast({
-          title: "Validation Error",
-          description: validationErrors.join(', '),
-          variant: "destructive"
-        });
-        setIsSubmitting(false);
-        return;
-      }
-      
-      setErrors([]);
-
-      // Prepare data for submission, converting to metric if necessary
-      const submissionData = { ...formData };
-
-      if (units === 'imperial') {
-        if (submissionData.height_cm !== undefined) {
-          submissionData.height_cm = convertLength(submissionData.height_cm, 'ft', 'cm');
-        }
-        if (submissionData.dbh_cm !== undefined) {
-          submissionData.dbh_cm = convertLength(submissionData.dbh_cm, 'in', 'cm');
-        }
-        if (submissionData.canopy_spread_ns !== undefined) {
-          submissionData.canopy_spread_ns = convertLength(submissionData.canopy_spread_ns, 'ft', 'm');
-        }
-        if (submissionData.canopy_spread_ew !== undefined) {
-          submissionData.canopy_spread_ew = convertLength(submissionData.canopy_spread_ew, 'ft', 'm');
-        }
-        if (submissionData.stem_diameters && submissionData.stem_diameters.length > 0) {
-          submissionData.stem_diameters = submissionData.stem_diameters.map(d => convertLength(d, 'in', 'cm'));
-        }
-      }
-
-      if (isEditMode && editTree) {
-        const updatedTree = TreeService.updateTree(editTree.id, submissionData);
-        if (updatedTree) {
-          toast({
-            title: "Tree Updated Successfully! 🌳",
-            description: `${updatedTree.species} has been updated.`,
-          });
-        }
-      } else {
-        const newTree = TreeService.addTree(submissionData);
-        toast({
-          title: "Tree Added Successfully! 🌳",
-          description: `${newTree.species} has been added to your forest.`,
-        });
-      }
-      
-      setOpen(false);
-      
-      if (!isEditMode) {
-        setFormData({
-          species: '',
-          location: { lat: 0, lng: 0 },
-          date_planted: '',
-          notes: '',
-          images: [],
-          scientificName: undefined,
-          commonName: undefined,
-          taxonomicRank: undefined,
-          iNaturalistId: undefined,
-          taxonomy: undefined,
-          seed_source: '',
-          nursery_stock_id: '',
-          condition_assessment: {
-            structure: [],
-            canopy_health: [],
-            pests_diseases: [],
-            site_conditions: [],
-            arborist_summary: '',
-            health_status: undefined,
-            notes: {}
-          },
-          management_actions: [],
-          iNaturalist_link: '',
-          verification_status: 'pending',
-          associated_species: [],
-          land_owner: '',
-          site_name: '',
-          height_cm: undefined,
-          dbh_cm: undefined,
-          health_status: undefined
-        });
-        setManagementActionsInput('');
-      }
-      
-      setShowSearchResults(false);
-      setSearchResults([]);
-      
-      onTreeAdded?.();
-    } catch (error) {
-      console.error('Error adding tree:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add tree. Please try again.",
-        variant: "destructive"
+      // Reset form for add mode
+      const currentUnitSystem = UnitService.getPreferredUnitSystem();
+      setUnitSystem(currentUnitSystem);
+      setFormData({
+        id: '',
+        species: '',
+        commonName: '',
+        scientificName: '',
+        lat: 0,
+        lng: 0,
+        plus_code_global: '',
+        plus_code_local: '',
+        date_planted: new Date().toISOString().split('T')[0],
+        height_cm: 0,
+        dbh_cm: 0,
+        is_multi_stem: false,
+        individual_stem_diameters_cm: '',
+        canopy_spread_ns_cm: 0,
+        canopy_spread_ew_cm: 0,
+        condition_assessment: {
+          structure: [],
+          canopy_health: [],
+          pests_diseases: [],
+          site_conditions: [],
+          arborist_summary: '',
+          health_status: undefined,
+          notes: {},
+        },
+        management_actions: [],
+        seed_source: '',
+        nursery_stock_id: '',
+        verification_status: 'pending',
+        notes: '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        iNaturalistId: '',
+        project_id: '',
       });
-    } finally {
-      setIsSubmitting(false);
+      setDbhInput('');
+      setIndividualStemDiametersInput('');
     }
+  }, [editTree, isEditMode, isOpen]); // Re-run when modal opens/closes or editTree changes
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const getCurrentLocation = () => {
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    let numericValue = parseFloat(value);
+    if (isNaN(numericValue)) numericValue = 0;
+
+    if (unitSystem === 'imperial') {
+      // Convert to cm for internal storage
+      if (id === 'height_cm' || id === 'canopy_spread_ns_cm' || id === 'canopy_spread_ew_cm') {
+        numericValue = UnitService.convertInToCm(numericValue);
+      }
+    }
+    setFormData(prev => ({ ...prev, [id]: numericValue }));
+  };
+
+  const handleSelectChange = (id: string, value: string) => {
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleLocationSelect = (lat: number, lng: number) => {
+    const { globalCode, localCode } = generatePlusCode(lat, lng);
+    setFormData(prev => ({
+      ...prev,
+      lat,
+      lng,
+      plus_code_global: globalCode,
+      plus_code_local: localCode,
+    }));
+  };
+
+  const handlePickOnMap = () => {
+    router.push(`/map?lat=${formData.lat}&lng=${formData.lng}`);
+  };
+
+  const handleGetGPS = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setFormData(prev => ({
-            ...prev,
-            location: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            }
-          }));
+          handleLocationSelect(position.coords.latitude, position.coords.longitude);
           toast({
-            title: "Location Set",
-            description: "Current location has been set successfully",
+            title: "GPS Location Captured",
+            description: "Latitude and Longitude have been updated.",
           });
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error("Error getting GPS location:", error);
           toast({
-            title: "Location Error",
-            description: "Unable to get current location. Please set manually.",
-            variant: "destructive"
+            title: "GPS Error",
+            description: "Could not retrieve GPS location. Please ensure location services are enabled.",
+            variant: "destructive",
           });
         }
       );
+    } else {
+      toast({
+        title: "GPS Not Supported",
+        description: "Geolocation is not supported by your browser.",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleMapLocationSelect = (lat: number, lng: number) => {
-    setFormData(prev => ({
-      ...prev,
-      location: { lat, lng }
-    }));
-    toast({
-      title: "Location Selected",
-      description: `Coordinates set to ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+  const handleDbhChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDbhInput(value);
+    let numericValue = parseFloat(value);
+    if (isNaN(numericValue)) numericValue = 0;
+
+    if (!formData.is_multi_stem) {
+      setFormData(prev => ({ ...prev, dbh_cm: unitSystem === 'imperial' ? UnitService.convertInToCm(numericValue) : numericValue }));
+    }
+  };
+
+  const handleIndividualStemDiametersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setIndividualStemDiametersInput(value);
+    setFormData(prev => ({ ...prev, individual_stem_diameters_cm: value }));
+
+    if (formData.is_multi_stem) {
+      const diameters = value.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n) && n > 0);
+      if (diameters.length > 0) {
+        const convertedDiameters = unitSystem === 'imperial' ? diameters.map(d => UnitService.convertInToCm(d)) : diameters;
+        const calculatedDbh = Math.sqrt(convertedDiameters.reduce((sum, d) => sum + d * d, 0));
+        setFormData(prev => ({ ...prev, dbh_cm: parseFloat(calculatedDbh.toFixed(2)) }));
+      } else {
+        setFormData(prev => ({ ...prev, dbh_cm: 0 }));
+      }
+    }
+  };
+
+  const handleMultiStemToggle = (checked: boolean) => {
+    setFormData(prev => ({ ...prev, is_multi_stem: checked }));
+    if (!checked) {
+      // If switching to single stem, reset individual stem diameters and use dbhInput for dbh_cm
+      setIndividualStemDiametersInput('');
+      setFormData(prev => ({
+        ...prev,
+        individual_stem_diameters_cm: '',
+        dbh_cm: parseFloat(dbhInput) || 0,
+      }));
+    } else {
+      // If switching to multi-stem, calculate dbh from individual stems if available
+      handleIndividualStemDiametersChange({ target: { value: individualStemDiametersInput } } as React.ChangeEvent<HTMLInputElement>);
+    }
+  };
+
+  const handleConditionChecklistChange = (category: keyof ConditionChecklistData, item: string, isChecked: boolean) => {
+    setFormData(prev => {
+      const currentCategory = prev.condition_assessment?.[category] || [];
+      const newCategory = isChecked
+        ? [...currentCategory, item]
+        : currentCategory.filter(i => i !== item);
+
+      return {
+        ...prev,
+        condition_assessment: {
+          ...prev.condition_assessment,
+          [category]: newCategory,
+        },
+      };
     });
   };
 
-  const searchSpecies = async () => {
-    if (!formData.species.trim()) {
-      toast({
-        title: "Search Error",
-        description: "Please enter a species name to search",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSearching(true);
-    try {
-      const results = await iNaturalistService.searchTreeSpecies(formData.species);
-      setSearchResults(results);
-      setShowSearchResults(true);
-      
-      if (results.length === 0) {
-        toast({
-          title: "No Results",
-          description: "No species found matching your search",
-        });
-      }
-    } catch (error) {
-      console.error('Error searching species:', error);
-      toast({
-        title: "Search Error",
-        description: "Failed to search species. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSearching(false);
-    }
+  const handleConditionNoteChange = (item: string, note: string) => {
+    setFormData(prev => ({
+      ...prev,
+      condition_assessment: {
+        ...prev.condition_assessment,
+        notes: {
+          ...prev.condition_assessment?.notes,
+          [item]: note,
+        },
+      },
+    }));
   };
 
-  const selectSpecies = async (taxon: any) => {
-    const speciesName = taxon.preferred_common_name || taxon.name;
-    const iNaturalistLink = `https://www.inaturalist.org/taxa/${taxon.id}`;
-    
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const dataToSave = { ...formData };
+
+    // Convert imperial to metric if current unit system is imperial
+    if (unitSystem === 'imperial') {
+      dataToSave.height_cm = UnitService.convertInToCm(formData.height_cm);
+      dataToSave.dbh_cm = UnitService.convertInToCm(formData.dbh_cm);
+      dataToSave.canopy_spread_ns_cm = UnitService.convertInToCm(formData.canopy_spread_ns_cm);
+      dataToSave.canopy_spread_ew_cm = UnitService.convertInToCm(formData.canopy_spread_ew_cm);
+      if (dataToSave.individual_stem_diameters_cm) {
+        dataToSave.individual_stem_diameters_cm = dataToSave.individual_stem_diameters_cm.split(',').map(s => UnitService.convertInToCm(parseFloat(s.trim())).toFixed(2)).join(', ');
+      }
+    }
+
     try {
-      // Get detailed taxonomic information
-      const detailedTaxon = await iNaturalistService.getDetailedTaxonWithHierarchy(taxon.id);
-      const taxonomy = detailedTaxon ? detailedTaxon.taxonomy : iNaturalistService.parseTaxonomicHierarchy(taxon);
-      
-      setFormData(prev => ({ 
-        ...prev, 
-        species: speciesName,
-        scientificName: taxon.name,
-        commonName: taxon.preferred_common_name,
-        taxonomicRank: taxon.rank,
-        iNaturalistId: taxon.id,
-        taxonomy: taxonomy,
-        iNaturalist_link: iNaturalistLink,
-        verification_status: 'verified',
-        // Enhanced data from detailed taxon info
-        description: detailedTaxon?.description,
-        distribution_info: detailedTaxon?.distribution_info,
-        conservation_status: detailedTaxon?.conservation_status,
-        photos: detailedTaxon?.enhanced_photos
-      }));
-      setShowSearchResults(false);
-      toast({
-        title: "Species Selected",
-        description: `Selected: ${speciesName} with full taxonomic data`,
-      });
+      if (isEditMode) {
+        TreeService.updateTree(dataToSave);
+        toast({
+          title: "Tree Updated",
+          description: `${formData.commonName || formData.species} has been updated successfully.`,
+        });
+      } else {
+        TreeService.addTree(dataToSave);
+        toast({
+          title: "Tree Added",
+          description: `${formData.commonName || formData.species} has been added to your inventory.`,
+        });
+      }
+      onTreeAdded();
+      setIsOpen(false);
     } catch (error) {
-      console.error('Error getting detailed taxon info:', error);
-      // Fallback to basic taxonomic parsing
-      const taxonomy = iNaturalistService.parseTaxonomicHierarchy(taxon);
-      
-      setFormData(prev => ({ 
-        ...prev, 
-        species: speciesName,
-        scientificName: taxon.name,
-        commonName: taxon.preferred_common_name,
-        taxonomicRank: taxon.rank,
-        iNaturalistId: taxon.id,
-        taxonomy: taxonomy,
-        iNaturalist_link: iNaturalistLink,
-        verification_status: 'verified'
-      }));
-      setShowSearchResults(false);
+      console.error("Error saving tree:", error);
       toast({
-        title: "Species Selected",
-        description: `Selected: ${speciesName}`,
+        title: "Error",
+        description: `Failed to save tree: ${error instanceof Error ? error.message : String(error)}`,
+        variant: "destructive",
       });
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {!isEditMode && (
-        <DialogTrigger asChild>
-          <Button className="w-full btn-primary-enhanced group touch-target mobile-button font-bold bg-gradient-to-r from-green-600 via-green-700 to-emerald-700 hover:from-green-700 hover:via-green-800 hover:to-emerald-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0 h-14 sm:h-16">
-            <div className="flex items-center justify-center gap-3">
-              <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all duration-300">
-                <Plus size={18} className="text-white transition-transform duration-300 group-hover:rotate-90" />
-              </div>
-              <span className="text-lg font-bold">+ Add Tree</span>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="w-full btn-primary-enhanced group touch-target mobile-button font-bold bg-gradient-to-r from-green-600 via-green-700 to-emerald-700 hover:from-green-700 hover:via-green-800 hover:to-emerald-800 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-0 h-14 sm:h-16"
+        >
+          <div className="flex items-center justify-center gap-3">
+            <div className="bg-white/20 rounded-full p-2 group-hover:bg-white/30 transition-all duration-300">
+              <Plus size={18} className="text-white transition-transform duration-300 group-hover:rotate-90" />
             </div>
-          </Button>
-        </DialogTrigger>
-      )}
-      <DialogContent className={`mobile-modal sm:max-w-[700px] overflow-y-auto ${isFullScreen ? '!p-0 !max-w-full !w-full !h-screen !m-0' : ''}`}>
-        <DialogHeader className="pb-2 sm:pb-4">
-          <DialogTitle className="text-green-800 flex items-center gap-2 text-base sm:text-lg lg:text-xl">
-            🌳 {isEditMode ? 'Edit Tree' : 'Add New Tree'}
-          </DialogTitle>
+            <span className="text-lg font-bold">+ Add Tree</span>
+          </div>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[800px] p-6 max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEditMode ? 'Edit Tree' : 'Add New Tree'}</DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 lg:space-y-6">
-          {/* Tree Details Section */}
-          <div className="bg-gradient-to-r from-green-50 to-green-25 p-4 sm:p-5 rounded-lg border border-green-100 space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2 mb-2 sm:mb-4 pb-2 border-b border-green-200">
-              <span className="text-lg sm:text-xl">🌳</span>
-              <h3 className="text-lg sm:text-xl font-bold text-green-800">Tree Details</h3>
-              <div className="ml-auto text-xs sm:text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">Required</div>
-            </div>
-            
-            <div>
-              <Label htmlFor="species" className="text-green-700 font-medium text-sm sm:text-base">Species *</Label>
-              <div className="flex flex-col gap-2 mt-1">
-                <Input
-                  id="species"
-                  value={formData.species}
-                  onChange={(e) => setFormData(prev => ({ ...prev, species: e.target.value }))}
-                  placeholder="e.g., Oak, Maple, Pine..."
-                  required
-                  className={`border-green-200 focus:border-green-400 text-sm sm:text-base ${
-                    errors.some(e => e.includes('Species')) ? 'border-red-500' : ''
-                  }`}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={searchSpecies}
-                  disabled={isSearching}
-                  className="btn-search-enhanced w-full touch-target mobile-button"
-                >
-                  <Search size={14} className={`transition-transform duration-300 ${isSearching ? 'animate-spin' : ''}`} />
-                  <span className="ml-2 mobile-text">{isSearching ? 'Searching...' : 'Search'}</span>
-                </Button>
-              </div>
-              
-              {showSearchResults && searchResults.length > 0 && (
-                <div className="mt-2 max-h-48 sm:max-h-60 overflow-y-auto border border-green-200 rounded-md bg-white shadow-sm">
-                  {searchResults.map((taxon) => {
-                    const taxonomy = iNaturalistService.parseTaxonomicHierarchy(taxon);
-                    return (
-                      <button
-                        key={taxon.id}
-                        type="button"
-                        onClick={() => selectSpecies(taxon)}
-                        className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-green-50 border-b border-green-100 last:border-b-0 transition-all duration-200 hover:scale-[1.01] hover:shadow-sm"
-                      >
-                        <div className="font-medium text-green-800 mb-1 text-sm sm:text-base">
-                          {taxon.preferred_common_name || taxon.name}
-                        </div>
-                        <div className="text-xs sm:text-sm text-green-600 mb-1 sm:mb-2">
-                          <span className="italic font-serif">{taxon.name}</span> • <span className="text-xs bg-green-100 px-1 sm:px-2 py-0.5 rounded-full">{taxon.rank}</span>
-                        </div>
-                        {taxonomy && (
-                          <div className="mt-1 hidden sm:block">
-                            <TaxonomyBreadcrumb taxonomy={taxonomy} />
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="date_planted" className="text-green-700 font-medium text-sm sm:text-base">Date Planted</Label>
-              <div className="flex items-center space-x-3 mb-2">
-                <input
-                  type="radio"
-                  id="planted_true"
-                  name="is_planted"
-                  checked={isPlanted}
-                  onChange={() => setIsPlanted(true)}
-                  className="w-4 h-4 text-green-600 bg-green-100 border-green-300 rounded-full focus:ring-green-500"
-                />
-                <label htmlFor="planted_true" className="text-green-700 font-medium">Planted</label>
-                <input
-                  type="radio"
-                  id="planted_false"
-                  name="is_planted"
-                  checked={!isPlanted}
-                  onChange={() => setIsPlanted(false)}
-                  className="w-4 h-4 text-green-600 bg-green-100 border-green-300 rounded-full focus:ring-green-500"
-                />
-                <label htmlFor="planted_false" className="text-green-700 font-medium">Wild (Naturally Occurring)</label>
-              </div>
-              <Input
-                id="date_planted"
-                type="date"
-                value={formData.date_planted}
-                onChange={(e) => setFormData(prev => ({ ...prev, date_planted: e.target.value }))}
-                className={`border-green-200 focus:border-green-400 text-sm sm:text-base mt-1 ${isPlanted && !formData.date_planted ? 'border-red-500' : ''}`}
-                required={isPlanted}
-                disabled={!isPlanted}
-              />
-              {!isPlanted && (
-                <p className="text-xs text-gray-500 mt-1">Date planted is not applicable for wild trees.</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="notes" className="text-green-700 font-medium text-sm sm:text-base">General Notes</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Any general notes about this tree..."
-                rows={2}
-                className="border-green-200 focus:border-green-400 text-sm sm:text-base mt-1 resize-none"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="grid gap-6 py-4">
+          {/* Tree Details */}
+          <div className="grid gap-2">
+            <h3 className="text-lg font-semibold text-green-700">Tree Details</h3>
+            <Label htmlFor="species">Species</Label>
+            <Input id="species" value={formData.species} onChange={handleChange} required />
+            <Label htmlFor="commonName">Common Name</Label>
+            <Input id="commonName" value={formData.commonName || ''} onChange={handleChange} />
+            <Label htmlFor="scientificName">Scientific Name</Label>
+            <Input id="scientificName" value={formData.scientificName || ''} onChange={handleChange} />
+            <Label htmlFor="notes">General Notes</Label>
+            <Textarea id="notes" value={formData.notes || ''} onChange={handleChange} />
           </div>
 
-          {/* Location Info Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-25 p-4 sm:p-5 rounded-lg border border-blue-100 space-y-3 sm:space-y-4 mt-4">
-            <div className="flex items-center gap-2 mb-2 sm:mb-4 pb-2 border-b border-blue-200">
-              <span className="text-lg sm:text-xl">📍</span>
-              <h3 className="text-lg sm:text-xl font-bold text-blue-800">Location Info</h3>
-              <div className="ml-auto text-xs sm:text-sm text-red-600 bg-red-100 px-2 py-1 rounded-full">Required</div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Location Information */}
+          <div className="grid gap-2">
+            <h3 className="text-lg font-semibold text-green-700">Location Information</h3>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="latitude" className="text-green-700 font-medium text-sm sm:text-base">Latitude *</Label>
-                <Input
-                  id="latitude"
-                  type="number"
-                  step="any"
-                  value={formData.location.lat === 0 ? '' : formData.location.lat}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    location: { ...prev.location, lat: e.target.value ? parseFloat(e.target.value) : 0 }
-                  }))}
-                  placeholder="0.000000"
-                  required
-                  className={`border-green-200 focus:border-green-400 text-sm sm:text-base mt-1 ${
-                    errors.some(e => e.includes('Latitude') || e.includes('Location')) ? 'border-red-500' : ''
-                  }`}
-                />
+                <Label htmlFor="lat">Latitude</Label>
+                <Input id="lat" type="number" step="any" value={formData.lat} onChange={handleNumberChange} required />
               </div>
               <div>
-                <Label htmlFor="longitude" className="text-green-700 font-medium text-sm sm:text-base">Longitude *</Label>
-                <Input
-                  id="longitude"
-                  type="number"
-                  step="any"
-                  value={formData.location.lng === 0 ? '' : formData.location.lng}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    location: { ...prev.location, lng: e.target.value ? parseFloat(e.target.value) : 0 }
-                  }))}
-                  placeholder="0.000000"
-                  required
-                  className={`border-green-200 focus:border-green-400 text-sm sm:text-base mt-1 ${
-                    errors.some(e => e.includes('Longitude') || e.includes('Location')) ? 'border-red-500' : ''
-                  }`}
-                />
+                <Label htmlFor="lng">Longitude</Label>
+                <Input id="lng" type="number" step="any" value={formData.lng} onChange={handleNumberChange} required />
               </div>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={getCurrentLocation}
-                className="btn-outline-enhanced w-full touch-target mobile-button"
-              >
-                <span className="mr-2 transition-transform duration-300 hover:scale-110">📍</span>
-                <span className="hidden xs:inline">Use Current Location</span>
-                <span className="xs:hidden">Current GPS</span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowLocationMap(!showLocationMap)}
-                className="btn-outline-enhanced w-full touch-target mobile-button"
-              >
-                <Map size={14} className="mr-2" />
-                {showLocationMap ? 'Hide Map' : 'Pick on Map'}
-              </Button>
+            <div className="flex gap-2 mt-2">
+              <Button type="button" onClick={handleGetGPS} variant="outline">Get Current GPS</Button>
+              <Button type="button" onClick={handlePickOnMap} variant="outline">Pick on Map</Button>
             </div>
-
-            {/* Interactive Map for Location Selection */}
-            {showLocationMap && (
-              <div className="mt-3 sm:mt-4 border border-green-200 rounded-lg overflow-hidden">
-                <div className="bg-green-50 px-3 sm:px-4 py-2 border-b border-green-200">
-                  <p className="text-xs sm:text-sm text-green-700 font-medium">📍 Click on the map to set tree location</p>
-                </div>
-                <div className="h-48 sm:h-64 w-full relative">
-                  <SimpleMapView 
-                    lat={formData.location.lat} 
-                    lng={formData.location.lng}
-                    onLocationSelect={handleMapLocationSelect}
-                  />
-                </div>
-                <div className="bg-green-50 px-3 sm:px-4 py-2 border-t border-green-200">
-                  <p className="text-xs text-green-600">
-                    💡 Tip: You can also enter coordinates manually in the fields above
-                  </p>
-                </div>
-              </div>
-            )}
             
-            {/* Plus Code Preview */}
-            {formData.location.lat !== 0 && formData.location.lng !== 0 && (
-              <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin size={14} className="text-green-600" />
-                  <span className="text-xs sm:text-sm font-medium text-green-700">Generated Plus Code Preview</span>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-green-600 mb-1">Global Code:</p>
-                    <a 
-                      href={`https://maps.google.com/?q=${formData.location.lat},${formData.location.lng}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all hover:underline"
-                    >
-                      {PlusCodeService.encode(formData.location.lat, formData.location.lng).global}
-                    </a>
-                  </div>
-                  <div>
-                    <p className="text-xs text-green-600 mb-1">Local Code:</p>
-                    <a 
-                      href={`https://maps.google.com/?q=${formData.location.lat},${formData.location.lng}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all hover:underline"
-                    >
-                      {PlusCodeService.encode(formData.location.lat, formData.location.lng).local}
-                    </a>
-                  </div>
-                  <div>
-                    <p className="text-xs text-green-600 mb-1">Coordinates:</p>
-                    <a
-                      href={`https://maps.google.com/?q=${formData.location.lat},${formData.location.lng}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-xs sm:text-sm bg-white border border-green-200 p-2 rounded text-green-800 break-all hover:underline"
-                    >
-                      {formData.location.lat.toFixed(6)}, {formData.location.lng.toFixed(6)}
-                    </a>
-                  </div>
-                  <div className="text-xs text-green-600">
-                    Precision: {PlusCodeService.encode(formData.location.lat, formData.location.lng).areaSize} area
-                  </div>
-                </div>
-              </div>
-            )}
+            <Label htmlFor="plus_code_global">Plus Code (Global)</Label>
+            <Input id="plus_code_global" value={formData.plus_code_global || ''} readOnly />
+            <Label htmlFor="plus_code_local">Plus Code (Local)</Label>
+            <Input id="plus_code_local" value={formData.plus_code_local || ''} readOnly />
+            
+            
           </div>
 
-          {/* Tree Measurements Section */}
-          <div className="bg-gradient-to-r from-purple-50 to-purple-25 p-4 sm:p-5 rounded-lg border border-purple-100 space-y-3 sm:space-y-4 mt-4">
-            <div className="flex items-center gap-2 mb-2 sm:mb-4 pb-2 border-b border-purple-200">
-              <span className="text-lg sm:text-xl">📏</span>
-              <h3 className="text-lg sm:text-xl font-bold text-purple-800">Tree Measurements</h3>
-              <div className="ml-auto text-xs sm:text-sm text-purple-600 bg-purple-100 px-2 py-1 rounded-full">Optional</div>
-            </div>
+          {/* Tree Measurements */}
+          <div className="grid gap-2">
+            <h3 className="text-lg font-semibold text-green-700">Tree Measurements</h3>
+            <Label htmlFor="height_cm">{UnitService.getUnitLabels(unitSystem).height}</Label>
+            <Input id="height_cm" type="number" step="any" value={unitSystem === 'imperial' ? UnitService.convertCmToIn(formData.height_cm).toFixed(2) : formData.height_cm} onChange={handleNumberChange} />
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="height_cm" className="text-green-700 font-medium text-sm sm:text-base">{getUnitLabels(units).height}</Label>
-                <Input
-                  id="height_cm"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={formData.height_cm || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, height_cm: e.target.value ? parseInt(e.target.value) : undefined }))}
-                  placeholder="e.g., 350"
-                  className="border-green-200 focus:border-green-400"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="dbh_cm" className="text-green-700 font-medium text-sm sm:text-base">{getUnitLabels(units).dbh}</Label>
-                <Input
-                  id="dbh_cm"
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={formData.dbh_cm !== undefined ? formData.dbh_cm.toString() : ''}
-                  onChange={(e) => {
-                    // Don't allow manual changes when multi-stem is enabled
-                    if (formData.is_multi_stem) return;
-                    setFormData(prev => ({ ...prev, dbh_cm: e.target.value ? parseFloat(e.target.value) : undefined }));
-                  }}
-                  placeholder="e.g., 45.5"
-                  className="border-green-200 focus:border-green-400"
-                  readOnly={formData.is_multi_stem}
-                  disabled={formData.is_multi_stem}
-                />
-                <p className="text-xs text-green-600 mt-1">
-                  {formData.is_multi_stem 
-                    ? "Auto-calculated using ISA formula: √(d1² + d2² + ...)" 
-                    : "Diameter at Breast Height"}
-                </p>
-              </div>
-            </div>
+            <Label htmlFor="dbh_cm">{UnitService.getUnitLabels(unitSystem).dbh}</Label>
+            <Input id="dbh_cm" type="number" step="any" value={dbhInput} onChange={handleDbhChange} disabled={formData.is_multi_stem} />
 
-            {/* Multi-stem checkbox */}
-            <div className="flex items-center space-x-3 mt-4">
+            <div className="flex items-center space-x-2 mt-2">
               <input
                 type="checkbox"
                 id="is_multi_stem"
-                checked={formData.is_multi_stem || false}
-                onChange={(e) => {
-                  const isMultiStem = e.target.checked;
-                  setFormData(prev => ({ 
-                    ...prev, 
-                    is_multi_stem: isMultiStem,
-                    // Clear stem diameters and DBH calculation when unchecking multi-stem
-                    ...(isMultiStem ? {} : { stem_diameters: undefined, dbh_cm: undefined })
-                  }));
-                }}
-                className="w-4 h-4 text-green-600 bg-green-100 border-green-300 rounded focus:ring-green-500"
+                checked={formData.is_multi_stem}
+                onChange={(e) => handleMultiStemToggle(e.target.checked)}
+                className="form-checkbox"
               />
-              <label htmlFor="is_multi_stem" className="text-green-700 font-medium">
-                Multi-stem tree?
-              </label>
+              <Label htmlFor="is_multi_stem">Multi-stem tree?</Label>
             </div>
 
-            {/* Show stem diameters if multi-stem is checked */}
             {formData.is_multi_stem && (
-              <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                <Label className="text-green-700 font-medium text-sm mb-2 block">
-                  {getUnitLabels(units).stemDiameters}
-                </Label>
+              <div className="grid gap-2 mt-2">
+                <Label htmlFor="individual_stem_diameters_cm">Individual Stem Diameters ({unitSystem === 'imperial' ? 'in' : 'cm'}, comma-separated)</Label>
                 <Input
-                  type="text"
-                  value={stemDiametersInput}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    setStemDiametersInput(inputValue);
-                    
-                    // Don't process if input is empty
-                    if (!inputValue.trim()) {
-                      setFormData(prev => ({ 
-                        ...prev, 
-                        stem_diameters: undefined,
-                        dbh_cm: undefined
-                      }));
-                      return;
-                    }
-                    
-                    // Split by comma and parse each value, filtering out invalid numbers
-                    const splitValues = inputValue.split(',');
-                    const trimmedValues = splitValues.map(v => v.trim());
-                    const nonEmptyValues = trimmedValues.filter(v => v.length > 0);
-                    const parsedValues = nonEmptyValues.map(v => parseFloat(v));
-                    const values = parsedValues.filter(v => !isNaN(v) && v > 0);
-                    
-                    console.log('DEBUG: Multi-stem parsing:', {
-                      inputValue,
-                      splitValues,
-                      trimmedValues,
-                      nonEmptyValues,
-                      parsedValues,
-                      values,
-                      step: 'parsing'
-                    });
-                    
-                    // Calculate ISA multi-stem DBH: √(d1² + d2² + d3² + ...)
-                    let calculatedDBH: number | undefined = undefined;
-                    if (values.length > 1) {
-                      const sumOfSquares = values.reduce((sum, diameter) => sum + (diameter * diameter), 0);
-                      calculatedDBH = Math.round(Math.sqrt(sumOfSquares) * 100) / 100; // Round to 2 decimal places
-                      console.log('Multi-stem calculation:', { 
-                        inputValue, 
-                        values, 
-                        sumOfSquares, 
-                        calculatedDBH,
-                        typeof: typeof calculatedDBH,
-                        mathSqrt: Math.sqrt(sumOfSquares),
-                        debugStep: 'final calculation'
-                      });
-                    } else if (values.length === 1) {
-                      calculatedDBH = values[0];
-                    }
-                    
-                    // Update state with proper type safety - ensure we only store parsed values
-                    setFormData(prev => ({ 
-                      ...prev, 
-                      stem_diameters: values.length > 0 ? values : undefined,
-                      dbh_cm: calculatedDBH
-                    }));
-                  }}
-                  placeholder="e.g., 12.5, 15.3, 18.0"
-                  className="border-green-200 focus:border-green-400"
+                  id="individual_stem_diameters_cm"
+                  value={individualStemDiametersInput}
+                  onChange={handleIndividualStemDiametersChange}
+                  placeholder={unitSystem === 'imperial' ? 'e.g., 4, 6, 8' : 'e.g., 10, 15, 20'}
                 />
-                <p className="text-xs text-green-600 mt-1">Separate multiple values with commas</p>
               </div>
             )}
 
-            {/* Canopy spread measurements */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-              <div>
-                <Label htmlFor="canopy_spread_ns" className="text-green-700 font-medium text-sm sm:text-base">
-                  {getUnitLabels(units).canopyNS}
-                </Label>
-                <Input
-                  id="canopy_spread_ns"
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={formData.canopy_spread_ns || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, canopy_spread_ns: e.target.value ? parseFloat(e.target.value) : undefined }))}
-                  placeholder="e.g., 12.5"
-                  className="border-green-200 focus:border-green-400"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="canopy_spread_ew" className="text-green-700 font-medium text-sm sm:text-base">
-                  {getUnitLabels(units).canopyEW}
-                </Label>
-                <Input
-                  id="canopy_spread_ew"
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={formData.canopy_spread_ew || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, canopy_spread_ew: e.target.value ? parseFloat(e.target.value) : undefined }))}
-                  placeholder="e.g., 15.0"
-                  className="border-green-200 focus:border-green-400"
-                />
-              </div>
-            </div>
+            <Label htmlFor="canopy_spread_ns_cm">Canopy Spread N-S ({unitSystem === 'imperial' ? 'ft' : 'cm'})</Label>
+            <Input id="canopy_spread_ns_cm" type="number" step="any" value={unitSystem === 'imperial' ? UnitService.convertCmToIn(formData.canopy_spread_ns_cm).toFixed(2) : formData.canopy_spread_ns_cm} onChange={handleNumberChange} />
+            <Label htmlFor="canopy_spread_ew_cm">Canopy Spread E-W ({unitSystem === 'imperial' ? 'ft' : 'cm'})</Label>
+            <Input id="canopy_spread_ew_cm" type="number" step="any" value={unitSystem === 'imperial' ? UnitService.convertCmToIn(formData.canopy_spread_ew_cm).toFixed(2) : formData.canopy_spread_ew_cm} onChange={handleNumberChange} />
           </div>
 
-          {/* Management Data Section */}
-          <div className="bg-gradient-to-r from-amber-50 to-amber-25 p-4 sm:p-5 rounded-lg border border-amber-100 space-y-4 mt-4">
-            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-amber-200">
-              <span className="text-lg sm:text-xl">🌲</span>
-              <h3 className="text-lg sm:text-xl font-bold text-amber-800">Management Data</h3>
-              <div className="ml-auto text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 py-1 rounded-full">Professional</div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="seed_source" className="text-green-700 font-medium text-sm sm:text-base">Seed Source</Label>
-                <Input
-                  id="seed_source"
-                  value={formData.seed_source}
-                  onChange={(e) => setFormData(prev => ({ ...prev, seed_source: e.target.value }))}
-                  placeholder="e.g., Local nursery, wild collection..."
-                  className="border-green-200 focus:border-green-400"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="nursery_stock_id" className="text-green-700 font-medium text-sm sm:text-base">Nursery Stock ID</Label>
-                <Input
-                  id="nursery_stock_id"
-                  value={formData.nursery_stock_id}
-                  onChange={(e) => setFormData(prev => ({ ...prev, nursery_stock_id: e.target.value }))}
-                  placeholder="e.g., NST-2024-001"
-                  className="border-green-200 focus:border-green-400"
-                />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="land_owner" className="text-green-700 font-medium text-sm sm:text-base">Land Owner</Label>
-                <Input
-                  id="land_owner"
-                  value={formData.land_owner}
-                  onChange={(e) => setFormData(prev => ({ ...prev, land_owner: e.target.value }))}
-                  placeholder="e.g., City Parks, Private owner..."
-                  className="border-green-200 focus:border-green-400"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="site_name" className="text-green-700 font-medium text-sm sm:text-base">Site Name</Label>
-                <Input
-                  id="site_name"
-                  value={formData.site_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, site_name: e.target.value }))}
-                  placeholder="e.g., Central Park, Smith Property..."
-                  className="border-green-200 focus:border-green-400"
-                />
-              </div>
-            </div>
-            
-            <ConditionAssessment
-              value={formData.condition_assessment!}
-              onChange={(conditionAssessment) => setFormData(prev => ({ ...prev, condition_assessment: conditionAssessment }))}
+          {/* Management Data */}
+          <div className="grid gap-2">
+            <h3 className="text-lg font-semibold text-green-700">Management Data</h3>
+            <Label htmlFor="project_id">Project Association</Label>
+            <Select value={formData.project_id} onValueChange={(value) => handleSelectChange('project_id', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a project" />
+              </SelectTrigger>
+              <SelectContent>
+                {/* TODO: Populate with actual projects from Admin Panel */}
+                <SelectItem value="project1">Project Alpha</SelectItem>
+                <SelectItem value="project2">Project Beta</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <ConditionAssessmentForm
+              initialConditionAssessment={formData.condition_assessment || {
+                structure: [],
+                canopy_health: [],
+                pests_diseases: [],
+                site_conditions: [],
+                arborist_summary: '',
+                notes: {},
+              }}
+              onConditionAssessmentChange={(newAssessment) =>
+                setFormData((prev) => ({ ...prev, condition_assessment: newAssessment }))
+              }
             />
-            
-            <div>
-              <Label htmlFor="management_actions" className="text-green-700 font-medium">Management Actions</Label>
-              <Textarea
-                id="management_actions"
-                value={managementActionsInput}
-                onChange={(e) => {
-                  // Update input field immediately for smooth typing
-                  setManagementActionsInput(e.target.value);
-                }}
-                onBlur={(e) => {
-                  // Process into array format when user finishes editing
-                  const inputValue = e.target.value.trim();
-                  if (inputValue === '') {
-                    setFormData(prev => ({ ...prev, management_actions: [] }));
-                  } else {
-                    const actions = inputValue.split(',').map(action => action.trim()).filter(action => action.length > 0);
-                    setFormData(prev => ({ ...prev, management_actions: actions }));
-                  }
-                }}
-                placeholder="watering, pruning, fertilizing, pest control... (separate with commas)"
-                rows={2}
-                className="border-green-200 focus:border-green-400"
-              />
-              <p className="text-xs text-green-600 mt-1">Separate multiple actions with commas</p>
-            </div>
 
-            {formData.iNaturalist_link && (
-              <div>
-                <Label htmlFor="iNaturalist_link" className="text-green-700 font-medium">iNaturalist Link</Label>
-                <Input
-                  id="iNaturalist_link"
-                  value={formData.iNaturalist_link}
-                  onChange={(e) => setFormData(prev => ({ ...prev, iNaturalist_link: e.target.value }))}
-                  placeholder="https://www.inaturalist.org/taxa/..."
-                  className="border-green-200 focus:border-green-400"
-                />
-              </div>
-            )}
-            
-            <div>
-              <Label htmlFor="health_status" className="text-green-700 font-medium">Health Status</Label>
-              <Select value={formData.health_status || ''} onValueChange={(value: 'Excellent' | 'Good' | 'Fair' | 'Poor' | 'Dead') => setFormData(prev => ({ ...prev, health_status: value }))}>
-                <SelectTrigger className="border-green-200 focus:border-green-400">
-                  <SelectValue placeholder="Select health status..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Excellent">Excellent</SelectItem>
-                  <SelectItem value="Good">Good</SelectItem>
-                  <SelectItem value="Fair">Fair</SelectItem>
-                  <SelectItem value="Poor">Poor</SelectItem>
-                  <SelectItem value="Dead">Dead</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <Label className="text-green-700 font-medium">Photos</Label>
-              <div className="space-y-3">
-                {/* Photo Upload Buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = 'image/*';
-                      input.capture = 'environment';
-                      input.multiple = true;
-                      input.onchange = (e) => handleImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
-                      input.click();
-                    }}
-                    className="border-green-200 text-green-700 hover:bg-green-50 flex items-center justify-center gap-2 py-3"
-                  >
-                    <span className="text-lg">📷</span>
-                    Camera
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = 'image/*';
-                      input.multiple = true;
-                      input.onchange = (e) => handleImageUpload(e as unknown as React.ChangeEvent<HTMLInputElement>);
-                      input.click();
-                    }}
-                    className="border-green-200 text-green-700 hover:bg-green-50 flex items-center justify-center gap-2 py-3"
-                  >
-                    <span className="text-lg">🖼️</span>
-                    Gallery
-                  </Button>
-                </div>
-                
-                {/* Selected Images Preview */}
-                {(formData.images && formData.images.length > 0) && (
-                  <div className="space-y-2">
-                    <p className="text-sm text-green-600 font-medium">Selected Photos ({formData.images.length})</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      {formData.images.map((image, index) => (
-                        <div key={index} className="relative group">
-                          <Image 
-                            src={image} 
-                            alt={`Tree photo ${index + 1}`}
-                            layout="fill"
-                            objectFit="cover"
-                            className="rounded border border-green-200 group-hover:border-green-400 transition-all duration-200"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => {
-                              const newImages = [...(formData.images || [])];
-                              newImages.splice(index, 1);
-                              setFormData(prev => ({ ...prev, images: newImages }));
-                            }}
-                            className="absolute -top-1 -right-1 w-6 h-6 rounded-full text-xs p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                          >
-                            ×
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                <p className="text-xs text-green-600">Tap Camera to take photos or Gallery to select from your device</p>
-              </div>
-            </div>
+            <Label htmlFor="management_actions">Management Actions (comma-separated)</Label>
+            <Input
+              id="management_actions"
+              value={formData.management_actions?.join(', ') || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, management_actions: e.target.value.split(',').map(s => s.trim()) }))}
+              placeholder="e.g., Pruning, Pest Treatment"
+            />
           </div>
 
-          <div className="flex flex-col gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-green-100">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full btn-primary-enhanced touch-target mobile-button font-semibold"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center">
-                  <span className="animate-spin mr-2">🌱</span>
-                  <span className="mobile-text">{isEditMode ? 'Updating...' : 'Adding...'}</span>
-                </span>
-              ) : (
-                <span className="mobile-text">{isEditMode ? 'Update Tree' : 'Add Tree'}</span>
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="w-full btn-outline-enhanced touch-target mobile-button"
-            >
-              Cancel
-            </Button>
+          {/* Other Details */}
+          <div className="grid gap-2">
+            <h3 className="text-lg font-semibold text-green-700">Other Details</h3>
+            <Label htmlFor="date_planted">Date Planted</Label>
+            <Input id="date_planted" type="date" value={formData.date_planted} onChange={handleChange} />
+            <Label htmlFor="seed_source">Seed Source</Label>
+            <Input id="seed_source" value={formData.seed_source || ''} onChange={handleChange} />
+            <Label htmlFor="nursery_stock_id">Nursery Stock ID</Label>
+            <Input id="nursery_stock_id" value={formData.nursery_stock_id || ''} onChange={handleChange} />
+            <Label htmlFor="verification_status">Verification Status</Label>
+            <Select value={formData.verification_status} onValueChange={(value) => handleSelectChange('verification_status', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="manual">Manual</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* Image Upload */}
+          <div className="grid gap-2">
+            <h3 className="text-lg font-semibold text-green-700">Tree Images</h3>
+            <ImageUpload
+              initialImages={formData.images}
+              onImagesChange={(newImages) => setFormData(prev => ({ ...prev, images: newImages }))}
+            />
+          </div>
+
+          <Button type="submit" className="w-full btn-primary-enhanced mt-4">
+            {isEditMode ? 'Save Changes' : 'Add Tree'}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
   );
-}
+};

@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { Tree } from "@/types/tree"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -16,6 +17,16 @@ export interface TreeAge {
 export function calculateTreeAge(datePlanted: string): TreeAge {
   const plantedDate = new Date(datePlanted);
   const currentDate = new Date();
+
+  if (isNaN(plantedDate.getTime())) {
+    return {
+      years: 0,
+      months: 0,
+      days: 0,
+      totalDays: 0,
+      displayText: 'Unknown age'
+    };
+  }
   
   // Calculate the difference in milliseconds
   const diffInMs = currentDate.getTime() - plantedDate.getTime();
@@ -59,4 +70,45 @@ export function calculateTreeAge(datePlanted: string): TreeAge {
     totalDays,
     displayText
   };
+}
+
+export function generatePlusCode(lat: number, lng: number): { global: string; local: string } {
+  try {
+    const { encode } = require('open-location-code');
+    const global = encode(lat, lng);
+    const local = encode(lat, lng, 10); // 10-character code for local precision
+    
+    return {
+      global,
+      local: local.substring(4) // Remove the area code for local
+    };
+  } catch (error) {
+    console.error('Error generating Plus Code:', error);
+    return {
+      global: '',
+      local: ''
+    };
+  }
+}
+
+export function getTreeIcon(tree: Tree): string {
+  const age = calculateTreeAge(tree.date_planted);
+
+  // Define icon based on health status and age
+  let iconColor = 'green'; // Default for healthy, mature trees
+
+  if (tree.health_status === 'Poor' || tree.health_status === 'Dead') {
+    iconColor = 'red';
+  } else if (tree.health_status === 'Fair') {
+    iconColor = 'orange';
+  } else if (age.years < 1) {
+    iconColor = 'blue'; // Sprout/young tree
+  } else if (age.years < 5) {
+    iconColor = 'purple'; // Sapling
+  }
+
+  // Using Google Maps default marker colors for simplicity. 
+  // In a real app, you'd use custom SVG or PNG icons.
+  // For example: `http://maps.google.com/mapfiles/ms/icons/${iconColor}-dot.png`
+  return `http://maps.google.com/mapfiles/ms/icons/${iconColor}-dot.png`;
 }

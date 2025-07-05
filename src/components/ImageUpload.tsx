@@ -1,155 +1,110 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, Image as ImageIcon, X } from 'lucide-react';
-import Image from 'next/image';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Camera, Image as ImageIcon, XCircle } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ImageUploadProps {
-  onImagesChange: (images: File[]) => void;
-  maxImages?: number;
+  initialImages?: string[]; // Array of base64 encoded image strings
+  onImagesChange: (images: string[]) => void;
 }
 
-interface ImagePreview {
-  file: File;
-  url: string;
-}
+export const ImageUpload: React.FC<ImageUploadProps> = ({
+  initialImages = [],
+  onImagesChange,
+}) => {
+  const { toast } = useToast();
+  const [images, setImages] = useState<string[]>(initialImages);
 
-export function ImageUpload({ onImagesChange, maxImages = 3 }: ImageUploadProps) {
-  const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    setImages(initialImages);
+  }, [initialImages]);
 
-  const handleImageSelect = (files: FileList | null) => {
-    if (!files) return;
-
-    const newImages: ImagePreview[] = [];
-    const imageFiles: File[] = [];
-
-    Array.from(files).forEach(file => {
-      if (file.type.startsWith('image/') && imagePreviews.length + newImages.length < maxImages) {
-        const url = URL.createObjectURL(file);
-        newImages.push({ file, url });
-        imageFiles.push(file);
-      }
-    });
-
-    const updatedPreviews = [...imagePreviews, ...newImages];
-    setImagePreviews(updatedPreviews);
-    
-    const allFiles = updatedPreviews.map(preview => preview.file);
-    onImagesChange(allFiles);
-  };
-
-  const removeImage = (index: number) => {
-    const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
-    setImagePreviews(updatedPreviews);
-    
-    // Clean up object URL
-    if (imagePreviews[index]) {
-      URL.revokeObjectURL(imagePreviews[index].url);
-    }
-    
-    const allFiles = updatedPreviews.map(preview => preview.file);
-    onImagesChange(allFiles);
-  };
-
-  const openCamera = () => {
-    if (cameraInputRef.current) {
-      cameraInputRef.current.click();
-    }
-  };
-
-  const openGallery = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  // Clean up object URLs on unmount
-  React.useEffect(() => {
-    return () => {
-      imagePreviews.forEach(preview => {
-        URL.revokeObjectURL(preview.url);
+  const handleImageChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newImages: string[] = [];
+      Array.from(files).forEach(file => {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            if (typeof reader.result === 'string') {
+              newImages.push(reader.result);
+              if (newImages.length === files.length) {
+                const updatedImages = [...images, ...newImages];
+                setImages(updatedImages);
+                onImagesChange(updatedImages);
+              }
+            }
+          };
+          reader.readAsDataURL(file);
+        } else {
+          toast({
+            title: "Invalid File Type",
+            description: "Only image files are supported.",
+            variant: "destructive",
+          });
+        }
       });
-    };
-  }, [imagePreviews]);
+    }
+  }, [images, onImagesChange, toast]);
+
+  const handleRemoveImage = useCallback((indexToRemove: number) => {
+    const updatedImages = images.filter((_, index) => index !== indexToRemove);
+    setImages(updatedImages);
+    onImagesChange(updatedImages);
+  }, [images, onImagesChange]);
 
   return (
     <div className="space-y-4">
+      <Label htmlFor="image-upload">Upload Images</Label>
       <div className="flex gap-2">
+        <Input
+          id="image-upload"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleImageChange}
+          className="hidden" // Hide the default input
+        />
         <Button
           type="button"
-          onClick={openCamera}
+          onClick={() => document.getElementById('image-upload')?.click()}
           variant="outline"
-          className="flex-1 bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-          disabled={imagePreviews.length >= maxImages}
+          className="flex items-center gap-2"
         >
-          <Camera className="w-4 h-4 mr-2" />
-          📷 Take Photo
+          <ImageIcon size={18} /> Select from Gallery
         </Button>
-        
+        {/* Future: Camera integration */}
         <Button
           type="button"
-          onClick={openGallery}
           variant="outline"
-          className="flex-1 bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
-          disabled={imagePreviews.length >= maxImages}
+          className="flex items-center gap-2"
+          disabled // Placeholder for camera functionality
         >
-          <ImageIcon className="w-4 h-4 mr-2" />
-          🖼️ Choose from Gallery
+          <Camera size={18} /> Take Photo
         </Button>
       </div>
 
-      {/* Hidden file inputs */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        multiple
-        className="hidden"
-        onChange={(e) => handleImageSelect(e.target.files)}
-      />
-      
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={(e) => handleImageSelect(e.target.files)}
-      />
-
-      {/* Image previews */}
-      {imagePreviews.length > 0 && (
-        <div className="grid grid-cols-3 gap-2">
-          {imagePreviews.map((preview, index) => (
-            <div key={index} className="relative group">
-              <Image
-                src={preview.url}
-                alt={`Preview ${index + 1}`}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-lg border border-green-200"
-              />
-              <button
-                type="button"
-                onClick={() => removeImage(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {imagePreviews.length > 0 && (
-        <p className="text-sm text-gray-600">
-          {imagePreviews.length} of {maxImages} images selected
-        </p>
-      )}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+        {images.map((image, index) => (
+          <div key={index} className="relative group aspect-square rounded-md overflow-hidden shadow-md">
+            <img src={image} alt={`Uploaded ${index}`} className="w-full h-full object-cover" />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-1 right-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              onClick={() => handleRemoveImage(index)}
+            >
+              <XCircle size={20} />
+            </Button>
+          </div>
+        ))}
+      </div>
     </div>
   );
-}
+};

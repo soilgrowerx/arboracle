@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/components/ui/use-toast';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { UnitService, UnitSystem } from '@/services/unitService';
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const [units, setUnits] = useState('metric');
+  const [units, setUnits] = useState<UnitSystem>(UnitService.getPreferredUnitSystem());
   const [aiPersona, setAiPersona] = useState('Bodhi'); // New state for AI persona
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export default function SettingsPage() {
       const savedSettings = localStorage.getItem('arboracle_user_settings');
       if (savedSettings) {
         const settings = JSON.parse(savedSettings);
-        setUnits(settings.preferences?.units || 'metric');
+        setUnits(settings.preferences?.units || UnitService.getPreferredUnitSystem());
         setAiPersona(settings.preferences?.aiPersona || 'Bodhi');
       }
     } catch (error) {
@@ -29,6 +30,7 @@ export default function SettingsPage() {
 
   const handleSaveSettings = () => {
     try {
+      UnitService.setPreferredUnitSystem(units);
       const settings = {
         preferences: {
           units: units,

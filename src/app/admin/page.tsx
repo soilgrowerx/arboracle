@@ -16,8 +16,9 @@ import { useToast } from '@/components/ui/use-toast';
 import { 
   Trash2, MapPin, Calendar, Shield, CheckCircle, Clock, ArrowLeft, 
   Edit, Users, TreePine, Settings, Search, Filter, Crown, User, 
-  BarChart3, Database, Lock, Unlock, FolderOpen, Plus, Building
+  BarChart3, Database, Lock, Unlock, FolderOpen, Plus, Building, Briefcase
 } from 'lucide-react';
+import { AdminProjects } from '@/components/AdminProjects';
 import Link from 'next/link';
 import { calculateTreeAge } from '@/lib/utils';
 
@@ -302,7 +303,7 @@ export default function AdminPage() {
               Trees
             </TabsTrigger>
             <TabsTrigger value="projects" className="flex items-center gap-2">
-              <FolderOpen size={16} />
+              <Building size={16} />
               Projects
             </TabsTrigger>
             <TabsTrigger value="users" className="flex items-center gap-2">
@@ -440,6 +441,11 @@ export default function AdminPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Projects Management Tab */}
+          <TabsContent value="projects" className="space-y-6">
+            <AdminProjects />
           </TabsContent>
 
           {/* Users Management Tab */}

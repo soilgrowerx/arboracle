@@ -1,38 +1,45 @@
-// src/components/SimpleMapView.tsx
 import React from 'react';
 
 interface SimpleMapViewProps {
-  latitude: number;
-  longitude: number;
-  onMapClick: (lat: number, lng: number) => void;
+  lat: number;
+  lng: number;
+  onLocationSelect?: (lat: number, lng: number) => void;
 }
 
-export function SimpleMapView({ latitude, longitude, onMapClick }: SimpleMapViewProps) {
-  // This is a placeholder component.
-  // In a real application, you would integrate a map library here (e.g., Leaflet, OpenLayers, or a simplified Google Maps setup).
-  // For now, it just displays the coordinates and simulates a clickable map.
+export const SimpleMapView: React.FC<SimpleMapViewProps> = ({ lat, lng, onLocationSelect }) => {
+  const mapUrl = `https://maps.google.com/maps?q=${lat},${lng}&hl=es&z=14&output=embed`;
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    // Simulate a click on the map by using the current center coordinates
-    // In a real map, you would get the clicked coordinates from the event
-    onMapClick(latitude, longitude);
+  const handleMapClick = (event: React.MouseEvent<HTMLIFrameElement>) => {
+    // This is a simplified approach. A real interactive map would use a library
+    // that provides click events with lat/lng. For an iframe, we can't directly
+    // get the clicked coordinates. This is just a placeholder for the prop.
+    console.log("Map clicked, but cannot get precise coordinates from iframe.");
+    // If we had a way to get coordinates, we would call:
+    // onLocationSelect?.(newLat, newLng);
   };
 
   return (
-    <div
-      className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-center cursor-pointer"
-      style={{
-        backgroundImage: 'url("https://via.placeholder.com/400x250?text=Simple+Map+View")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
-      onClick={handleClick}
-    >
-      <div>
-        <p className="font-bold text-lg">Map Placeholder</p>
-        <p>Lat: {latitude.toFixed(6)}, Lng: {longitude.toFixed(6)}</p>
-        <p className="text-sm mt-2">(Click to simulate location selection)</p>
-      </div>
+    <div style={{ width: '100%', height: '400px', overflow: 'hidden', position: 'relative' }}>
+      <iframe
+        width="100%"
+        height="100%"
+        src={mapUrl}
+        frameBorder="0"
+        style={{ border: 0 }}
+        allowFullScreen={false}
+        aria-hidden="false"
+        tabIndex={0}
+        onClick={handleMapClick}
+      ></iframe>
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0,0,0,0)', // Transparent overlay to capture clicks if needed
+        zIndex: 1 // Ensure it's above the iframe if you want to capture clicks on this div
+      }} onClick={handleMapClick}></div>
     </div>
   );
-}
+};

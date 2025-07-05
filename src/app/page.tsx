@@ -21,6 +21,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { calculateTreeAge } from '@/lib/utils';
 import { EcosystemService } from '@/services/ecosystemService';
+import { UnitService } from '@/services/unitService';
 
 export default function Home() {
   const router = useRouter();
@@ -606,7 +607,7 @@ export default function Home() {
                 </TabsContent>
 
                 <TabsContent value="map" className="space-y-6">
-                  <TreeMapView onTreeSelect={handleTreeSelect} />
+                  <TreeMapView onTreeSelect={handleTreeSelect} trees={trees} />
                 </TabsContent>
 
                 <TabsContent value="analytics" className="space-y-6">
